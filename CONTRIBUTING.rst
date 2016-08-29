@@ -15,7 +15,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/kragniz/etcd3/issues.
+Report bugs at https://github.com/kragniz/python-etcd3/issues.
 
 If you are reporting a bug, please include:
 
