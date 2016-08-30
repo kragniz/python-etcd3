@@ -23,7 +23,8 @@ Python client for the etcd3 API
 * Free software: Apache Software License 2.0
 * Documentation: https://python-etcd3.readthedocs.io.
 
-This project is developed using Readme Driven Development.
+This project is developed using Readme Driven Development, the most hip
+development methodology.
 
 Fictitious example of api usage:
 
@@ -32,6 +33,11 @@ Fictitious example of api usage:
     import etcd3
 
     etcd = etcd3.client()
+    # or
+    etcd = etcd3.client(username='root',
+                        password='hunter2',
+                        host='127.0.0.1',
+                        port=1234)
 
     etcd.get('foo')
     etcd.put('bar', 'doot')
@@ -48,3 +54,11 @@ Fictitious example of api usage:
     # watching
     for event in etcd.watch('some-key'):
         print(event)
+
+    # admin stuff
+    member_id = etcd.add_member('newMember', peer_urls=['https://127.0.0.1:12345'])
+    etcd.update_member(member_id, peer_urls=['https://127.0.0.1:12345'])
+    etcd.remove_member(member_id)
+    for member in etcd.members:
+        print(member.id, member.name, member.peer_addresses)
+        member.remove()
