@@ -9,4 +9,4 @@ Sphinx==1.4.4
 PyYAML==3.11
 pytest==2.9.2
 grpcio
-grpcio-tools
+grpcio-tools==1.0.0
