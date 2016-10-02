@@ -40,7 +40,7 @@ Fictitious example of api usage:
                         port=1234)
 
     etcd.get('foo')
-    etcd.put('bar', 'doot')
+    etcd.set('bar', 'doot')
     etcd.delete('bar')
 
     # locks
@@ -62,3 +62,14 @@ Fictitious example of api usage:
     for member in etcd.members:
         print(member.id, member.name, member.peer_addresses)
         member.remove()
+
+
+Generating protobuf stuff
+-------------------------
+
+I ran::
+
+    $ protoc --python_out=. -I/home/kragniz/git/protobuf -I/home/kragniz/git/googleapis -I. -I.. /home/kragniz/git/protobuf/gogoproto/gogo.proto ./etcdserver/etcdserverpb/rpc.proto
+
+from inside the etcd repo and it did stuff. Not sure if it did the correct
+stuff, but it output some python.
