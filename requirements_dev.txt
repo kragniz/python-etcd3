@@ -8,5 +8,5 @@ coverage==4.1
 Sphinx==1.4.4
 PyYAML==3.11
 pytest==2.9.2
-grpcio
+grpcio==1.0.0
 grpcio-tools
