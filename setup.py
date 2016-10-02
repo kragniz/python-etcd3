@@ -24,7 +24,7 @@ setup(
     long_description=readme + '\n\n' + history,
     author="Louis Taylor",
     author_email='louis@kragniz.eu',
-    url='https://github.com/kragniz/etcd3',
+    url='https://github.com/kragniz/python-etcd3',
     packages=[
         'etcd3',
     ],
