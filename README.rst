@@ -69,7 +69,7 @@ Generating protobuf stuff
 
 I ran::
 
-    $ protoc --python_out=. -I/home/kragniz/git/protobuf -I/home/kragniz/git/googleapis -I. -I.. /home/kragniz/git/protobuf/gogoproto/gogo.proto ./etcdserver/etcdserverpb/rpc.proto
+    python -m grpc.tools.protoc -Ietcd3/proto --python_out=etcd3/etcdrpc/ --grpc_python_out=etcd3/etcdrpc/ etcd3/proto/*.proto
 
-from inside the etcd repo and it did stuff. Not sure if it did the correct
-stuff, but it output some python.
+from inside the python-etcd3 repo and it did stuff. Not sure if it did the
+correct stuff, but it output some python.
