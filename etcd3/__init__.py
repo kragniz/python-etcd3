@@ -12,6 +12,6 @@ channel = grpc.insecure_channel('localhost:2379')
 stub = etcdrpc.KVStub(channel)
 
 put_request = etcdrpc.PutRequest()
-put_request.key = 'doot'
-put_request.value = 'toottoot'
+put_request.key = 'doot'.encode('utf-8')
+put_request.value = 'toottoot'.encode('utf-8')
 print(stub.Put(put_request))
