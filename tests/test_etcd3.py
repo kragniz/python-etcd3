@@ -11,7 +11,7 @@ Tests for `etcd3` module.
 import pytest
 
 
-from etcd3 import etcd3
+import etcd3
 
 
 class TestEtcd3(object):
