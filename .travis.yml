@@ -29,5 +29,5 @@ deploy:
     secure: PLEASE_REPLACE_ME
   on:
     tags: true
-    repo: kragniz/etcd3
+    repo: kragniz/python-etcd3
     condition: $TOXENV == py27
