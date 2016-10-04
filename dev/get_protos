@@ -11,6 +11,7 @@ else:
     print('Usage: {} etcd_dir'.format(sys.argv[0]))
     sys.exit(1)
 
-
-for proto_file in glob.iglob(os.path.join(etcd_dir, '**', '*.proto'), recursive=True):
-    print(proto_file)
+for d in os.listdir(etcd_dir):
+    if d not in ('cmd', 'gopath'):
+        for proto_file in glob.iglob(os.path.join(etcd_dir, d, '**', '*.proto'), recursive=True):
+            print(proto_file)
