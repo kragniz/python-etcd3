@@ -1,0 +1,16 @@
+#!/usr/bin/env python3.5
+
+import glob
+import os
+import sys
+
+
+if len(sys.argv) > 1:
+    etcd_dir = sys.argv[1]
+else:
+    print('Usage: {} etcd_dir'.format(sys.argv[0]))
+    sys.exit(1)
+
+
+for proto_file in glob.iglob(os.path.join(etcd_dir, '**', '*.proto'), recursive=True):
+    print(proto_file)
