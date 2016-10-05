@@ -5,6 +5,8 @@ test_etcd3
 Tests for `etcd3` module.
 """
 
+import os
+
 import pytest
 
 import etcd3
@@ -26,14 +28,15 @@ class TestEtcd3(object):
             etcd.get('probably-invalid-key')
 
     def test_get_key(self):
+        os.system("etcdctl put /doot/a_key some_value")
         etcd = etcd3.client()
-        etcd.get('doot')
+        etcd.get('/doot/a_key')
 
     def test_put_key(self):
         etcd = etcd3.client()
-        etcd.put('doot', 'this is a doot')
+        etcd.put('/doot', 'this is a doot')
 
     @classmethod
     def teardown_class(cls):
-        pass
+        os.system("etcdctl -w json del --prefix /doot")
 
