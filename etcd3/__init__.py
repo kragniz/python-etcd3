@@ -9,18 +9,20 @@ __all__ = ['Etcd3Client', 'client']
 import grpc
 
 from etcd3.etcdrpc import rpc_pb2 as etcdrpc
+import etcd3.exceptions as exceptions
 
 
 class Etcd3Client(object):
     def __init__(self):
         self.channel = grpc.insecure_channel('localhost:2379')
-        self.kvstub = etcdrpc.KVStub(channel)
+        self.kvstub = etcdrpc.KVStub(self.channel)
 
     def get(self, key):
         '''
         Get the value of a key from etcd.
         '''
-        pass
+        raise exceptions.KeyNotFoundError(
+            'the key "{}" was not found'.format(key))
 
     def put(self, key, value):
         '''
