@@ -17,9 +17,15 @@ class Etcd3Client(object):
         self.kvstub = etcdrpc.KVStub(channel)
 
     def get(self, key):
+        '''
+        Get the value of a key from etcd.
+        '''
         pass
 
     def put(self, key, value):
+        '''
+        Save a value to etcd.
+        '''
         put_request = etcdrpc.PutRequest()
         put_request.key = key.encode('utf-8')
         put_request.value = value.encode('utf-8')
