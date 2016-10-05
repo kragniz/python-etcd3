@@ -12,6 +12,8 @@ import pytest
 import etcd3
 
 
+os.environ['ETCDCTL_API'] = '3'
+
 class TestEtcd3(object):
 
     @classmethod
