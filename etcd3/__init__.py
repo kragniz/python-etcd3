@@ -8,21 +8,17 @@ import grpc
 
 from etcdrpc import rpc_pb2 as etcdrpc
 
-channel = grpc.insecure_channel('localhost:2379')
-stub = etcdrpc.KVStub(channel)
-
-put_request = etcdrpc.PutRequest()
-put_request.key = 'doot'.encode('utf-8')
-put_request.value = 'toottoot'.encode('utf-8')
-print(stub.Put(put_request))
-
 
 class Etcd3Client(object):
     def __init__(self):
-        pass
+        self.channel = grpc.insecure_channel('localhost:2379')
+        self.kvstub = etcdrpc.KVStub(channel)
 
     def get(self, key):
         pass
 
     def put(self, key, value):
-        pass
+        put_request = etcdrpc.PutRequest()
+        put_request.key = key.encode('utf-8')
+        put_request.value = value.encode('utf-8')
+        self.kvstub.Put(put_request)
