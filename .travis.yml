@@ -14,7 +14,8 @@ install:
     - pip install -U tox
     - curl -L https://github.com/coreos/etcd/releases/download/v3.0.10/etcd-v3.0.10-linux-amd64.tar.gz -o etcd-v3.0.10-linux-amd64.tar.gz
     - tar xzvf etcd-v3.0.10-linux-amd64.tar.gz
-    - etcd-v3.0.10-linux-amd64/etcd &
+    - export PATH=$PATH:etcd-v3.0.10-linux-amd64
+    - etcd &
 
 # command to run tests, e.g. python setup.py test
 script: tox -e ${TOXENV}
