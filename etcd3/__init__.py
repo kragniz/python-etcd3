@@ -13,8 +13,10 @@ import etcd3.exceptions as exceptions
 
 
 class Etcd3Client(object):
-    def __init__(self):
-        self.channel = grpc.insecure_channel('localhost:2379')
+    def __init__(self, host='localhost', port=2379):
+        self.channel = grpc.insecure_channel('{host}:{port}'.format(
+            host=host, port=port)
+        )
         self.kvstub = etcdrpc.KVStub(self.channel)
 
     def get(self, key):
@@ -36,4 +38,4 @@ class Etcd3Client(object):
 
 def client():
     '''Return an instance of an Etcd3Client'''
-    return Etcd3Client()
+    return Etcd3Client(host='localhost', port=2379)
