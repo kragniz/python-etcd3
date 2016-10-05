@@ -23,8 +23,16 @@ class Etcd3Client(object):
         '''
         Get the value of a key from etcd.
         '''
-        raise exceptions.KeyNotFoundError(
-            'the key "{}" was not found'.format(key))
+        range_request = etcdrpc.RangeRequest()
+        range_request.key = key.encode('utf-8')
+        range_response = self.kvstub.Range(range_request)
+
+        if range_response.count < 1:
+            raise exceptions.KeyNotFoundError(
+                'the key "{}" was not found'.format(key))
+        else:
+            # smells funny - there must be a cleaner way to get the value?
+            return range_response.kvs.pop().value
 
     def put(self, key, value):
         '''
