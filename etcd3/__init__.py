@@ -8,7 +8,7 @@ __all__ = ['Etcd3Client', 'client']
 
 import grpc
 
-from etcdrpc import rpc_pb2 as etcdrpc
+from etcd3.etcdrpc import rpc_pb2 as etcdrpc
 
 
 class Etcd3Client(object):
