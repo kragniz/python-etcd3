@@ -4,6 +4,8 @@ __author__ = 'Louis Taylor'
 __email__ = 'louis@kragniz.eu'
 __version__ = '0.1.0'
 
+__all__ = ['Etcd3Client', 'client']
+
 import grpc
 
 from etcdrpc import rpc_pb2 as etcdrpc
@@ -22,3 +24,8 @@ class Etcd3Client(object):
         put_request.key = key.encode('utf-8')
         put_request.value = value.encode('utf-8')
         self.kvstub.Put(put_request)
+
+
+def client():
+    '''Return an instance of an Etcd3Client'''
+    return Etcd3Client()
