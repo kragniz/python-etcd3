@@ -9,5 +9,5 @@ To use python-etcd3 in a project::
 API
 ===
 
-.. automodule:: etcd
+.. autoclass:: etcd3.Etcd3Client
     :members:
