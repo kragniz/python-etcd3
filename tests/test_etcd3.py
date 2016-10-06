@@ -5,6 +5,7 @@ test_etcd3
 Tests for `etcd3` module.
 """
 
+import base64
 import json
 import os
 import subprocess
@@ -55,9 +56,13 @@ class TestEtcd3(object):
         returned = etcd.get('/doot/' + string)
         assert returned == b'dootdoot'
 
-    def test_put_key(self):
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
+    def test_put_key(self, string):
         etcd = etcd3.client()
-        etcd.put('/doot/put_1', 'this is a doot')
+        etcd.put('/doot/put_1', string)
+        out = etcdctl('get', '/doot/put_1')
+        assert base64.b64decode(out['kvs'][0]['value']) == \
+            string.encode('utf-8')
 
     @classmethod
     def teardown_class(cls):
