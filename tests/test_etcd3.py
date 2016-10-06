@@ -5,7 +5,9 @@ test_etcd3
 Tests for `etcd3` module.
 """
 
+import json
 import os
+import subprocess
 
 import pytest
 
@@ -13,6 +15,13 @@ import etcd3
 
 
 os.environ['ETCDCTL_API'] = '3'
+
+
+def etcdctl(args):
+    args = ['etcdctl', '-w', 'json'] + args.split()
+    output = subprocess.check_output(args)
+    return json.loads(output.decode('utf-8'))
+
 
 class TestEtcd3(object):
 
@@ -30,15 +39,14 @@ class TestEtcd3(object):
             etcd.get('probably-invalid-key')
 
     def test_get_key(self):
-        os.system("etcdctl put /doot/a_key some_value")
+        etcdctl('put /doot/a_key some_value')
         etcd = etcd3.client()
         etcd.get('/doot/a_key')
 
     def test_put_key(self):
         etcd = etcd3.client()
-        etcd.put('/doot', 'this is a doot')
+        etcd.put('/doot/put_1', 'this is a doot')
 
     @classmethod
     def teardown_class(cls):
-        os.system("etcdctl -w json del --prefix /doot")
-
+        etcdctl('del --prefix /doot')
