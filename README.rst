@@ -17,6 +17,9 @@ python-etcd3
      :target: https://pyup.io/repos/github/kragniz/python-etcd3/
      :alt: Updates
 
+.. image:: https://codecov.io/github/kragniz/python-etcd3/coverage.svg?branch=master
+        :target: https://codecov.io/github/kragniz/python-etcd3?branch=master
+
 
 Python client for the etcd3 API
 
