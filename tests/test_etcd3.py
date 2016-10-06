@@ -10,6 +10,9 @@ import os
 import subprocess
 
 import pytest
+from hypothesis import given
+from hypothesis.strategies import characters
+from hypothesis.strategies import text
 
 import etcd3
 
@@ -17,8 +20,8 @@ import etcd3
 os.environ['ETCDCTL_API'] = '3'
 
 
-def etcdctl(args):
-    args = ['etcdctl', '-w', 'json'] + args.split()
+def etcdctl(*args):
+    args = ['etcdctl', '-w', 'json'] + list(args)
     output = subprocess.check_output(args)
     return json.loads(output.decode('utf-8'))
 
@@ -38,11 +41,12 @@ class TestEtcd3(object):
         with pytest.raises(etcd3.exceptions.KeyNotFoundError):
             etcd.get('probably-invalid-key')
 
-    def test_get_key(self):
-        etcdctl('put /doot/a_key some_value')
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
+    def test_get_key(self, string):
+        etcdctl('put', '/doot/a_key', string)
         etcd = etcd3.client()
         returned = etcd.get('/doot/a_key')
-        assert returned == b'some_value'
+        assert returned == string.encode('utf-8')
 
     def test_put_key(self):
         etcd = etcd3.client()
@@ -50,4 +54,4 @@ class TestEtcd3(object):
 
     @classmethod
     def teardown_class(cls):
-        etcdctl('del --prefix /doot')
+        etcdctl('del', '--prefix', '/doot')
