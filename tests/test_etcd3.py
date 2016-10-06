@@ -41,7 +41,8 @@ class TestEtcd3(object):
     def test_get_key(self):
         etcdctl('put /doot/a_key some_value')
         etcd = etcd3.client()
-        etcd.get('/doot/a_key')
+        returned = etcd.get('/doot/a_key')
+        assert returned == b'some_value'
 
     def test_put_key(self):
         etcd = etcd3.client()
