@@ -48,6 +48,13 @@ class TestEtcd3(object):
         returned = etcd.get('/doot/a_key')
         assert returned == string.encode('utf-8')
 
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
+    def test_get_random_key(self, string):
+        etcdctl('put', '/doot/' + string, 'dootdoot')
+        etcd = etcd3.client()
+        returned = etcd.get('/doot/' + string)
+        assert returned == b'dootdoot'
+
     def test_put_key(self):
         etcd = etcd3.client()
         etcd.put('/doot/put_1', 'this is a doot')
