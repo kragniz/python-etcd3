@@ -35,6 +35,12 @@ class Etcd3Client(object):
         put_request.value = value.encode('utf-8')
         self.kvstub.Put(put_request)
 
+    def delete(self, key):
+        pass
+
+    def compact(self):
+        pass
+
 
 def client():
     '''Return an instance of an Etcd3Client'''
