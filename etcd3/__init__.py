@@ -8,4 +8,4 @@ __all__ = ['Etcd3Client', 'client', 'etcdrpc']
 
 from etcd3.client import Etcd3Client
 from etcd3.client import client
-import etcdrpc
+import etcd3.etcdrpc
