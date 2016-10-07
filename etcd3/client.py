@@ -14,6 +14,10 @@ class Etcd3Client(object):
     def get(self, key):
         '''
         Get the value of a key from etcd.
+
+        :param key: key in etcd to get
+        :returns: value of key
+        :rtype: bytes
         '''
         range_request = etcdrpc.RangeRequest()
         range_request.key = key.encode('utf-8')
@@ -29,6 +33,10 @@ class Etcd3Client(object):
     def put(self, key, value):
         '''
         Save a value to etcd.
+
+        :param key: key in etcd to set
+        :param value: value to set key to
+        :type value: bytes
         '''
         put_request = etcdrpc.PutRequest()
         put_request.key = key.encode('utf-8')
