@@ -30,6 +30,19 @@ class Etcd3Client(object):
             # smells funny - there must be a cleaner way to get the value?
             return range_response.kvs.pop().value
 
+    def get_range(self, start_key, end_key='\0'):
+        range_request = etcdrpc.RangeRequest()
+        range_request.key = start_key.encode('utf-8')
+        range_request.range_end = end_key.encode('utf-8')
+        range_response = self.kvstub.Range(range_request)
+
+        if range_response.count < 1:
+            raise exceptions.KeyNotFoundError('no keys found')
+        else:
+            for kv in range_response.kvs:
+                yield (kv.key, kv.value)
+
+
     def put(self, key, value):
         '''
         Save a value to etcd.
