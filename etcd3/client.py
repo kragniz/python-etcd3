@@ -44,7 +44,9 @@ class Etcd3Client(object):
         self.kvstub.Put(put_request)
 
     def delete(self, key):
-        pass
+        delete_request = etcdrpc.DeleteRangeRequest()
+        delete_request.key = key.encode('utf-8')
+        self.kvstub.DeleteRange(delete_request)
 
     def compact(self):
         pass
