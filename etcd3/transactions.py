@@ -33,7 +33,25 @@ class Version(BaseCompare):
     compare_type = 'version'
 
 
+class Create(BaseCompare):
+    compare_type = 'create'
+
+
+class Mod(BaseCompare):
+    compare_type = 'mod'
+
+
 class Put(object):
     def __init__(self, key, value):
         self.key = key
         self.value = value
+
+
+class Get(object):
+    def __init__(self, key):
+        self.key = key
+
+
+class Delete(object):
+    def __init__(self, key):
+        self.key = key
