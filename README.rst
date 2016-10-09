@@ -58,6 +58,20 @@ Fictitious example of api usage:
     for event in etcd.watch('some-key'):
         print(event)
 
+    # transactions
+    etcd.transaction(
+        compare=[
+            etcd.transactions.value('/doot/testing') == 'doot',
+            etcd.transactions.version('/doot/testing') > 0,
+        ],
+        success=[
+            etcd.transactions.put('/doot/testing', 'success'),
+        ],
+        failure=[
+            etcd.transactions.put('/doot/testing', 'failure'),
+        ]
+    )
+
     # admin stuff
     member_id = etcd.add_member('newMember', peer_urls=['https://127.0.0.1:12345'])
     etcd.update_member(member_id, peer_urls=['https://127.0.0.1:12345'])
