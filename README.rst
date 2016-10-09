@@ -43,7 +43,7 @@ Fictitious example of api usage:
                         port=1234)
 
     etcd.get('foo')
-    etcd.set('bar', 'doot')
+    etcd.put('bar', 'doot')
     etcd.delete('bar')
 
     # locks
