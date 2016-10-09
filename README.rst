@@ -21,7 +21,7 @@ python-etcd3
         :target: https://codecov.io/github/kragniz/python-etcd3?branch=master
 
 
-Python client for the etcd3 API
+Python client for the etcd API v3.
 
 * Free software: Apache Software License 2.0
 * Documentation: https://python-etcd3.readthedocs.io.
