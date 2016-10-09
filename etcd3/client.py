@@ -70,6 +70,13 @@ class Etcd3Client(object):
         pass
 
 
+class Transaction(object):
+    def __init__(self):
+        self.compare_list = None
+        self.on_success = None
+        self.on_failure = None
+
+
 def client():
     '''Return an instance of an Etcd3Client'''
     return Etcd3Client(host='localhost', port=2379)
