@@ -82,12 +82,6 @@ class Etcd3Client(object):
     def transaction(self, compare, success=None, failure=None):
         print(compare, success, failure)
 
-class Transaction(object):
-    def __init__(self):
-        self.compare_list = None
-        self.on_success = None
-        self.on_failure = None
-
 
 def client():
     '''Return an instance of an Etcd3Client'''
