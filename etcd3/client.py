@@ -2,6 +2,15 @@ import grpc
 
 from etcd3.etcdrpc import rpc_pb2 as etcdrpc
 import etcd3.exceptions as exceptions
+import etcd3.transactions as transactions
+
+
+class Transactions(object):
+    def __init__(self):
+        self.value = transactions.Value
+        self.version = transactions.Version
+
+        self.put = transactions.Put
 
 
 class Etcd3Client(object):
@@ -10,6 +19,7 @@ class Etcd3Client(object):
             host=host, port=port)
         )
         self.kvstub = etcdrpc.KVStub(self.channel)
+        self.transactions = Transactions()
 
     def get(self, key):
         '''
@@ -69,6 +79,8 @@ class Etcd3Client(object):
     def compact(self):
         pass
 
+    def transaction(self, compare, success=None, failure=None):
+        print(compare, success, failure)
 
 class Transaction(object):
     def __init__(self):
