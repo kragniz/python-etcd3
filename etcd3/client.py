@@ -80,6 +80,32 @@ class Etcd3Client(object):
         pass
 
     def transaction(self, compare, success=None, failure=None):
+        '''
+        Perform a transaction.
+
+        Example usage:
+
+        .. code-block:: python
+
+            etcd.transaction(
+                compare=[
+                    etcd.transactions.value('/doot/testing') == 'doot',
+                    etcd.transactions.version('/doot/testing') > 0,
+                ],
+                success=[
+                    etcd.transactions.put('/doot/testing', 'success'),
+                ],
+                failure=[
+                    etcd.transactions.put('/doot/testing', 'failure'),
+                ]
+            )
+
+        :param compare: A list of comparisons to make
+        :param success: A list of operations to perform if all the comparisons
+                        are true
+        :param failure: A list of operations to perform if any of the
+                        comparisons are false
+        '''
         print(compare, success, failure)
 
 
