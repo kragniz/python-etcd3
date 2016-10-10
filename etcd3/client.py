@@ -77,6 +77,9 @@ class Etcd3Client(object):
         self.kvstub.DeleteRange(delete_request)
 
     def compact(self):
+        '''
+        Compact the event history in etcd.
+        '''
         pass
 
     def transaction(self, compare, success=None, failure=None):
