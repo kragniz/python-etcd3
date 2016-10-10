@@ -111,6 +111,31 @@ class Etcd3Client(object):
         '''
         print(compare, success, failure)
 
+    def add_member(self, urls):
+        '''
+        Add a member into the cluster.
+        '''
+        pass
+
+    def remove_member(self, member_id):
+        '''
+        Remove an existing member from the cluster.
+        '''
+        pass
+
+    def update_member(self, member_id, urls):
+        '''
+        Update the configuration of an existing member in the cluster.
+        '''
+        pass
+
+    @property
+    def members(self):
+        '''
+        List of all members associated with the cluster.
+        '''
+        pass
+
 
 def client():
     '''Return an instance of an Etcd3Client'''
