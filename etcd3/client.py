@@ -137,6 +137,6 @@ class Etcd3Client(object):
         pass
 
 
-def client():
+def client(host='localhost', port=2379):
     '''Return an instance of an Etcd3Client'''
-    return Etcd3Client(host='localhost', port=2379)
+    return Etcd3Client(host=host, port=port)

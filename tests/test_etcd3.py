@@ -9,6 +9,7 @@ import base64
 import json
 import os
 import subprocess
+from six.moves.urllib.parse import urlparse
 
 import pytest
 from hypothesis import given
@@ -22,7 +23,11 @@ os.environ['ETCDCTL_API'] = '3'
 
 
 def etcdctl(*args):
+    endpoint = os.environ.get('ETCD_ENDPOINT', None)
+    if endpoint:
+        args = ['--endpoints', endpoint] + list(args)
     args = ['etcdctl', '-w', 'json'] + list(args)
+    print(" ".join(args))
     output = subprocess.check_output(args)
     return json.loads(output.decode('utf-8'))
 
@@ -33,33 +38,38 @@ class TestEtcd3(object):
     def setup_class(cls):
         pass
 
+    # TODO workout how fixtures work...
+    @property
+    def client(self):
+        endpoint = os.environ.get('ETCD_ENDPOINT', None)
+        if endpoint:
+            url = urlparse(endpoint)
+            return etcd3.client(host=url.hostname, port=url.port)
+        else:
+            return etcd3.client()
+
     def test_client_stub(self):
-        etcd = etcd3.client()
-        assert etcd is not None
+        assert self.client is not None
 
     def test_get_unknown_key(self):
-        etcd = etcd3.client()
         with pytest.raises(etcd3.exceptions.KeyNotFoundError):
-            etcd.get('probably-invalid-key')
+            self.client.get('probably-invalid-key')
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
     def test_get_key(self, string):
         etcdctl('put', '/doot/a_key', string)
-        etcd = etcd3.client()
-        returned = etcd.get('/doot/a_key')
+        returned = self.client.get('/doot/a_key')
         assert returned == string.encode('utf-8')
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
     def test_get_random_key(self, string):
         etcdctl('put', '/doot/' + string, 'dootdoot')
-        etcd = etcd3.client()
-        returned = etcd.get('/doot/' + string)
+        returned = self.client.get('/doot/' + string)
         assert returned == b'dootdoot'
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
     def test_put_key(self, string):
-        etcd = etcd3.client()
-        etcd.put('/doot/put_1', string)
+        self.client.put('/doot/put_1', string)
         out = etcdctl('get', '/doot/put_1')
         assert base64.b64decode(out['kvs'][0]['value']) == \
             string.encode('utf-8')
