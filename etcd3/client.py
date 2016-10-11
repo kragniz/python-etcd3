@@ -5,12 +5,17 @@ import etcd3.exceptions as exceptions
 import etcd3.transactions as transactions
 
 
+
 class Transactions(object):
     def __init__(self):
         self.value = transactions.Value
         self.version = transactions.Version
+        self.create = transactions.Create
+        self.mod = transactions.Mod
 
         self.put = transactions.Put
+        self.get = transactions.Get
+        self.delete = transactions.Delete
 
 
 class Etcd3Client(object):
