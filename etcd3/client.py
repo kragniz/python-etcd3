@@ -57,6 +57,11 @@ class Etcd3Client(object):
             for kv in range_response.kvs:
                 yield (kv.key, kv.value)
 
+    def _build_put_request(self, key, value):
+        put_request = etcdrpc.PutRequest()
+        put_request.key = key.encode('utf-8')
+        put_request.value = value.encode('utf-8')
+        return put_request
 
     def put(self, key, value):
         '''
@@ -66,9 +71,7 @@ class Etcd3Client(object):
         :param value: value to set key to
         :type value: bytes
         '''
-        put_request = etcdrpc.PutRequest()
-        put_request.key = key.encode('utf-8')
-        put_request.value = value.encode('utf-8')
+        put_request = self._build_put_request(key, value)
         self.kvstub.Put(put_request)
 
     def delete(self, key):
@@ -86,6 +89,21 @@ class Etcd3Client(object):
         Compact the event history in etcd.
         '''
         pass
+
+    def _ops_to_requests(self, ops):
+        '''
+        Return a list of grpc requests from an input list of
+        etcd3.transactions.{Put, Get, Delete} objects.
+        '''
+        request_ops = []
+        for op in ops:
+            if isinstance(op, transactions.Put):
+                request = self._build_put_request(op.key, op.value)
+                request_op = etcdrpc.RequestOp(request_put=request)
+                request_ops.append(request_op)
+            else:
+                raise Exception('Unknown request class {}'.format(op.__class__))
+        return request_ops
 
     def transaction(self, compare, success=None, failure=None):
         '''
@@ -114,7 +132,16 @@ class Etcd3Client(object):
         :param failure: A list of operations to perform if any of the
                         comparisons are false
         '''
-        print(compare, success, failure)
+
+        compare = [c.build_message() for c in compare]
+
+        success_ops = self._ops_to_requests(success)
+        failure_ops = self._ops_to_requests(failure)
+
+        transaction_request = etcdrpc.TxnRequest(compare=compare,
+                                                 success=success_ops,
+                                                 failure=failure_ops)
+        self.kvstub.Txn(transaction_request)
 
     def add_member(self, urls):
         '''
