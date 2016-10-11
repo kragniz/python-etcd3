@@ -64,6 +64,17 @@ class TestEtcd3(object):
         assert base64.b64decode(out['kvs'][0]['value']) == \
             string.encode('utf-8')
 
+    def test_delete_key(self):
+        etcdctl('put', '/doot/delete_this', 'delete pls')
+
+        etcd = etcd3.client()
+        assert etcd.get('/doot/delete_this') == b'delete pls'
+
+        etcd.delete('/doot/delete_this')
+
+        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
+            etcd.get('/doot/delete_this')
+
     def test_transaction_success(self):
         etcdctl('put', '/doot/txn', 'dootdoot')
         etcd = etcd3.client()
