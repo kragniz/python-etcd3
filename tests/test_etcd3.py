@@ -64,6 +64,28 @@ class TestEtcd3(object):
         assert base64.b64decode(out['kvs'][0]['value']) == \
             string.encode('utf-8')
 
+    def test_transaction_success(self):
+        etcdctl('put', '/doot/txn', 'dootdoot')
+        etcd = etcd3.client()
+        etcd.transaction(
+            compare=[etcd.transactions.value('/doot/txn') == 'dootdoot'],
+            success=[etcd.transactions.put('/doot/txn', 'success')],
+            failure=[etcd.transactions.put('/doot/txn', 'failure')]
+        )
+        out = etcdctl('get', '/doot/txn')
+        assert base64.b64decode(out['kvs'][0]['value']) == b'success'
+
+    def test_transaction_failure(self):
+        etcdctl('put', '/doot/txn', 'notdootdoot')
+        etcd = etcd3.client()
+        etcd.transaction(
+            compare=[etcd.transactions.value('/doot/txn') == 'dootdoot'],
+            success=[etcd.transactions.put('/doot/txn', 'success')],
+            failure=[etcd.transactions.put('/doot/txn', 'failure')]
+        )
+        out = etcdctl('get', '/doot/txn')
+        assert base64.b64decode(out['kvs'][0]['value']) == b'failure'
+
     @classmethod
     def teardown_class(cls):
         etcdctl('del', '--prefix', '/doot')
