@@ -106,6 +106,18 @@ class TestEtcd3(object):
         out = etcdctl('get', '/doot/txn')
         assert base64.b64decode(out['kvs'][0]['value']) == b'failure'
 
+    def test_get_prefix(self):
+        for i in range(20):
+            etcdctl('put', '/doot/range{}'.format(i), 'i am a range')
+
+        for i in range(5):
+            etcdctl('put', '/doot/notrange{}'.format(i), 'i am a not range')
+
+        values = list(self.client.get_prefix('/doot/range'))
+        assert len(values) == 20
+        for key, value in values:
+            assert value == b'i am a range'
+
     @classmethod
     def teardown_class(cls):
         etcdctl('del', '--prefix', '/doot')

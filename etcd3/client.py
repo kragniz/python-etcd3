@@ -2,6 +2,7 @@ import grpc
 
 import etcd3.exceptions as exceptions
 import etcd3.transactions as transactions
+import etcd3.utils as utils
 from etcd3.etcdrpc import rpc_pb2 as etcdrpc
 
 
@@ -44,19 +45,18 @@ class Etcd3Client(object):
             # smells funny - there must be a cleaner way to get the value?
             return range_response.kvs.pop().value
 
-    def get_range(self, start_key, range_end='\0',
-                  sort_order=None, sort_target='key'):
+    def get_prefix(self, key_prefix, sort_order=None, sort_target='key'):
         '''
-        Get a range of keys.
+        Get a range of keys with a prefix.
 
-        :param start_key: first key in range
-        :param range_end: upper bound of requested range
+        :param key_prefix: first key in range
 
         :returns: sequence of (key, value) tuples
         '''
         range_request = etcdrpc.RangeRequest()
-        range_request.key = start_key.encode('utf-8')
-        range_request.range_end = range_end.encode('utf-8')
+        range_request.key = key_prefix.encode('utf-8')
+        range_request.range_end = \
+            utils.increment_last_byte(key_prefix.encode('utf-8'))
 
         if sort_order is None:
             range_request.sort_order = etcdrpc.RangeRequest.NONE
