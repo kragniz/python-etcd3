@@ -11,6 +11,7 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'six',
+    'grpcio',
 ]
 
 test_requirements = [
