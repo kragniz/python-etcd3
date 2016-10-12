@@ -102,6 +102,17 @@ class Etcd3Client(object):
         delete_request.key = key.encode('utf-8')
         self.kvstub.DeleteRange(delete_request)
 
+    def delete_range(self, start_key, range_end='\0'):
+        '''
+        Delete a range of keys in etcd.
+
+        :param start_key: first key in range to delete
+        '''
+        delete_request = etcdrpc.DeleteRangeRequest()
+        delete_request.key = start_key.encode('utf-8')
+        delete_request.range_end = range_end.encode('utf-8')
+        self.kvstub.DeleteRange(delete_request)
+
     def compact(self):
         '''
         Compact the event history in etcd.
