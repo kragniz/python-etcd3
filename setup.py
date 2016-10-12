@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import re
 from setuptools import setup
 
 with open('README.rst') as readme_file:
@@ -9,14 +10,15 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [
-    'six',
-    'grpcio',
-]
+def load_reqs(filename):
+    with open(filename) as reqs_file:
+        return [
+            re.sub('==', '>=', line) for line in reqs_file.readlines()
+            if not re.match('\s*#', line)
+        ]
 
-test_requirements = [
-    'pytest',
-]
+requirements = load_reqs('requirements.txt')
+test_requirements = load_reqs('test-requirements.txt')
 
 setup(
     name='etcd3',
