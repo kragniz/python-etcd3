@@ -109,3 +109,8 @@ class TestEtcd3(object):
     @classmethod
     def teardown_class(cls):
         etcdctl('del', '--prefix', '/doot')
+
+
+class TestUtils(object):
+    def test_increment_last_byte(self):
+        assert etcd3.utils.increment_last_byte(b'foo') == b'fop'
