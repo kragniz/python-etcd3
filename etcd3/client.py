@@ -45,10 +45,29 @@ class Etcd3Client(object):
             # smells funny - there must be a cleaner way to get the value?
             return range_response.kvs.pop().value
 
-    def get_range(self, start_key, end_key='\0'):
+    def get_range(self, start_key, range_end='\0',
+                  sort_order=None, sort_target='key'):
+        '''
+        Get a range of keys.
+
+        :param start_key: first key in range
+        :param range_end: upper bound of requested range
+
+        :returns: sequence of (key, value) tuples
+        '''
         range_request = etcdrpc.RangeRequest()
         range_request.key = start_key.encode('utf-8')
-        range_request.range_end = end_key.encode('utf-8')
+        range_request.range_end = range_end.encode('utf-8')
+
+        if sort_order is None:
+            range_request.sort_order = etcdrpc.RangeRequest.NONE
+        elif sort_order == 'ascend':
+            range_request.sort_order = etcdrpc.RangeRequest.ASCEND
+        elif sort_order == 'descend':
+            range_request.sort_order = etcdrpc.RangeRequest.DESCEND
+        else:
+            raise Exception('unknown sort order: "{}"'.format(sort_order))
+
         range_response = self.kvstub.Range(range_request)
 
         if range_response.count < 1:
