@@ -10,6 +10,7 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
+
 def load_reqs(filename):
     with open(filename) as reqs_file:
         return [

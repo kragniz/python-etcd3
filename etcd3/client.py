@@ -5,7 +5,6 @@ import etcd3.exceptions as exceptions
 import etcd3.transactions as transactions
 
 
-
 class Transactions(object):
     def __init__(self):
         self.value = transactions.Value
@@ -121,7 +120,8 @@ class Etcd3Client(object):
                 request_op = etcdrpc.RequestOp(request_put=request)
                 request_ops.append(request_op)
             else:
-                raise Exception('Unknown request class {}'.format(op.__class__))
+                raise Exception(
+                    'Unknown request class {}'.format(op.__class__))
         return request_ops
 
     def transaction(self, compare, success=None, failure=None):
