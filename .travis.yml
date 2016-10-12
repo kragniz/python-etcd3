@@ -5,6 +5,7 @@ env:
   - TOXENV=py35
   - TOXENV=py34
   - TOXENV=py27
+  - TOXENV=flake8
 
 install:
     - pip install -U tox codecov

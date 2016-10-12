@@ -9,12 +9,11 @@ import base64
 import json
 import os
 import subprocess
-from six.moves.urllib.parse import urlparse
 
-import pytest
 from hypothesis import given
 from hypothesis.strategies import characters
-from hypothesis.strategies import text
+import pytest
+from six.moves.urllib.parse import urlparse
 
 import etcd3
 
