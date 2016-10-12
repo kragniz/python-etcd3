@@ -1,2 +1,4 @@
 def increment_last_byte(byte_string):
-    return byte_string[:-1] + bytes([byte_string[-1] + 1])
+    s = bytearray(byte_string)
+    s[-1] = s[-1] + 1
+    return bytes(s)
