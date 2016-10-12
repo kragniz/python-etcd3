@@ -1,5 +1,5 @@
 flake8==3.0.4
-tox==2.3.1
+tox==2.4.0
 coverage==4.2
 pytest==3.0.3
 hypothesis==3.5.3
