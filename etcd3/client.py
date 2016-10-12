@@ -1,8 +1,8 @@
 import grpc
 
-from etcd3.etcdrpc import rpc_pb2 as etcdrpc
 import etcd3.exceptions as exceptions
 import etcd3.transactions as transactions
+from etcd3.etcdrpc import rpc_pb2 as etcdrpc
 
 
 class Transactions(object):
