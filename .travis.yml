@@ -18,15 +18,13 @@ script: tox -e ${TOXENV}
 after_success:
       - codecov
 
-# After you create the Github repo and add it to Travis, run the
-# travis_pypi_setup.py script to finish PyPI deployment setup
 deploy:
   provider: pypi
-  distributions: sdist bdist_wheel
   user: kragniz
   password:
-    secure: PLEASE_REPLACE_ME
+    secure: YK7eGpk14nLqeH/c3y2UuQ5NHz+7L48Hj1zFX78o6BntF+xq7OhZpVOiLnStSW7CW70IXdSsuLhT6zPyzTemUWLZVAfF8uYdCCZkN8E0IVjTbEPkq4YK5HaQH4kSgWWN/B16vDQBpLCVVK6J2E+wI9Y9sKGWqBP0d2pJJd1T4wpBHZDzY8AFzo8UO+HP//iCX/yTeStqPz4tYT2dVtRFiyc1DKZWwZGxIInQS2QNAsT7eszuZDbBGrVXye+rm65nAxYY8SMxRbTlRqqUDyQ8nzdaHTHW8J5uDSWSd+OIeZQd/Sp51rH4JqaUTib0al+s0PhrOzOAxxygiSRkYaMNE9L5lNVIwaU8J5McCK9rVdXGFnP0UVgrlYetX0n4yksGpfqt2Ert+pH/kwrtQkREvSr/etOAqWwY87bqwRhhk5INxIGvRe/YP45BW6FFvInTc6ZBitIfUQ7Pv+2D/a7nfsvDEOi9eeGJCC7H5NYKreysIoP8jIhhNTjnsd3t/QfFqUTrlzAXBgW8zLlZASdjH3aUOgKZbRtSG3d32B/2ILgmUdSVi4jbMDYa5L8kZywusWfih2FHN86BaziMbZ+3o3vA134lzwXETo+H1lx62O0+QLAR2NPAEjQ7cEaR5WG4r48qPTFmehZWGSmfbX6j2MObkbTMF6FoXfqW/RcxOMk=
   on:
     tags: true
+    distributions: sdist bdist_wheel
     repo: kragniz/python-etcd3
     condition: $TOXENV == py27
