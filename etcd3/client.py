@@ -109,6 +109,27 @@ class Etcd3Client(object):
             for kv in range_response.kvs:
                 yield (kv.key, kv.value)
 
+    def get_all(self, sort_order=None, sort_target='key'):
+        '''
+        Get all keys currently stored in etcd.
+
+        :returns: sequence of (key, value) tuples
+        '''
+        range_request = self._build_get_range_request(
+            key=b'\0',
+            range_end=b'\0',
+            sort_order=sort_order,
+            sort_target=sort_target,
+        )
+
+        range_response = self.kvstub.Range(range_request)
+
+        if range_response.count < 1:
+            raise exceptions.KeyNotFoundError('no keys')
+        else:
+            for kv in range_response.kvs:
+                yield (kv.key, kv.value)
+
     def _build_put_request(self, key, value):
         put_request = etcdrpc.PutRequest()
         put_request.key = key.encode('utf-8')

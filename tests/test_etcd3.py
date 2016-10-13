@@ -110,6 +110,17 @@ class TestEtcd3(object):
         for key, value in values:
             assert value == b'i am a range'
 
+    def test_get_all(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/range{}'.format(i), 'i am in all')
+
+        for i in range(5):
+            etcdctl('put', '/doot/notrange{}'.format(i), 'i am in all')
+        values = list(etcd.get_all())
+        assert len(values) == 25
+        for key, value in values:
+            assert value == b'i am in all'
+
 
 class TestUtils(object):
     def test_increment_last_byte(self):
