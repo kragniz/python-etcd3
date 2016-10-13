@@ -38,9 +38,12 @@ class TestEtcd3(object):
         endpoint = os.environ.get('ETCD_ENDPOINT', None)
         if endpoint:
             url = urlparse(endpoint)
-            return etcd3.client(host=url.hostname, port=url.port)
+            yield etcd3.client(host=url.hostname, port=url.port)
         else:
-            return etcd3.client()
+            yield etcd3.client()
+
+        # clean up after fixture goes out of scope
+        etcdctl('del', '--prefix', '/')
 
     def test_get_unknown_key(self, etcd):
         with pytest.raises(etcd3.exceptions.KeyNotFoundError):
@@ -106,10 +109,6 @@ class TestEtcd3(object):
         assert len(values) == 20
         for key, value in values:
             assert value == b'i am a range'
-
-    @classmethod
-    def teardown_class(cls):
-        etcdctl('del', '--prefix', '/doot')
 
 
 class TestUtils(object):
