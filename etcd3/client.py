@@ -51,7 +51,7 @@ class Etcd3Client(object):
         elif sort_order == 'descend':
             range_request.sort_order = etcdrpc.RangeRequest.DESCEND
         else:
-            raise Exception('unknown sort order: "{}"'.format(sort_order))
+            raise ValueError('unknown sort order: "{}"'.format(sort_order))
 
         if sort_target is None or sort_target == 'key':
             range_request.sort_target = etcdrpc.RangeRequest.KEY
