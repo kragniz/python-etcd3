@@ -26,6 +26,35 @@ class Etcd3Client(object):
         self.kvstub = etcdrpc.KVStub(self.channel)
         self.transactions = Transactions()
 
+    def _build_get_range_request(self, key,
+                                 range_end=None,
+                                 limit=None,
+                                 revision=None,
+                                 sort_order=None,
+                                 sort_target='key',
+                                 serializable=None,
+                                 keys_only=None,
+                                 count_only=None,
+                                 min_mod_revision=None,
+                                 max_mod_revision=None,
+                                 min_create_revision=None,
+                                 max_create_revision=None):
+        range_request = etcdrpc.RangeRequest()
+        range_request.key = key
+        if range_end is not None:
+            range_request.range_end = range_end
+
+        if sort_order is None:
+            range_request.sort_order = etcdrpc.RangeRequest.NONE
+        elif sort_order == 'ascend':
+            range_request.sort_order = etcdrpc.RangeRequest.ASCEND
+        elif sort_order == 'descend':
+            range_request.sort_order = etcdrpc.RangeRequest.DESCEND
+        else:
+            raise Exception('unknown sort order: "{}"'.format(sort_order))
+
+        return range_request
+
     def get(self, key):
         '''
         Get the value of a key from etcd.
@@ -34,8 +63,7 @@ class Etcd3Client(object):
         :returns: value of key
         :rtype: bytes
         '''
-        range_request = etcdrpc.RangeRequest()
-        range_request.key = key.encode('utf-8')
+        range_request = self._build_get_range_request(key.encode('utf-8'))
         range_response = self.kvstub.Range(range_request)
 
         if range_response.count < 1:
@@ -54,18 +82,11 @@ class Etcd3Client(object):
         :returns: sequence of (key, value) tuples
         '''
         range_request = etcdrpc.RangeRequest()
-        range_request.key = key_prefix.encode('utf-8')
-        range_request.range_end = \
-            utils.increment_last_byte(key_prefix.encode('utf-8'))
-
-        if sort_order is None:
-            range_request.sort_order = etcdrpc.RangeRequest.NONE
-        elif sort_order == 'ascend':
-            range_request.sort_order = etcdrpc.RangeRequest.ASCEND
-        elif sort_order == 'descend':
-            range_request.sort_order = etcdrpc.RangeRequest.DESCEND
-        else:
-            raise Exception('unknown sort order: "{}"'.format(sort_order))
+        range_request = self._build_get_range_request(
+            key=key_prefix.encode('utf-8'),
+            range_end=utils.increment_last_byte(key_prefix.encode('utf-8')),
+            sort_order=sort_order,
+        )
 
         range_response = self.kvstub.Range(range_request)
 
