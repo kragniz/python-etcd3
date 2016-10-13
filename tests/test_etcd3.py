@@ -33,13 +33,8 @@ def etcdctl(*args):
 
 class TestEtcd3(object):
 
-    @classmethod
-    def setup_class(cls):
-        pass
-
-    # TODO workout how fixtures work...
-    @property
-    def client(self):
+    @pytest.fixture
+    def etcd(self):
         endpoint = os.environ.get('ETCD_ENDPOINT', None)
         if endpoint:
             url = urlparse(endpoint)
@@ -47,36 +42,32 @@ class TestEtcd3(object):
         else:
             return etcd3.client()
 
-    def test_client_stub(self):
-        assert self.client is not None
-
-    def test_get_unknown_key(self):
+    def test_get_unknown_key(self, etcd):
         with pytest.raises(etcd3.exceptions.KeyNotFoundError):
-            self.client.get('probably-invalid-key')
+            etcd.get('probably-invalid-key')
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
-    def test_get_key(self, string):
+    def test_get_key(self, etcd, string):
         etcdctl('put', '/doot/a_key', string)
-        returned = self.client.get('/doot/a_key')
+        returned = etcd.get('/doot/a_key')
         assert returned == string.encode('utf-8')
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
-    def test_get_random_key(self, string):
+    def test_get_random_key(self, etcd, string):
         etcdctl('put', '/doot/' + string, 'dootdoot')
-        returned = self.client.get('/doot/' + string)
+        returned = etcd.get('/doot/' + string)
         assert returned == b'dootdoot'
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
-    def test_put_key(self, string):
-        self.client.put('/doot/put_1', string)
+    def test_put_key(self, etcd, string):
+        etcd.put('/doot/put_1', string)
         out = etcdctl('get', '/doot/put_1')
         assert base64.b64decode(out['kvs'][0]['value']) == \
             string.encode('utf-8')
 
-    def test_delete_key(self):
+    def test_delete_key(self, etcd):
         etcdctl('put', '/doot/delete_this', 'delete pls')
 
-        etcd = etcd3.client()
         assert etcd.get('/doot/delete_this') == b'delete pls'
 
         etcd.delete('/doot/delete_this')
@@ -84,9 +75,8 @@ class TestEtcd3(object):
         with pytest.raises(etcd3.exceptions.KeyNotFoundError):
             etcd.get('/doot/delete_this')
 
-    def test_transaction_success(self):
+    def test_transaction_success(self, etcd):
         etcdctl('put', '/doot/txn', 'dootdoot')
-        etcd = etcd3.client()
         etcd.transaction(
             compare=[etcd.transactions.value('/doot/txn') == 'dootdoot'],
             success=[etcd.transactions.put('/doot/txn', 'success')],
@@ -95,9 +85,8 @@ class TestEtcd3(object):
         out = etcdctl('get', '/doot/txn')
         assert base64.b64decode(out['kvs'][0]['value']) == b'success'
 
-    def test_transaction_failure(self):
+    def test_transaction_failure(self, etcd):
         etcdctl('put', '/doot/txn', 'notdootdoot')
-        etcd = etcd3.client()
         etcd.transaction(
             compare=[etcd.transactions.value('/doot/txn') == 'dootdoot'],
             success=[etcd.transactions.put('/doot/txn', 'success')],
@@ -106,14 +95,14 @@ class TestEtcd3(object):
         out = etcdctl('get', '/doot/txn')
         assert base64.b64decode(out['kvs'][0]['value']) == b'failure'
 
-    def test_get_prefix(self):
+    def test_get_prefix(self, etcd):
         for i in range(20):
             etcdctl('put', '/doot/range{}'.format(i), 'i am a range')
 
         for i in range(5):
             etcdctl('put', '/doot/notrange{}'.format(i), 'i am a not range')
 
-        values = list(self.client.get_prefix('/doot/range'))
+        values = list(etcd.get_prefix('/doot/range'))
         assert len(values) == 20
         for key, value in values:
             assert value == b'i am a range'
