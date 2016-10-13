@@ -53,6 +53,17 @@ class Etcd3Client(object):
         else:
             raise Exception('unknown sort order: "{}"'.format(sort_order))
 
+        if sort_target is None or sort_target == 'key':
+            range_request.sort_target = etcdrpc.RangeRequest.KEY
+        elif sort_target == 'version':
+            range_request.sort_target = etcdrpc.RangeRequest.VERSION
+        elif sort_target == 'create':
+            range_request.sort_target = etcdrpc.RangeRequest.CREATE
+        elif sort_target == 'mod':
+            range_request.sort_target = etcdrpc.RangeRequest.MOD
+        elif sort_target == 'value':
+            range_request.sort_target = etcdrpc.RangeRequest.VALUE
+
         return range_request
 
     def get(self, key):
