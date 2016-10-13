@@ -23,6 +23,11 @@ python-etcd3
 
 Python client for the etcd API v3.
 
+**Warning: this is a work in progress, many basic features do not have a stable
+API.**
+
+If you're interested in using this library, please get involved.
+
 * Free software: Apache Software License 2.0
 * Documentation: https://python-etcd3.readthedocs.io.
 
