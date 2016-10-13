@@ -9,17 +9,17 @@ class BaseCompare(object):
 
     def __eq__(self, other):
         self.value = other
-        self.op = '='
+        self.op = etcdrpc.Compare.EQUAL
         return self
 
     def __lt__(self, other):
         self.value = other
-        self.op = '<'
+        self.op = etcdrpc.Compare.LESS
         return self
 
     def __gt__(self, other):
         self.value = other
-        self.op = '>'
+        self.op = etcdrpc.Compare.GREATER
         return self
 
     def __repr__(self):
@@ -30,45 +30,37 @@ class BaseCompare(object):
         compare = etcdrpc.Compare()
         compare.key = self.key.encode('utf-8')
 
-        if self.op == '=':
-            compare.result = etcdrpc.Compare.EQUAL
-        elif self.op == '<':
-            compare.result = etcdrpc.Compare.LESS
-        elif self.op == '>':
-            compare.result = etcdrpc.Compare.GREATER
-        else:
+        if self.op is None:
             raise ValueError('op must be one of =, < or >')
 
-        if self.compare_type == 'value':
-            compare.target = etcdrpc.Compare.VALUE
-            compare.value = self.value.encode('utf-8')
-        elif self.compare_type == 'version':
-            compare.target = etcdrpc.Compare.VERSION
-            compare.version = int(self.value)
-        elif self.compare_type == 'create':
-            compare.target = etcdrpc.Compare.CREATE
-            compare.create_revision = int(self.value)
-        elif self.compare_type == 'mod':
-            compare.target = etcdrpc.Compare.MOD
-            compare.mod_revision = int(self.value)
+        compare.result = self.op
 
+        self.build_compare(compare)
         return compare
 
 
 class Value(BaseCompare):
-    compare_type = 'value'
+    def build_compare(self, compare):
+        compare.target = etcdrpc.Compare.VALUE
+        compare.value = self.value.encode('utf-8')
 
 
 class Version(BaseCompare):
-    compare_type = 'version'
+    def build_compare(self, compare):
+        compare.target = etcdrpc.Compare.VERSION
+        compare.version = int(self.value)
 
 
 class Create(BaseCompare):
-    compare_type = 'create'
+    def build_compare(self, compare):
+        compare.target = etcdrpc.Compare.CREATE
+        compare.create_revision = int(self.value)
 
 
 class Mod(BaseCompare):
-    compare_type = 'mod'
+    def build_compare(self, compare):
+        compare.target = etcdrpc.Compare.MOD
+        compare.mod_revision = int(self.value)
 
 
 class Put(object):
