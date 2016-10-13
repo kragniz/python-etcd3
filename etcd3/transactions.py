@@ -37,7 +37,7 @@ class BaseCompare(object):
         elif self.op == '>':
             compare.result = etcdrpc.Compare.GREATER
         else:
-            raise  # TODO: add a proper exception class for this
+            raise ValueError('op must be one of =, < or >')
 
         if self.compare_type == 'value':
             compare.target = etcdrpc.Compare.VALUE
