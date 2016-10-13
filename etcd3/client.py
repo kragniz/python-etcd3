@@ -63,6 +63,9 @@ class Etcd3Client(object):
             range_request.sort_target = etcdrpc.RangeRequest.MOD
         elif sort_target == 'value':
             range_request.sort_target = etcdrpc.RangeRequest.VALUE
+        else:
+            raise ValueError('sort_target must be one of "key", '
+                             '"version", "create", "mod" or "value"')
 
         return range_request
 
