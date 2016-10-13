@@ -95,7 +95,6 @@ class Etcd3Client(object):
 
         :returns: sequence of (key, value) tuples
         '''
-        range_request = etcdrpc.RangeRequest()
         range_request = self._build_get_range_request(
             key=key_prefix.encode('utf-8'),
             range_end=utils.increment_last_byte(key_prefix.encode('utf-8')),
