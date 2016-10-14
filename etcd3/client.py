@@ -254,7 +254,15 @@ class Etcd3Client(object):
         '''
         Add a member into the cluster.
         '''
-        pass
+        member_add_request = etcdrpc.MemberAddRequest(peerURLs=urls)
+
+        member_add_response = self.clusterstub.MemberAdd(member_add_request)
+        member = member_add_response.member
+        return etcd3.members.Member(member.ID,
+                                    member.name,
+                                    member.peerURLs,
+                                    member.clientURLs,
+                                    etcd_client=self)
 
     def remove_member(self, member_id):
         '''
