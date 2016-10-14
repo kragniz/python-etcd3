@@ -1,6 +1,7 @@
 import grpc
 
 import etcd3.exceptions as exceptions
+import etcd3.members
 import etcd3.transactions as transactions
 import etcd3.utils as utils
 from etcd3.etcdrpc import rpc_pb2 as etcdrpc
@@ -24,6 +25,7 @@ class Etcd3Client(object):
             host=host, port=port)
         )
         self.kvstub = etcdrpc.KVStub(self.channel)
+        self.clusterstub = etcdrpc.ClusterStub(self.channel)
         self.transactions = Transactions()
 
     def _build_get_range_request(self, key,
@@ -271,7 +273,14 @@ class Etcd3Client(object):
         '''
         List of all members associated with the cluster.
         '''
-        pass
+        member_list_request = etcdrpc.MemberListRequest()
+        member_list_response = self.clusterstub.MemberList(member_list_request)
+
+        for member in member_list_response.members:
+            yield etcd3.members.Member(member.ID,
+                                       member.name,
+                                       member.peerURLs,
+                                       member.clientURLs)
 
 
 def client(host='localhost', port=2379):
