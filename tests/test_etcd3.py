@@ -121,6 +121,28 @@ class TestEtcd3(object):
         for key, value in values:
             assert value == b'i am in all'
 
+    def test_sort_order(self, etcd):
+        def remove_prefix(string, prefix):
+            return string[len(prefix):]
+
+        initial_keys = 'abcde'
+        initial_values = 'qwert'
+
+        for k, v in zip(initial_keys, initial_values):
+            etcdctl('put', '/doot/{}'.format(k), v)
+
+        keys = ''
+        for key, value in etcd.get_prefix('/doot', sort_order='ascend'):
+            keys += remove_prefix(key.decode('utf-8'), '/doot/')
+
+        assert keys == initial_keys
+
+        reverse_keys = ''
+        for key, value in etcd.get_prefix('/doot', sort_order='descend'):
+            reverse_keys += remove_prefix(key.decode('utf-8'), '/doot/')
+
+        assert reverse_keys == ''.join(reversed(initial_keys))
+
 
 class TestUtils(object):
     def test_increment_last_byte(self):
