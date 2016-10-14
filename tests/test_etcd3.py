@@ -19,7 +19,6 @@ import etcd3
 from etcd3.etcdrpc import rpc_pb2 as etcdrpc
 
 
-
 os.environ['ETCDCTL_API'] = '3'
 
 
@@ -150,8 +149,8 @@ class TestUtils(object):
     def test_increment_last_byte(self):
         assert etcd3.utils.increment_last_byte(b'foo') == b'fop'
 
-class TestClient(object):
 
+class TestClient(object):
     @pytest.fixture
     def etcd(self):
         yield etcd3.client()
@@ -166,12 +165,13 @@ class TestClient(object):
             'mod': etcdrpc.RangeRequest.MOD,
             'value': etcdrpc.RangeRequest.VALUE,
         }
+
         for input, expected in sort_target.items():
-            range_request = etcd._build_get_range_request(key, sort_target=input)
+            range_request = etcd._build_get_range_request(key,
+                                                          sort_target=input)
             assert range_request.sort_target == expected
         with pytest.raises(ValueError):
             etcd._build_get_range_request(key, sort_target='feelsbadman')
-
 
     def test_sort_order(self, etcd):
         key = 'key'.encode('utf-8')
@@ -180,11 +180,14 @@ class TestClient(object):
             'ascend': etcdrpc.RangeRequest.ASCEND,
             'descend': etcdrpc.RangeRequest.DESCEND,
         }
+
         for input, expected in sort_target.items():
-            range_request = etcd._build_get_range_request(key, sort_order=input)
+            range_request = etcd._build_get_range_request(key,
+                                                          sort_order=input)
             assert range_request.sort_order == expected
         with pytest.raises(ValueError):
             etcd._build_get_range_request(key, sort_order='feelsbadman')
+
 
 class TestCompares(object):
 
@@ -200,7 +203,8 @@ class TestCompares(object):
 
         version_compare = tx.version(key) > 92
         assert version_compare.op == etcdrpc.Compare.GREATER
-        assert version_compare.build_message().target == etcdrpc.Compare.VERSION
+        assert version_compare.build_message().target == \
+            etcdrpc.Compare.VERSION
 
     def test_compare_value(self):
         key = 'key'
