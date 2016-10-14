@@ -185,6 +185,11 @@ class Etcd3Client(object):
                 request = self._build_put_request(op.key, op.value)
                 request_op = etcdrpc.RequestOp(request_put=request)
                 request_ops.append(request_op)
+
+            elif isinstance(op, transactions.Get):
+                request = self._build_get_range_request(op.key)
+                request_op = etcdrpc.RequestOp(request_range=request)
+                request_ops.append(request_op)
             else:
                 raise Exception(
                     'Unknown request class {}'.format(op.__class__))
@@ -226,7 +231,22 @@ class Etcd3Client(object):
         transaction_request = etcdrpc.TxnRequest(compare=compare,
                                                  success=success_ops,
                                                  failure=failure_ops)
-        self.kvstub.Txn(transaction_request)
+        txn_response = self.kvstub.Txn(transaction_request)
+
+        responses = []
+        for response in txn_response.responses:
+            response_type = response.WhichOneof('response')
+            if response_type == 'response_put':
+                responses.append(None)
+
+            elif response_type == 'response_range':
+                range_kvs = []
+                for kv in response.response_range.kvs:
+                    range_kvs.append((kv.key, kv.value))
+
+                responses.append(range_kvs)
+
+        return responses
 
     def add_member(self, urls):
         '''
