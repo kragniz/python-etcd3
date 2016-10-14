@@ -160,6 +160,12 @@ class TestUtils(object):
     def test_increment_last_byte(self):
         assert etcd3.utils.increment_last_byte(b'foo') == b'fop'
 
+    def test_to_bytes(self):
+        assert isinstance(etcd3.utils.to_bytes(b'doot'), bytes) is True
+        assert isinstance(etcd3.utils.to_bytes('doot'), bytes) is True
+        assert etcd3.utils.to_bytes(b'doot') == b'doot'
+        assert etcd3.utils.to_bytes('doot') == b'doot'
+
 
 class TestClient(object):
     @pytest.fixture
