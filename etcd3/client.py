@@ -262,7 +262,7 @@ class Etcd3Client(object):
         '''
         pass
 
-    def update_member(self, member_id, urls):
+    def update_member(self, member_id, peer_urls):
         '''
         Update the configuration of an existing member in the cluster.
         '''
@@ -280,7 +280,8 @@ class Etcd3Client(object):
             yield etcd3.members.Member(member.ID,
                                        member.name,
                                        member.peerURLs,
-                                       member.clientURLs)
+                                       member.clientURLs,
+                                       etcd_client=self)
 
 
 def client(host='localhost', port=2379):
