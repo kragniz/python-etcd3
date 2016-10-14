@@ -275,7 +275,9 @@ class Etcd3Client(object):
         '''
         Update the configuration of an existing member in the cluster.
         '''
-        pass
+        member_update_request = etcdrpc.MemberUpdateRequest(ID=member_id,
+                                                            peerURLs=peer_urls)
+        self.clusterstub.MemberUpdate(member_update_request)
 
     @property
     def members(self):
