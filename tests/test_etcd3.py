@@ -16,6 +16,8 @@ import pytest
 from six.moves.urllib.parse import urlparse
 
 import etcd3
+from etcd3.etcdrpc import rpc_pb2 as etcdrpc
+
 
 
 os.environ['ETCDCTL_API'] = '3'
@@ -125,3 +127,97 @@ class TestEtcd3(object):
 class TestUtils(object):
     def test_increment_last_byte(self):
         assert etcd3.utils.increment_last_byte(b'foo') == b'fop'
+
+class TestClient(object):
+
+    @pytest.fixture
+    def etcd(self):
+        yield etcd3.client()
+
+    def test_sort_target(self, etcd):
+        key = 'key'.encode('utf-8')
+        sort_target = {
+            None: etcdrpc.RangeRequest.KEY,
+            'key': etcdrpc.RangeRequest.KEY,
+            'version': etcdrpc.RangeRequest.VERSION,
+            'create': etcdrpc.RangeRequest.CREATE,
+            'mod': etcdrpc.RangeRequest.MOD,
+            'value': etcdrpc.RangeRequest.VALUE,
+        }
+        for input, expected in sort_target.items():
+            range_request = etcd._build_get_range_request(key, sort_target=input)
+            assert range_request.sort_target == expected
+        with pytest.raises(ValueError):
+            etcd._build_get_range_request(key, sort_target='feelsbadman')
+
+
+    def test_sort_order(self, etcd):
+        key = 'key'.encode('utf-8')
+        sort_target = {
+            None: etcdrpc.RangeRequest.NONE,
+            'ascend': etcdrpc.RangeRequest.ASCEND,
+            'descend': etcdrpc.RangeRequest.DESCEND,
+        }
+        for input, expected in sort_target.items():
+            range_request = etcd._build_get_range_request(key, sort_order=input)
+            assert range_request.sort_order == expected
+        with pytest.raises(ValueError):
+            etcd._build_get_range_request(key, sort_order='feelsbadman')
+
+class TestCompares(object):
+
+    def test_compare_version(self):
+        key = 'key'
+        tx = etcd3.Transactions()
+
+        version_compare = tx.version(key) == 1
+        assert version_compare.op == etcdrpc.Compare.EQUAL
+
+        version_compare = tx.version(key) < 91
+        assert version_compare.op == etcdrpc.Compare.LESS
+
+        version_compare = tx.version(key) > 92
+        assert version_compare.op == etcdrpc.Compare.GREATER
+        assert version_compare.build_message().target == etcdrpc.Compare.VERSION
+
+    def test_compare_value(self):
+        key = 'key'
+        tx = etcd3.Transactions()
+
+        value_compare = tx.value(key) == 'b'
+        assert value_compare.op == etcdrpc.Compare.EQUAL
+
+        value_compare = tx.value(key) < 'b'
+        assert value_compare.op == etcdrpc.Compare.LESS
+
+        value_compare = tx.value(key) > 'b'
+        assert value_compare.op == etcdrpc.Compare.GREATER
+        assert value_compare.build_message().target == etcdrpc.Compare.VALUE
+
+    def test_compare_mod(self):
+        key = 'key'
+        tx = etcd3.Transactions()
+
+        mod_compare = tx.mod(key) == -100
+        assert mod_compare.op == etcdrpc.Compare.EQUAL
+
+        mod_compare = tx.mod(key) < 19
+        assert mod_compare.op == etcdrpc.Compare.LESS
+
+        mod_compare = tx.mod(key) > 21
+        assert mod_compare.op == etcdrpc.Compare.GREATER
+        assert mod_compare.build_message().target == etcdrpc.Compare.MOD
+
+    def test_compare_create(self):
+        key = 'key'
+        tx = etcd3.Transactions()
+
+        create_compare = tx.create(key) == 10
+        assert create_compare.op == etcdrpc.Compare.EQUAL
+
+        create_compare = tx.create(key) < 155
+        assert create_compare.op == etcdrpc.Compare.LESS
+
+        create_compare = tx.create(key) > -12
+        assert create_compare.op == etcdrpc.Compare.GREATER
+        assert create_compare.build_message().target == etcdrpc.Compare.CREATE

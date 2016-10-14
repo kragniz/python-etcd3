@@ -7,6 +7,8 @@ class BaseCompare(object):
         self.value = None
         self.op = None
 
+    # TODO check other is of correct type for compare
+    # Version, Mod and Create can only be ints
     def __eq__(self, other):
         self.value = other
         self.op = etcdrpc.Compare.EQUAL
