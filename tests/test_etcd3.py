@@ -111,6 +111,17 @@ class TestEtcd3(object):
         for key, value in values:
             assert value == b'i am a range'
 
+    def test_all_not_found_error(self, etcd):
+        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
+            list(etcd.get_all())
+
+    def test_range_not_found_error(self, etcd):
+        for i in range(5):
+            etcdctl('put', '/doot/notrange{}'.format(i), 'i am a not range')
+
+        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
+            list(etcd.get_prefix('/doot/range'))
+
     def test_get_all(self, etcd):
         for i in range(20):
             etcdctl('put', '/doot/range{}'.format(i), 'i am in all')
