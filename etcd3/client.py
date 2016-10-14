@@ -268,7 +268,8 @@ class Etcd3Client(object):
         '''
         Remove an existing member from the cluster.
         '''
-        pass
+        member_rm_request = etcdrpc.MemberRemoveRequest(ID=member_id)
+        self.clusterstub.MemberRemove(member_rm_request)
 
     def update_member(self, member_id, peer_urls):
         '''
