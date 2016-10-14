@@ -149,26 +149,38 @@ class Etcd3Client(object):
         put_request = self._build_put_request(key, value)
         self.kvstub.Put(put_request)
 
+    def _build_delete_request(self, key,
+                              range_end=None,
+                              prev_kv=None):
+        delete_request = etcdrpc.DeleteRangeRequest()
+        delete_request.key = utils.to_bytes(key)
+
+        if range_end is not None:
+            delete_request.range_end = utils.to_bytes(range_end)
+
+        if prev_kv is not None:
+            delete_request.prev_kv = prev_kv
+
+        return delete_request
+
     def delete(self, key):
         '''
         Delete a single key in etcd.
 
         :param key: key in etcd to delete
         '''
-        delete_request = etcdrpc.DeleteRangeRequest()
-        delete_request.key = utils.to_bytes(key)
+        delete_request = self._build_delete_request(key)
         self.kvstub.DeleteRange(delete_request)
 
-    def delete_range(self, start_key, range_end='\0'):
+    def delete_prefix(self, prefix):
         '''
-        Delete a range of keys in etcd.
-
-        :param start_key: first key in range to delete
+        Delete a range of keys with a prefix in etcd.
         '''
-        delete_request = etcdrpc.DeleteRangeRequest()
-        delete_request.key = utils.to_bytes(start_key)
-        delete_request.range_end = utils.to_bytes(range_end)
-        self.kvstub.DeleteRange(delete_request)
+        delete_request = self._build_delete_request(
+            prefix,
+            range_end=utils.increment_last_byte(prefix)
+        )
+        return self.kvstub.DeleteRange(delete_request)
 
     def compact(self):
         '''
