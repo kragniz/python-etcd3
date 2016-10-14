@@ -246,7 +246,7 @@ class Etcd3Client(object):
 
                 responses.append(range_kvs)
 
-        return responses
+        return txn_response.succeeded, responses
 
     def add_member(self, urls):
         '''
