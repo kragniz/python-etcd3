@@ -40,9 +40,9 @@ class Etcd3Client(object):
                                  min_create_revision=None,
                                  max_create_revision=None):
         range_request = etcdrpc.RangeRequest()
-        range_request.key = key
+        range_request.key = utils.to_bytes(key)
         if range_end is not None:
-            range_request.range_end = range_end
+            range_request.range_end = utils.to_bytes(range_end)
 
         if sort_order is None:
             range_request.sort_order = etcdrpc.RangeRequest.NONE
@@ -77,7 +77,7 @@ class Etcd3Client(object):
         :returns: value of key
         :rtype: bytes
         '''
-        range_request = self._build_get_range_request(key.encode('utf-8'))
+        range_request = self._build_get_range_request(key)
         range_response = self.kvstub.Range(range_request)
 
         if range_response.count < 1:
@@ -96,8 +96,8 @@ class Etcd3Client(object):
         :returns: sequence of (key, value) tuples
         '''
         range_request = self._build_get_range_request(
-            key=key_prefix.encode('utf-8'),
-            range_end=utils.increment_last_byte(key_prefix.encode('utf-8')),
+            key=key_prefix,
+            range_end=utils.increment_last_byte(utils.to_bytes(key_prefix)),
             sort_order=sort_order,
         )
 
@@ -132,8 +132,8 @@ class Etcd3Client(object):
 
     def _build_put_request(self, key, value):
         put_request = etcdrpc.PutRequest()
-        put_request.key = key.encode('utf-8')
-        put_request.value = value.encode('utf-8')
+        put_request.key = utils.to_bytes(key)
+        put_request.value = utils.to_bytes(value)
         return put_request
 
     def put(self, key, value):
@@ -154,7 +154,7 @@ class Etcd3Client(object):
         :param key: key in etcd to delete
         '''
         delete_request = etcdrpc.DeleteRangeRequest()
-        delete_request.key = key.encode('utf-8')
+        delete_request.key = utils.to_bytes(key)
         self.kvstub.DeleteRange(delete_request)
 
     def delete_range(self, start_key, range_end='\0'):
@@ -164,8 +164,8 @@ class Etcd3Client(object):
         :param start_key: first key in range to delete
         '''
         delete_request = etcdrpc.DeleteRangeRequest()
-        delete_request.key = start_key.encode('utf-8')
-        delete_request.range_end = range_end.encode('utf-8')
+        delete_request.key = utils.to_bytes(start_key)
+        delete_request.range_end = utils.to_bytes(range_end)
         self.kvstub.DeleteRange(delete_request)
 
     def compact(self):
