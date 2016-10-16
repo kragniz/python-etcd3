@@ -7,7 +7,7 @@ from etcd3.members import Member
 
 __author__ = 'Louis Taylor'
 __email__ = 'louis@kragniz.eu'
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 __all__ = ['Etcd3Client', 'client', 'etcdrpc', 'utils', 'Transactions',
            'Member']
