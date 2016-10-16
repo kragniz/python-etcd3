@@ -21,5 +21,8 @@ class Member(object):
     def update(self, peer_urls):
         '''
         Update the configuration of this member.
+
+        :param peer_urls: new list of peer urls the member will use to
+                          communicate with the cluster
         '''
         self.etcd_client.update_member(self.id, peer_urls)
