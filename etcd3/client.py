@@ -267,6 +267,9 @@ class Etcd3Client(object):
     def add_member(self, urls):
         '''
         Add a member into the cluster.
+
+        :returns: new member
+        :rtype: :class:`.Member`
         '''
         member_add_request = etcdrpc.MemberAddRequest(peerURLs=urls)
 
@@ -281,6 +284,8 @@ class Etcd3Client(object):
     def remove_member(self, member_id):
         '''
         Remove an existing member from the cluster.
+
+        :param member_id: ID of the member to remove
         '''
         member_rm_request = etcdrpc.MemberRemoveRequest(ID=member_id)
         self.clusterstub.MemberRemove(member_rm_request)
@@ -288,6 +293,10 @@ class Etcd3Client(object):
     def update_member(self, member_id, peer_urls):
         '''
         Update the configuration of an existing member in the cluster.
+
+        :param member_id: ID of the member to update
+        :param peer_urls: new list of peer urls the member will use to
+                          communicate with the cluster
         '''
         member_update_request = etcdrpc.MemberUpdateRequest(ID=member_id,
                                                             peerURLs=peer_urls)
@@ -297,6 +306,9 @@ class Etcd3Client(object):
     def members(self):
         '''
         List of all members associated with the cluster.
+
+        :type: sequence of :class:`.Member`
+
         '''
         member_list_request = etcdrpc.MemberListRequest()
         member_list_response = self.clusterstub.MemberList(member_list_request)
