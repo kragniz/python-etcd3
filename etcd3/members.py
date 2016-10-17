@@ -1,5 +1,5 @@
 class Member(object):
-    '''
+    """
     A member of the etcd cluster.
 
     :ivar id: ID of the member
@@ -8,7 +8,7 @@ class Member(object):
                      communication
     :ivar client_urls: list of URLs the member exposes to clients for
                        communication
-    '''
+    """
 
     def __init__(self, id, name, peer_urls, client_urls, etcd_client=None):
         self.id = id
@@ -24,16 +24,14 @@ class Member(object):
                                              client_urls=self.client_urls))
 
     def remove(self):
-        '''
-        Remove this member from the cluster.
-        '''
+        """Remove this member from the cluster."""
         self._etcd_client.remove_member(self.id)
 
     def update(self, peer_urls):
-        '''
+        """
         Update the configuration of this member.
 
         :param peer_urls: new list of peer urls the member will use to
                           communicate with the cluster
-        '''
+        """
         self._etcd_client.update_member(self.id, peer_urls)

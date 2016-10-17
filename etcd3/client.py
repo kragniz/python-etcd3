@@ -72,13 +72,13 @@ class Etcd3Client(object):
         return range_request
 
     def get(self, key):
-        '''
+        """
         Get the value of a key from etcd.
 
         :param key: key in etcd to get
         :returns: value of key
         :rtype: bytes
-        '''
+        """
         range_request = self._build_get_range_request(key)
         range_response = self.kvstub.Range(range_request)
 
@@ -90,13 +90,13 @@ class Etcd3Client(object):
             return range_response.kvs.pop().value
 
     def get_prefix(self, key_prefix, sort_order=None, sort_target='key'):
-        '''
+        """
         Get a range of keys with a prefix.
 
         :param key_prefix: first key in range
 
         :returns: sequence of (key, value) tuples
-        '''
+        """
         range_request = self._build_get_range_request(
             key=key_prefix,
             range_end=utils.increment_last_byte(utils.to_bytes(key_prefix)),
@@ -112,11 +112,11 @@ class Etcd3Client(object):
                 yield (kv.key, kv.value)
 
     def get_all(self, sort_order=None, sort_target='key'):
-        '''
+        """
         Get all keys currently stored in etcd.
 
         :returns: sequence of (key, value) tuples
-        '''
+        """
         range_request = self._build_get_range_request(
             key=b'\0',
             range_end=b'\0',
@@ -139,13 +139,13 @@ class Etcd3Client(object):
         return put_request
 
     def put(self, key, value):
-        '''
+        """
         Save a value to etcd.
 
         :param key: key in etcd to set
         :param value: value to set key to
         :type value: bytes
-        '''
+        """
         put_request = self._build_put_request(key, value)
         self.kvstub.Put(put_request)
 
@@ -164,18 +164,16 @@ class Etcd3Client(object):
         return delete_request
 
     def delete(self, key):
-        '''
+        """
         Delete a single key in etcd.
 
         :param key: key in etcd to delete
-        '''
+        """
         delete_request = self._build_delete_request(key)
         self.kvstub.DeleteRange(delete_request)
 
     def delete_prefix(self, prefix):
-        '''
-        Delete a range of keys with a prefix in etcd.
-        '''
+        """Delete a range of keys with a prefix in etcd."""
         delete_request = self._build_delete_request(
             prefix,
             range_end=utils.increment_last_byte(prefix)
@@ -183,18 +181,18 @@ class Etcd3Client(object):
         return self.kvstub.DeleteRange(delete_request)
 
     def compact(self, revision, physical=False):
-        '''
-        Compact the event history in etcd.
-        '''
+        """Compact the event history in etcd."""
         compact_request = etcdrpc.CompactionRequest(revision=revision,
                                                     physical=physical)
         self.kvstub.Compact(compact_request)
 
     def _ops_to_requests(self, ops):
-        '''
-        Return a list of grpc requests from an input list of
-        etcd3.transactions.{Put, Get, Delete} objects.
-        '''
+        """
+        Return a list of grpc requests.
+
+        Returns list from an input list of etcd3.transactions.{Put, Get,
+        Delete} objects.
+        """
         request_ops = []
         for op in ops:
             if isinstance(op, transactions.Put):
@@ -212,7 +210,7 @@ class Etcd3Client(object):
         return request_ops
 
     def transaction(self, compare, success=None, failure=None):
-        '''
+        """
         Perform a transaction.
 
         Example usage:
@@ -237,8 +235,7 @@ class Etcd3Client(object):
                         are true
         :param failure: A list of operations to perform if any of the
                         comparisons are false
-        '''
-
+        """
         compare = [c.build_message() for c in compare]
 
         success_ops = self._ops_to_requests(success)
@@ -265,12 +262,12 @@ class Etcd3Client(object):
         return txn_response.succeeded, responses
 
     def add_member(self, urls):
-        '''
+        """
         Add a member into the cluster.
 
         :returns: new member
         :rtype: :class:`.Member`
-        '''
+        """
         member_add_request = etcdrpc.MemberAddRequest(peerURLs=urls)
 
         member_add_response = self.clusterstub.MemberAdd(member_add_request)
@@ -282,34 +279,34 @@ class Etcd3Client(object):
                                     etcd_client=self)
 
     def remove_member(self, member_id):
-        '''
+        """
         Remove an existing member from the cluster.
 
         :param member_id: ID of the member to remove
-        '''
+        """
         member_rm_request = etcdrpc.MemberRemoveRequest(ID=member_id)
         self.clusterstub.MemberRemove(member_rm_request)
 
     def update_member(self, member_id, peer_urls):
-        '''
+        """
         Update the configuration of an existing member in the cluster.
 
         :param member_id: ID of the member to update
         :param peer_urls: new list of peer urls the member will use to
                           communicate with the cluster
-        '''
+        """
         member_update_request = etcdrpc.MemberUpdateRequest(ID=member_id,
                                                             peerURLs=peer_urls)
         self.clusterstub.MemberUpdate(member_update_request)
 
     @property
     def members(self):
-        '''
+        """
         List of all members associated with the cluster.
 
         :type: sequence of :class:`.Member`
 
-        '''
+        """
         member_list_request = etcdrpc.MemberListRequest()
         member_list_response = self.clusterstub.MemberList(member_list_request)
 
@@ -322,5 +319,5 @@ class Etcd3Client(object):
 
 
 def client(host='localhost', port=2379):
-    '''Return an instance of an Etcd3Client'''
+    """Return an instance of an Etcd3Client."""
     return Etcd3Client(host=host, port=port)
