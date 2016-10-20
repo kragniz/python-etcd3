@@ -292,6 +292,15 @@ class Etcd3Client(object):
         lease_revoke_request = etcdrpc.LeaseRevokeRequest(ID=lease_id)
         self.leasestub.LeaseRevoke(lease_revoke_request)
 
+    def keep_alive_lease(self):
+        pass
+
+    def get_lease_info(self, lease_id):
+        # FIXME: currently broken due to protobuf stubs being out of date
+        ttl_request = etcdrpc.LeaseTimeToLiveRequest(ID=lease_id,
+                                                     keys=True)
+        return self.leasestub.LeaseTimeToLive(ttl_request)
+
     def add_member(self, urls):
         """
         Add a member into the cluster.

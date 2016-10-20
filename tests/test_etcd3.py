@@ -170,6 +170,11 @@ class TestEtcd3(object):
         lease = etcd.lease(1)
         lease.revoke()
 
+    @pytest.mark.skip(reason="broken due to protobuf stubs being out of date")
+    def test_lease_keys_empty(self, etcd):
+        lease = etcd.lease(1)
+        assert lease.keys == []
+
 
 class TestUtils(object):
     def test_increment_last_byte(self):
