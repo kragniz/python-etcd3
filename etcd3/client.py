@@ -1,10 +1,10 @@
 import grpc
 
+import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions as exceptions
 import etcd3.members
 import etcd3.transactions as transactions
 import etcd3.utils as utils
-import etcd3.etcdrpc as etcdrpc
 
 
 class Transactions(object):
