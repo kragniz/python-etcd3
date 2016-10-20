@@ -155,7 +155,7 @@ class TestEtcd3(object):
         assert reverse_keys == ''.join(reversed(initial_keys))
 
     def test_lease_grant(self, etcd):
-        lease = etcd.grant_lease(1)
+        lease = etcd.lease(1)
         assert isinstance(lease.ttl, int)
         assert isinstance(lease.id, int)
 

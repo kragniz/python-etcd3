@@ -263,7 +263,7 @@ class Etcd3Client(object):
 
         return txn_response.succeeded, responses
 
-    def grant_lease(self, ttl, id=None):
+    def lease(self, ttl, id=None):
         """
         Create a new lease.
 
