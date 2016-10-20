@@ -166,6 +166,10 @@ class TestEtcd3(object):
         assert isinstance(lease.ttl, int_types)
         assert isinstance(lease.id, int_types)
 
+    def test_lease_revoke(self, etcd):
+        lease = etcd.lease(1)
+        lease.revoke()
+
 
 class TestUtils(object):
     def test_increment_last_byte(self):

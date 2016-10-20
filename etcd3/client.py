@@ -263,7 +263,7 @@ class Etcd3Client(object):
 
         return txn_response.succeeded, responses
 
-    def lease(self, ttl, id=None):
+    def lease(self, ttl, lease_id=None):
         """
         Create a new lease.
 
@@ -272,15 +272,25 @@ class Etcd3Client(object):
         ttl.
 
         :param ttl: Requested time to live
-        :param id: Requested ID for the lease
+        :param lease_id: Requested ID for the lease
 
         :returns: new lease
         :rtype: :class:`.Lease`
         """
-        lease_grant_request = etcdrpc.LeaseGrantRequest(TTL=ttl, ID=id)
+        lease_grant_request = etcdrpc.LeaseGrantRequest(TTL=ttl, ID=lease_id)
         lease_grant_response = self.leasestub.LeaseGrant(lease_grant_request)
-        return leases.Lease(id=lease_grant_response.ID,
-                            ttl=lease_grant_response.TTL)
+        return leases.Lease(lease_id=lease_grant_response.ID,
+                            ttl=lease_grant_response.TTL,
+                            etcd_client=self)
+
+    def revoke_lease(self, lease_id):
+        """
+        Revoke a lease.
+
+        :param lease_id: ID of the lease to revoke.
+        """
+        lease_revoke_request = etcdrpc.LeaseRevokeRequest(ID=lease_id)
+        self.leasestub.LeaseRevoke(lease_revoke_request)
 
     def add_member(self, urls):
         """
