@@ -12,6 +12,7 @@ import subprocess
 from hypothesis import given
 from hypothesis.strategies import characters
 import pytest
+import six
 from six.moves.urllib.parse import urlparse
 
 import etcd3
@@ -156,8 +157,14 @@ class TestEtcd3(object):
 
     def test_lease_grant(self, etcd):
         lease = etcd.lease(1)
-        assert isinstance(lease.ttl, int)
-        assert isinstance(lease.id, int)
+
+        if six.PY2:
+            int_types = (int, long)
+        else:
+            int_types = (int,)
+
+        assert isinstance(lease.ttl, int_types)
+        assert isinstance(lease.id, int_types)
 
 
 class TestUtils(object):
