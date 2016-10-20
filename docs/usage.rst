@@ -14,3 +14,6 @@ API
 
 .. autoclass:: etcd3.Member
     :members:
+
+.. autoclass:: etcd3.Lease
+    :members:

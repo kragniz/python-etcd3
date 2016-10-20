@@ -273,6 +273,9 @@ class Etcd3Client(object):
 
         :param ttl: Requested time to live
         :param id: Requested ID for the lease
+
+        :returns: new lease
+        :rtype: :class:`.Lease`
         """
         lease_grant_request = etcdrpc.LeaseGrantRequest(TTL=ttl, ID=id)
         lease_grant_response = self.leasestub.LeaseGrant(lease_grant_request)
