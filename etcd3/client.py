@@ -2,6 +2,7 @@ import grpc
 
 import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions as exceptions
+import etcd3.leases as leases
 import etcd3.members
 import etcd3.transactions as transactions
 import etcd3.utils as utils
@@ -26,6 +27,7 @@ class Etcd3Client(object):
         )
         self.kvstub = etcdrpc.KVStub(self.channel)
         self.clusterstub = etcdrpc.ClusterStub(self.channel)
+        self.leasestub = etcdrpc.LeaseStub(self.channel)
         self.transactions = Transactions()
 
     def _build_get_range_request(self, key,
@@ -260,6 +262,22 @@ class Etcd3Client(object):
                 responses.append(range_kvs)
 
         return txn_response.succeeded, responses
+
+    def grant_lease(self, ttl, id=None):
+        """
+        Create a new lease.
+
+        All keys attached to this lease will be expired and deleted if the
+        lease expires. A lease can be sent keep alive messages to refresh the
+        ttl.
+
+        :param ttl: Requested time to live
+        :param id: Requested ID for the lease
+        """
+        lease_grant_request = etcdrpc.LeaseGrantRequest(TTL=ttl, ID=id)
+        lease_grant_response = self.leasestub.LeaseGrant(lease_grant_request)
+        return leases.Lease(id=lease_grant_response.ID,
+                            ttl=lease_grant_response.TTL)
 
     def add_member(self, urls):
         """
