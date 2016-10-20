@@ -15,7 +15,7 @@ import pytest
 from six.moves.urllib.parse import urlparse
 
 import etcd3
-from etcd3.etcdrpc import rpc_pb2 as etcdrpc
+import etcd3.etcdrpc as etcdrpc
 
 
 os.environ['ETCDCTL_API'] = '3'

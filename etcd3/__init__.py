@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from etcd3.client import Etcd3Client
 from etcd3.client import Transactions
 from etcd3.client import client
+import etcd3.etcdrpc as etcdrpc
 from etcd3.members import Member
 
 __author__ = 'Louis Taylor'

@@ -4,7 +4,7 @@ import etcd3.exceptions as exceptions
 import etcd3.members
 import etcd3.transactions as transactions
 import etcd3.utils as utils
-from etcd3.etcdrpc import rpc_pb2 as etcdrpc
+import etcd3.etcdrpc as etcdrpc
 
 
 class Transactions(object):

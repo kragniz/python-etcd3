@@ -1,4 +1,4 @@
-from etcd3.etcdrpc import rpc_pb2 as etcdrpc
+import etcd3.etcdrpc as etcdrpc
 
 
 class BaseCompare(object):
