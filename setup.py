@@ -31,9 +31,12 @@ setup(
     url='https://github.com/kragniz/python-etcd3',
     packages=[
         'etcd3',
+        'etcd3.etcdrpc',
     ],
-    package_dir={'etcd3':
-                 'etcd3'},
+    package_dir={
+        'etcd3': 'etcd3',
+        'etcd3.etcdrpc': 'etcd3/etcdrpc',
+    },
     include_package_data=True,
     install_requires=requirements,
     license="Apache Software License 2.0",
