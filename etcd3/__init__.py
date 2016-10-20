@@ -8,7 +8,7 @@ from etcd3.members import Member
 
 __author__ = 'Louis Taylor'
 __email__ = 'louis@kragniz.eu'
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 __all__ = (
     'Etcd3Client',
