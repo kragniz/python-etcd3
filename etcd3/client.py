@@ -176,7 +176,7 @@ class Etcd3Client(object):
         """Delete a range of keys with a prefix in etcd."""
         delete_request = self._build_delete_request(
             prefix,
-            range_end=utils.increment_last_byte(prefix)
+            range_end=utils.increment_last_byte(utils.to_bytes(prefix))
         )
         return self.kvstub.DeleteRange(delete_request)
 
