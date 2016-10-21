@@ -19,6 +19,8 @@ import etcd3
 import etcd3.etcdrpc as etcdrpc
 
 
+etcd_version = os.environ.get('ETCD_VERSION', 'v3.0.10')
+
 os.environ['ETCDCTL_API'] = '3'
 
 
@@ -170,7 +172,8 @@ class TestEtcd3(object):
         lease = etcd.lease(1)
         lease.revoke()
 
-    @pytest.mark.skip(reason="broken due to protobuf stubs being out of date")
+    @pytest.mark.skipif(not etcd_version.startswith('v3.1'),
+                        reason="requires etcd v3.1")
     def test_lease_keys_empty(self, etcd):
         lease = etcd.lease(1)
         assert lease.keys == []
