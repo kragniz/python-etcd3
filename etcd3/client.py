@@ -296,7 +296,7 @@ class Etcd3Client(object):
         pass
 
     def get_lease_info(self, lease_id):
-        # FIXME: currently broken due to protobuf stubs being out of date
+        # only available in etcd v3.1.0 and later
         ttl_request = etcdrpc.LeaseTimeToLiveRequest(ID=lease_id,
                                                      keys=True)
         return self.leasestub.LeaseTimeToLive(ttl_request)
