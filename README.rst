@@ -84,14 +84,3 @@ Fictitious example of api usage:
     for member in etcd.members:
         print(member.id, member.name, member.peer_addresses)
         member.remove()
-
-
-Generating protobuf stuff
--------------------------
-
-I ran::
-
-    python -m grpc.tools.protoc -Ietcd3/proto --python_out=etcd3/etcdrpc/ --grpc_python_out=etcd3/etcdrpc/ etcd3/proto/*.proto
-
-from inside the python-etcd3 repo and it did stuff. Not sure if it did the
-correct stuff, but it output some python.

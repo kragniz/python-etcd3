@@ -105,10 +105,14 @@ Before you submit a pull request, check that it meets these guidelines:
    https://travis-ci.org/kragniz/etcd3/pull_requests
    and make sure that the tests pass for all supported Python versions.
 
-Tips
-----
+Generating protobuf stubs
+-------------------------
 
-To run a subset of tests::
+If the upstream protobuf files changes, copy the stubs::
 
-$ py.test tests.test_etcd3
+    $ cp etcd/etcdserver/etcdserverpb/*.proto python-etcd3/etcd3/proto/
 
+Then::
+
+    $ cd python-etcd3
+    $ tox -e genproto
