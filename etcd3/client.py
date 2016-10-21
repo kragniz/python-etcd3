@@ -156,6 +156,31 @@ class Etcd3Client(object):
         put_request = self._build_put_request(key, value, lease=lease)
         self.kvstub.Put(put_request)
 
+    def replace(self, key, initial_value, new_value):
+        """
+        Atomically replace the value of a key with a new value.
+
+        This compares the current value of a key, then replaces it with a new
+        value if it is equal to a specified value. This operation takes place
+        in a transaction.
+
+        :param key: key in etcd to replace
+        :param initial_value: old value to replace
+        :type initial_value: bytes
+        :param new_value: new value of the key
+        :type new_value: bytes
+        :returns: status of transaction, ``True`` if the replace was
+                  successful, ``False`` otherwise
+        :rtype: bool
+        """
+        status, _ = self.transaction(
+            compare=[self.transactions.value(key) == initial_value],
+            success=[self.transactions.put(key, new_value)],
+            failure=[],
+        )
+
+        return status
+
     def _build_delete_request(self, key,
                               range_end=None,
                               prev_kv=None):
