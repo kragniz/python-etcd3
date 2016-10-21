@@ -136,21 +136,32 @@ class Etcd3Client(object):
             for kv in range_response.kvs:
                 yield (kv.key, kv.value)
 
-    def _build_put_request(self, key, value):
+    def _build_put_request(self, key, value, lease=None):
         put_request = etcdrpc.PutRequest()
         put_request.key = utils.to_bytes(key)
         put_request.value = utils.to_bytes(value)
+
+        if hasattr(lease, 'id'):
+            lease_id = lease.id
+        else:
+            try:
+                lease_id = int(lease)
+            except TypeError:
+                lease_id = 0
+        put_request.lease = lease_id
         return put_request
 
-    def put(self, key, value):
+    def put(self, key, value, lease=None):
         """
         Save a value to etcd.
 
         :param key: key in etcd to set
         :param value: value to set key to
         :type value: bytes
+        :param lease: Lease to associate with this key.
+        :type lease: either :class:`.Lease`, or int (ID of lease)
         """
-        put_request = self._build_put_request(key, value)
+        put_request = self._build_put_request(key, value, lease=lease)
         self.kvstub.Put(put_request)
 
     def _build_delete_request(self, key,
