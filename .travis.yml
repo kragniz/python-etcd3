@@ -7,11 +7,14 @@ env:
   - TOXENV=py27
   - TOXENV=flake8
 
+  matrix:
+      - ETCD_VERSION=v3.0.10
+
 install:
     - pip install -U tox codecov
-    - curl -L https://github.com/coreos/etcd/releases/download/v3.0.10/etcd-v3.0.10-linux-amd64.tar.gz -o etcd-v3.0.10-linux-amd64.tar.gz
-    - tar xzvf etcd-v3.0.10-linux-amd64.tar.gz
-    - export PATH=$PATH:etcd-v3.0.10-linux-amd64
+    - curl -L https://github.com/coreos/etcd/releases/download/$ETCD_VERSION/etcd-$ETCD_VERSION-linux-amd64.tar.gz -o etcd-$ETCD_VERSION-linux-amd64.tar.gz
+    - tar xzvf etcd-$ETCD_VERSION-linux-amd64.tar.gz
+    - export PATH=$PATH:etcd-$ETCD_VERSION-linux-amd64
     - etcd &
 
 script: tox -e ${TOXENV}
