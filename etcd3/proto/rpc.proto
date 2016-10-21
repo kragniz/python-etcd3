@@ -1,39 +1,41 @@
 syntax = "proto3";
+package etcdserverpb;
 
 import "kv.proto";
 import "auth.proto";
 
-package etcdserverpb;
+// for grpc-gateway
 
-option java_multiple_files = true;
-option java_package = "com.coreos.jetcd.api";
-option java_outer_classname = "JetcdProto";
-option objc_class_prefix = "Jetcd";
 
 service KV {
   // Range gets the keys in the range from the key-value store.
-  rpc Range(RangeRequest) returns (RangeResponse) {}
+  rpc Range(RangeRequest) returns (RangeResponse) {
+  }
 
   // Put puts the given key into the key-value store.
   // A put request increments the revision of the key-value store
   // and generates one event in the event history.
-  rpc Put(PutRequest) returns (PutResponse) {}
+  rpc Put(PutRequest) returns (PutResponse) {
+  }
 
   // DeleteRange deletes the given range from the key-value store.
   // A delete request increments the revision of the key-value store
   // and generates a delete event in the event history for every deleted key.
-  rpc DeleteRange(DeleteRangeRequest) returns (DeleteRangeResponse) {}
+  rpc DeleteRange(DeleteRangeRequest) returns (DeleteRangeResponse) {
+  }
 
   // Txn processes multiple requests in a single transaction.
   // A txn request increments the revision of the key-value store
   // and generates events with the same revision for every completed request.
   // It is not allowed to modify the same key several times within one txn.
-  rpc Txn(TxnRequest) returns (TxnResponse) {}
+  rpc Txn(TxnRequest) returns (TxnResponse) {
+  }
 
   // Compact compacts the event history in the etcd key-value store. The key-value
   // store should be periodically compacted or the event history will continue to grow
   // indefinitely.
-  rpc Compact(CompactionRequest) returns (CompactionResponse) {}
+  rpc Compact(CompactionRequest) returns (CompactionResponse) {
+  }
 }
 
 service Watch {
@@ -42,107 +44,139 @@ service Watch {
   // stream sends events. One watch RPC can watch on multiple key ranges, streaming events
   // for several watches at once. The entire event history can be watched starting from the
   // last compaction revision.
-  rpc Watch(stream WatchRequest) returns (stream WatchResponse) {}
+  rpc Watch(stream WatchRequest) returns (stream WatchResponse) {
+  }
 }
 
 service Lease {
   // LeaseGrant creates a lease which expires if the server does not receive a keepAlive
   // within a given time to live period. All keys attached to the lease will be expired and
   // deleted if the lease expires. Each expired key generates a delete event in the event history.
-  rpc LeaseGrant(LeaseGrantRequest) returns (LeaseGrantResponse) {}
+  rpc LeaseGrant(LeaseGrantRequest) returns (LeaseGrantResponse) {
+  }
 
   // LeaseRevoke revokes a lease. All keys attached to the lease will expire and be deleted.
-  rpc LeaseRevoke(LeaseRevokeRequest) returns (LeaseRevokeResponse) {}
+  rpc LeaseRevoke(LeaseRevokeRequest) returns (LeaseRevokeResponse) {
+  }
 
   // LeaseKeepAlive keeps the lease alive by streaming keep alive requests from the client
   // to the server and streaming keep alive responses from the server to the client.
-  rpc LeaseKeepAlive(stream LeaseKeepAliveRequest) returns (stream LeaseKeepAliveResponse) {}
+  rpc LeaseKeepAlive(stream LeaseKeepAliveRequest) returns (stream LeaseKeepAliveResponse) {
+  }
+
+  // LeaseTimeToLive retrieves lease information.
+  rpc LeaseTimeToLive(LeaseTimeToLiveRequest) returns (LeaseTimeToLiveResponse) {
+  }
 
   // TODO(xiangli) List all existing Leases?
-  // TODO(xiangli) Get details information (expirations, leased keys, etc.) of a lease?
 }
 
 service Cluster {
   // MemberAdd adds a member into the cluster.
-  rpc MemberAdd(MemberAddRequest) returns (MemberAddResponse) {}
+  rpc MemberAdd(MemberAddRequest) returns (MemberAddResponse) {
+  }
 
   // MemberRemove removes an existing member from the cluster.
-  rpc MemberRemove(MemberRemoveRequest) returns (MemberRemoveResponse) {}
+  rpc MemberRemove(MemberRemoveRequest) returns (MemberRemoveResponse) {
+  }
 
   // MemberUpdate updates the member configuration.
-  rpc MemberUpdate(MemberUpdateRequest) returns (MemberUpdateResponse) {}
+  rpc MemberUpdate(MemberUpdateRequest) returns (MemberUpdateResponse) {
+  }
 
   // MemberList lists all the members in the cluster.
-  rpc MemberList(MemberListRequest) returns (MemberListResponse) {}
+  rpc MemberList(MemberListRequest) returns (MemberListResponse) {
+  }
 }
 
 service Maintenance {
   // Alarm activates, deactivates, and queries alarms regarding cluster health.
-  rpc Alarm(AlarmRequest) returns (AlarmResponse) {}
+  rpc Alarm(AlarmRequest) returns (AlarmResponse) {
+  }
 
   // Status gets the status of the member.
-  rpc Status(StatusRequest) returns (StatusResponse) {}
+  rpc Status(StatusRequest) returns (StatusResponse) {
+  }
 
   // Defragment defragments a member's backend database to recover storage space.
-  rpc Defragment(DefragmentRequest) returns (DefragmentResponse) {}
+  rpc Defragment(DefragmentRequest) returns (DefragmentResponse) {
+  }
 
   // Hash returns the hash of the local KV state for consistency checking purpose.
   // This is designed for testing; do not use this in production when there
   // are ongoing transactions.
-  rpc Hash(HashRequest) returns (HashResponse) {}
+  rpc Hash(HashRequest) returns (HashResponse) {
+  }
 
   // Snapshot sends a snapshot of the entire backend from a member over a stream to a client.
-  rpc Snapshot(SnapshotRequest) returns (stream SnapshotResponse) {}
+  rpc Snapshot(SnapshotRequest) returns (stream SnapshotResponse) {
+  }
 }
 
 service Auth {
   // AuthEnable enables authentication.
-  rpc AuthEnable(AuthEnableRequest) returns (AuthEnableResponse) {}
+  rpc AuthEnable(AuthEnableRequest) returns (AuthEnableResponse) {
+  }
 
   // AuthDisable disables authentication.
-  rpc AuthDisable(AuthDisableRequest) returns (AuthDisableResponse) {}
+  rpc AuthDisable(AuthDisableRequest) returns (AuthDisableResponse) {
+  }
 
   // Authenticate processes an authenticate request.
-  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse) {}
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse) {
+  }
 
   // UserAdd adds a new user.
-  rpc UserAdd(AuthUserAddRequest) returns (AuthUserAddResponse) {}
+  rpc UserAdd(AuthUserAddRequest) returns (AuthUserAddResponse) {
+  }
 
   // UserGet gets detailed user information.
-  rpc UserGet(AuthUserGetRequest) returns (AuthUserGetResponse) {}
+  rpc UserGet(AuthUserGetRequest) returns (AuthUserGetResponse) {
+  }
 
   // UserList gets a list of all users.
-  rpc UserList(AuthUserListRequest) returns (AuthUserListResponse) {}
+  rpc UserList(AuthUserListRequest) returns (AuthUserListResponse) {
+  }
 
   // UserDelete deletes a specified user.
-  rpc UserDelete(AuthUserDeleteRequest) returns (AuthUserDeleteResponse) {}
+  rpc UserDelete(AuthUserDeleteRequest) returns (AuthUserDeleteResponse) {
+  }
 
   // UserChangePassword changes the password of a specified user.
-  rpc UserChangePassword(AuthUserChangePasswordRequest) returns (AuthUserChangePasswordResponse) {}
+  rpc UserChangePassword(AuthUserChangePasswordRequest) returns (AuthUserChangePasswordResponse) {
+  }
 
   // UserGrant grants a role to a specified user.
-  rpc UserGrantRole(AuthUserGrantRoleRequest) returns (AuthUserGrantRoleResponse) {}
+  rpc UserGrantRole(AuthUserGrantRoleRequest) returns (AuthUserGrantRoleResponse) {
+  }
 
   // UserRevokeRole revokes a role of specified user.
-  rpc UserRevokeRole(AuthUserRevokeRoleRequest) returns (AuthUserRevokeRoleResponse) {}
+  rpc UserRevokeRole(AuthUserRevokeRoleRequest) returns (AuthUserRevokeRoleResponse) {
+  }
 
   // RoleAdd adds a new role.
-  rpc RoleAdd(AuthRoleAddRequest) returns (AuthRoleAddResponse) {}
+  rpc RoleAdd(AuthRoleAddRequest) returns (AuthRoleAddResponse) {
+  }
 
   // RoleGet gets detailed role information.
-  rpc RoleGet(AuthRoleGetRequest) returns (AuthRoleGetResponse) {}
+  rpc RoleGet(AuthRoleGetRequest) returns (AuthRoleGetResponse) {
+  }
 
   // RoleList gets lists of all roles.
-  rpc RoleList(AuthRoleListRequest) returns (AuthRoleListResponse) {}
+  rpc RoleList(AuthRoleListRequest) returns (AuthRoleListResponse) {
+  }
 
   // RoleDelete deletes a specified role.
-  rpc RoleDelete(AuthRoleDeleteRequest) returns (AuthRoleDeleteResponse) {}
+  rpc RoleDelete(AuthRoleDeleteRequest) returns (AuthRoleDeleteResponse) {
+  }
 
   // RoleGrantPermission grants a permission of a specified key or range to a specified role.
-  rpc RoleGrantPermission(AuthRoleGrantPermissionRequest) returns (AuthRoleGrantPermissionResponse) {}
+  rpc RoleGrantPermission(AuthRoleGrantPermissionRequest) returns (AuthRoleGrantPermissionResponse) {
+  }
 
   // RoleRevokePermission revokes a key or range permission of a specified role.
-  rpc RoleRevokePermission(AuthRoleRevokePermissionRequest) returns (AuthRoleRevokePermissionResponse) {}
+  rpc RoleRevokePermission(AuthRoleRevokePermissionRequest) returns (AuthRoleRevokePermissionResponse) {
+  }
 }
 
 message ResponseHeader {
@@ -204,6 +238,22 @@ message RangeRequest {
  
   // count_only when set returns only the count of the keys in the range.
   bool count_only = 9;
+
+  // min_mod_revision is the lower bound for returned key mod revisions; all keys with
+  // lesser mod revisions will be filtered away.
+  int64 min_mod_revision = 10;
+
+  // max_mod_revision is the upper bound for returned key mod revisions; all keys with
+  // greater mod revisions will be filtered away.
+  int64 max_mod_revision = 11;
+
+  // min_create_revision is the lower bound for returned key create revisions; all keys with
+  // lesser create trevisions will be filtered away.
+  int64 min_create_revision = 12;
+
+  // max_create_revision is the upper bound for returned key create revisions; all keys with
+  // greater create revisions will be filtered away.
+  int64 max_create_revision = 13;
 }
 
 message RangeResponse {
@@ -242,6 +292,8 @@ message DeleteRangeRequest {
   bytes key = 1;
   // range_end is the key following the last key to delete for the range [key, range_end).
   // If range_end is not given, the range is defined to contain only the key argument.
+  // If range_end is one bit larger than the given key, then the range is all
+  // the all keys with the prefix (the given key).
   // If range_end is '\0', the range is all keys greater than or equal to the key argument.
   bytes range_end = 2;
 
@@ -396,6 +448,8 @@ message WatchCreateRequest {
   // range_end is the end of the range [key, range_end) to watch. If range_end is not given,
   // only the key argument is watched. If range_end is equal to '\0', all keys greater than
   // or equal to the key argument are watched.
+  // If the range_end is one bit larger than the given key,
+  // then all keys with the prefix (the given key) will be watched.
   bytes range_end = 2;
   // start_revision is an optional revision to watch from (inclusive). No start_revision is "now".
   int64 start_revision = 3;
@@ -485,6 +539,25 @@ message LeaseKeepAliveResponse {
   int64 ID = 2;
   // TTL is the new time-to-live for the lease.
   int64 TTL = 3;
+}
+
+message LeaseTimeToLiveRequest {
+  // ID is the lease ID for the lease.
+  int64 ID = 1;
+  // keys is true to query all the keys attached to this lease.
+  bool keys = 2;
+}
+
+message LeaseTimeToLiveResponse {
+  ResponseHeader header = 1;
+  // ID is the lease ID from the keep alive request.
+  int64 ID = 2;
+  // TTL is the remaining TTL in seconds for the lease; the lease will expire in under TTL+1 seconds.
+  int64 TTL = 3;
+  // GrantedTTL is the initial granted time in seconds upon lease creation/renewal.
+  int64 grantedTTL = 4;
+  // Keys is the list of keys attached to this lease.
+  repeated bytes keys = 5;
 }
 
 message Member {
