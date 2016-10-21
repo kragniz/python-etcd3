@@ -66,9 +66,10 @@ class Mod(BaseCompare):
 
 
 class Put(object):
-    def __init__(self, key, value):
+    def __init__(self, key, value, lease=None):
         self.key = key
         self.value = value
+        self.lease = lease
 
 
 class Get(object):

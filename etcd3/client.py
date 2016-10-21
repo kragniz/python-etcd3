@@ -203,7 +203,7 @@ class Etcd3Client(object):
         request_ops = []
         for op in ops:
             if isinstance(op, transactions.Put):
-                request = self._build_put_request(op.key, op.value)
+                request = self._build_put_request(op.key, op.value, op.lease)
                 request_op = etcdrpc.RequestOp(request_put=request)
                 request_ops.append(request_op)
 
