@@ -2,13 +2,15 @@ language: python
 python: 3.5
 
 env:
-  - TOXENV=py35
-  - TOXENV=py34
-  - TOXENV=py27
-  - TOXENV=flake8
-
+  global:
+    - ETCD_VERSION=v3.0.10
   matrix:
-      - ETCD_VERSION=v3.0.10
+    - TOXENV=py35
+    - TOXENV=py34
+    - TOXENV=py27
+    - TOXENV=flake8
+
+    - TOXENV=py35 ETCD_VERSION=v3.1.0-rc.0
 
 install:
     - pip install -U tox codecov
