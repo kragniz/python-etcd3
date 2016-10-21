@@ -140,15 +140,7 @@ class Etcd3Client(object):
         put_request = etcdrpc.PutRequest()
         put_request.key = utils.to_bytes(key)
         put_request.value = utils.to_bytes(value)
-
-        if hasattr(lease, 'id'):
-            lease_id = lease.id
-        else:
-            try:
-                lease_id = int(lease)
-            except TypeError:
-                lease_id = 0
-        put_request.lease = lease_id
+        put_request.lease = utils.lease_to_id(lease)
         return put_request
 
     def put(self, key, value, lease=None):

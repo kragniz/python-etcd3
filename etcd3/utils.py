@@ -15,3 +15,16 @@ def to_bytes(maybe_bytestring):
         return maybe_bytestring
     else:
         return maybe_bytestring.encode('utf-8')
+
+
+def lease_to_id(lease):
+    """Figure out if the argument is a Lease object, or the lease ID."""
+    lease_id = 0
+    if hasattr(lease, 'id'):
+        lease_id = lease.id
+    else:
+        try:
+            lease_id = int(lease)
+        except TypeError:
+            pass
+    return lease_id
