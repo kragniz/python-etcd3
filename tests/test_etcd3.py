@@ -108,6 +108,18 @@ class TestEtcd3(object):
         out = etcdctl('get', '/doot/txn')
         assert base64.b64decode(out['kvs'][0]['value']) == b'failure'
 
+    def test_replace_success(self, etcd):
+        etcd.put('/doot/thing', 'toot')
+        status = etcd.replace('/doot/thing', 'toot', 'doot')
+        assert etcd.get('/doot/thing') == b'doot'
+        assert status is True
+
+    def test_replace_fail(self, etcd):
+        etcd.put('/doot/thing', 'boot')
+        status = etcd.replace('/doot/thing', 'toot', 'doot')
+        assert etcd.get('/doot/thing') == b'boot'
+        assert status is False
+
     def test_get_prefix(self, etcd):
         for i in range(20):
             etcdctl('put', '/doot/range{}'.format(i), 'i am a range')
