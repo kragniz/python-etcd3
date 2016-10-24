@@ -207,6 +207,7 @@ class TestEtcd3(object):
         etcd.put(key, 'this is a lease', lease=lease)
         assert lease.keys == [utils.to_bytes(key)]
         assert etcd.get(key) == b'this is a lease'
+        assert lease.remaining_ttl <= lease.granted_ttl
 
         # wait for the lease to expire
         time.sleep(lease.granted_ttl + 2)
