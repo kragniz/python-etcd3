@@ -8,6 +8,7 @@ import base64
 import json
 import os
 import subprocess
+import time
 
 from hypothesis import given
 from hypothesis.strategies import characters
@@ -184,6 +185,20 @@ class TestEtcd3(object):
         lease = etcd.lease(1)
         etcd.put('/doot/lease_test', 'this is a lease', lease=lease)
         assert lease.keys == ['/doot/lease_test']
+
+    @pytest.mark.skipif(not etcd_version.startswith('v3.1'),
+                        reason="requires etcd v3.1")
+    def test_lease_expire(self, etcd):
+        key = '/doot/lease_test_expire'
+        lease = etcd.lease(1)
+        etcd.put(key, 'this is a lease', lease=lease)
+        assert lease.keys == [key]
+        assert etcd.get(key) == b'this is a lease'
+
+        # wait for the lease to expire
+        time.sleep(lease.granted_ttl + 2)
+        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
+            etcd.get(key)
 
 
 class TestUtils(object):
