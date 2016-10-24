@@ -11,6 +11,7 @@ env:
     - TOXENV=flake8
 
     - TOXENV=py35 ETCD_VERSION=v3.1.0-rc.0
+    - TOXENV=py27 ETCD_VERSION=v3.1.0-rc.0
 
 install:
     - pip install -U tox codecov
