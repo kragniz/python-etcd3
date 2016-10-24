@@ -178,6 +178,13 @@ class TestEtcd3(object):
         lease = etcd.lease(1)
         assert lease.keys == []
 
+    @pytest.mark.skipif(not etcd_version.startswith('v3.1'),
+                        reason="requires etcd v3.1")
+    def test_lease_single_key(self, etcd):
+        lease = etcd.lease(1)
+        etcd.put('/doot/lease_test', 'this is a lease', lease=lease)
+        assert lease.keys == ['/doot/lease_test']
+
 
 class TestUtils(object):
     def test_increment_last_byte(self):
