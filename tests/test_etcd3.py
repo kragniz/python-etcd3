@@ -18,6 +18,7 @@ from six.moves.urllib.parse import urlparse
 
 import etcd3
 import etcd3.etcdrpc as etcdrpc
+import etcd3.utils as utils
 
 
 etcd_version = os.environ.get('ETCD_VERSION', 'v3.0.10')
@@ -184,7 +185,7 @@ class TestEtcd3(object):
     def test_lease_single_key(self, etcd):
         lease = etcd.lease(1)
         etcd.put('/doot/lease_test', 'this is a lease', lease=lease)
-        assert lease.keys == ['/doot/lease_test']
+        assert lease.keys == [b'/doot/lease_test']
 
     @pytest.mark.skipif(not etcd_version.startswith('v3.1'),
                         reason="requires etcd v3.1")
@@ -192,7 +193,7 @@ class TestEtcd3(object):
         key = '/doot/lease_test_expire'
         lease = etcd.lease(1)
         etcd.put(key, 'this is a lease', lease=lease)
-        assert lease.keys == [key]
+        assert lease.keys == [utils.to_bytes(key)]
         assert etcd.get(key) == b'this is a lease'
 
         # wait for the lease to expire
