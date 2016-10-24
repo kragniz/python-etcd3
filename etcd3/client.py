@@ -1,3 +1,5 @@
+import time
+
 import grpc
 
 import etcd3.etcdrpc as etcdrpc
@@ -134,22 +136,50 @@ class Etcd3Client(object):
             for kv in range_response.kvs:
                 yield (kv.key, kv.value)
 
-    def _build_put_request(self, key, value):
+    def _build_put_request(self, key, value, lease=None):
         put_request = etcdrpc.PutRequest()
         put_request.key = utils.to_bytes(key)
         put_request.value = utils.to_bytes(value)
+        put_request.lease = utils.lease_to_id(lease)
         return put_request
 
-    def put(self, key, value):
+    def put(self, key, value, lease=None):
         """
         Save a value to etcd.
 
         :param key: key in etcd to set
         :param value: value to set key to
         :type value: bytes
+        :param lease: Lease to associate with this key.
+        :type lease: either :class:`.Lease`, or int (ID of lease)
         """
-        put_request = self._build_put_request(key, value)
+        put_request = self._build_put_request(key, value, lease=lease)
         self.kvstub.Put(put_request)
+
+    def replace(self, key, initial_value, new_value):
+        """
+        Atomically replace the value of a key with a new value.
+
+        This compares the current value of a key, then replaces it with a new
+        value if it is equal to a specified value. This operation takes place
+        in a transaction.
+
+        :param key: key in etcd to replace
+        :param initial_value: old value to replace
+        :type initial_value: bytes
+        :param new_value: new value of the key
+        :type new_value: bytes
+        :returns: status of transaction, ``True`` if the replace was
+                  successful, ``False`` otherwise
+        :rtype: bool
+        """
+        status, _ = self.transaction(
+            compare=[self.transactions.value(key) == initial_value],
+            success=[self.transactions.put(key, new_value)],
+            failure=[],
+        )
+
+        return status
 
     def _build_delete_request(self, key,
                               range_end=None,
@@ -198,7 +228,7 @@ class Etcd3Client(object):
         request_ops = []
         for op in ops:
             if isinstance(op, transactions.Put):
-                request = self._build_put_request(op.key, op.value)
+                request = self._build_put_request(op.key, op.value, op.lease)
                 request_op = etcdrpc.RequestOp(request_put=request)
                 request_ops.append(request_op)
 
@@ -292,8 +322,11 @@ class Etcd3Client(object):
         lease_revoke_request = etcdrpc.LeaseRevokeRequest(ID=lease_id)
         self.leasestub.LeaseRevoke(lease_revoke_request)
 
-    def keep_alive_lease(self):
-        pass
+    def keep_alive_lease(self, lease_id):
+        keep_alive_request = etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
+        request_stream = [keep_alive_request]
+        for response in self.leasestub.LeaseKeepAlive(request_stream):
+            time.sleep(1)
 
     def get_lease_info(self, lease_id):
         # only available in etcd v3.1.0 and later
