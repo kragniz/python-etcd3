@@ -25,6 +25,11 @@ etcd_version = os.environ.get('ETCD_VERSION', 'v3.0.10')
 
 os.environ['ETCDCTL_API'] = '3'
 
+if six.PY2:
+    int_types = (int, long)
+else:
+    int_types = (int,)
+
 
 def etcdctl(*args):
     endpoint = os.environ.get('ETCD_ENDPOINT', None)
@@ -162,11 +167,6 @@ class TestEtcd3(object):
     def test_lease_grant(self, etcd):
         lease = etcd.lease(1)
 
-        if six.PY2:
-            int_types = (int, long)
-        else:
-            int_types = (int,)
-
         assert isinstance(lease.ttl, int_types)
         assert isinstance(lease.id, int_types)
 
@@ -200,6 +200,18 @@ class TestEtcd3(object):
         time.sleep(lease.granted_ttl + 2)
         with pytest.raises(etcd3.exceptions.KeyNotFoundError):
             etcd.get(key)
+
+    def test_member_list_single(self, etcd):
+        # if tests are run against an etcd cluster rather than a single node,
+        # this test will need to be changed
+        assert len(list(etcd.members)) == 1
+        for member in etcd.members:
+            assert member.name == 'default'
+            for peer_url in member.peer_urls:
+                assert peer_url.startswith('http://')
+            for client_url in member.client_urls:
+                assert client_url.startswith('http://')
+            assert isinstance(member.id, int_types) is True
 
 
 class TestUtils(object):
