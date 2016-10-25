@@ -1,3 +1,8 @@
+import uuid
+
+import etcd3.exceptions as exceptions
+
+
 lock_prefix = '/locks/'
 
 
@@ -9,12 +14,16 @@ class Lock(object):
         if etcd_client is not None:
             self.etcd_client = etcd_client
 
+        self.key = lock_prefix + self.name
+        self.uuid = None
+
     def acquire(self):
-        key = lock_prefix + self.name
         lease = self.etcd_client.lease(self.ttl)
 
         success = False
         attempts = 10
+
+        self.uuid = str(uuid.uuid1())
 
         while success is not True and attempts > 0:
             attempts -= 1
@@ -22,17 +31,27 @@ class Lock(object):
             # sure we still have the lock
             success, _ = self.etcd_client.transaction(
                 compare=[
-                    self.etcd_client.transactions.create(key) == 0
+                    self.etcd_client.transactions.create(self.key) == 0
                 ],
                 success=[
-                    self.etcd_client.transactions.put(key, '', lease=lease)
+                    self.etcd_client.transactions.put(self.key, self.uuid, lease=lease)
                 ],
                 failure=[
-                    self.etcd_client.transactions.get(key)
+                    self.etcd_client.transactions.get(self.key)
                 ]
             )
+        return success
 
-            if success is True:
-                print('we got the lock!')
-            else:
-                print('we didn\'t get the lock :(')
+    def release(self):
+        #print(self.etcd_client.get(self.key))
+        success, _ = self.etcd_client.transaction(
+            compare=[
+                self.etcd_client.transactions.value(self.key) == \
+                    self.uuid.decode('utf-8')],
+            success=[self.etcd_client.transactions.delete(self.key)],
+            failure=[]
+        )
+        if success is False:
+            raise exceptions.LockAlreadyReleasedError(
+                'lock "{}" does not exist'.format(self.name)
+            )

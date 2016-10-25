@@ -237,6 +237,12 @@ class Etcd3Client(object):
                 request = self._build_get_range_request(op.key)
                 request_op = etcdrpc.RequestOp(request_range=request)
                 request_ops.append(request_op)
+
+            elif isinstance(op, transactions.Delete):
+                request = self._build_delete_request(op.key)
+                request_op = etcdrpc.RequestOp(request_delete_range=request)
+                request_ops.append(request_op)
+
             else:
                 raise Exception(
                     'Unknown request class {}'.format(op.__class__))
