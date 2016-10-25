@@ -18,6 +18,7 @@ class Lock(object):
         self.uuid = None
 
     def acquire(self):
+        print('acquiring', self.name)
         lease = self.etcd_client.lease(self.ttl)
 
         success = False
@@ -43,7 +44,7 @@ class Lock(object):
         return success
 
     def release(self):
-        #print(self.etcd_client.get(self.key))
+        print('releasing', self.name)
         success, _ = self.etcd_client.transaction(
             compare=[
                 self.etcd_client.transactions.value(self.key) == \
@@ -51,7 +52,10 @@ class Lock(object):
             success=[self.etcd_client.transactions.delete(self.key)],
             failure=[]
         )
-        if success is False:
-            raise exceptions.LockAlreadyReleasedError(
-                'lock "{}" does not exist'.format(self.name)
-            )
+        return success
+
+    def __enter__(self):
+        self.acquire()
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.release()
