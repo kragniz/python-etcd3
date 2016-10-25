@@ -3,7 +3,7 @@ python: 3.5
 
 env:
   global:
-    - ETCD_VERSION=v3.0.10
+    - ETCD_VERSION=v3.0.13
   matrix:
     - TOXENV=py35
     - TOXENV=py34
