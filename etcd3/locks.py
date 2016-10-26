@@ -1,8 +1,5 @@
 import uuid
 
-import etcd3.exceptions as exceptions
-
-
 lock_prefix = '/locks/'
 
 
@@ -49,8 +46,9 @@ class Lock(object):
         print('releasing', self.name)
         success, _ = self.etcd_client.transaction(
             compare=[
-                self.etcd_client.transactions.value(self.key) == \
-                    self.uuid.decode('utf-8')],
+                self.etcd_client.transactions.value(self.key) ==
+                self.uuid.decode('utf-8')
+            ],
             success=[self.etcd_client.transactions.delete(self.key)],
             failure=[]
         )
