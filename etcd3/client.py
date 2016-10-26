@@ -340,6 +340,18 @@ class Etcd3Client(object):
         return self.leasestub.LeaseTimeToLive(ttl_request)
 
     def lock(self, name, ttl=60):
+        """
+        Create a new lock.
+
+        :param name: name of the lock
+        :type name: string or bytes
+        :param ttl: length of time for the lock to live for in seconds. The
+                    lock will be released after this time elapses, unless
+                    refreshed
+        :type ttl: int
+        :returns: new lock
+        :rtype: :class:`.Lock`
+        """
         return locks.Lock(name, ttl=ttl, etcd_client=self)
 
     def add_member(self, urls):

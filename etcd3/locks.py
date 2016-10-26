@@ -6,6 +6,31 @@ lock_prefix = '/locks/'
 
 
 class Lock(object):
+    """
+    A distributed lock.
+
+    This can be used as a context manager, with the lock being acquired and
+    release as you would expect:
+
+    .. code-block:: python
+
+        etcd = etcd3.client()
+
+        # create a lock that expires after 20 seconds
+        with etcd.lock('toot', ttl=20) as lock:
+            # do something that requires the lock
+            print(lock.is_acquired())
+
+            # refresh the timeout on the lease
+            lock.refresh()
+
+    :param name: name of the lock
+    :type name: string or bytes
+    :param ttl: length of time for the lock to live for in seconds. The lock
+                will be released after this time elapses, unless refreshed
+    :type ttl: int
+    """
+
     def __init__(self, name, ttl=60,
                  etcd_client=None):
         self.name = name
@@ -18,7 +43,7 @@ class Lock(object):
         self.uuid = None
 
     def acquire(self):
-        print('acquiring', self.name)
+        """Acquire the lock."""
         self.lease = self.etcd_client.lease(self.ttl)
 
         success = False
@@ -47,7 +72,7 @@ class Lock(object):
         return success
 
     def release(self):
-        print('releasing', self.name)
+        """Release the lock."""
         success, _ = self.etcd_client.transaction(
             compare=[
                 self.etcd_client.transactions.value(self.key) == self.uuid
