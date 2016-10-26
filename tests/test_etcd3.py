@@ -226,6 +226,59 @@ class TestEtcd3(object):
                 assert client_url.startswith('http://')
             assert isinstance(member.id, int_types) is True
 
+    def test_lock_acquire(self, etcd):
+        lock = etcd.lock('lock-1', ttl=10)
+        assert lock.acquire() is True
+        assert etcd.get(lock.key) is not None
+
+    def test_lock_release(self, etcd):
+        lock = etcd.lock('lock-2', ttl=10)
+        assert lock.acquire() is True
+        assert etcd.get(lock.key) is not None
+        assert lock.release() is True
+        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
+            etcd.get(lock.key)
+
+    def test_lock_expire(self, etcd):
+        lock = etcd.lock('lock-3', ttl=2)
+        assert lock.acquire() is True
+        assert etcd.get(lock.key) is not None
+        # wait for the lease to expire
+        time.sleep(6)
+        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
+            etcd.get(lock.key)
+
+    def test_lock_refresh(self, etcd):
+        lock = etcd.lock('lock-4', ttl=2)
+        assert lock.acquire() is True
+        assert etcd.get(lock.key) is not None
+        # sleep for the same total time as test_lock_expire, but refresh each
+        # second
+        for _ in range(6):
+            time.sleep(1)
+            lock.refresh()
+
+        assert etcd.get(lock.key) is not None
+
+    def test_lock_is_acquired(self, etcd):
+        lock1 = etcd.lock('lock-5', ttl=2)
+        assert lock1.is_acquired() is False
+
+        lock2 = etcd.lock('lock-5', ttl=2)
+        lock2.acquire()
+        assert lock2.is_acquired() is True
+        lock2.release()
+
+        lock3 = etcd.lock('lock-5', ttl=2)
+        lock3.acquire()
+        assert lock3.is_acquired() is True
+        assert lock2.is_acquired() is False
+
+    def test_lock_context_manager(self, etcd):
+        with etcd.lock('lock-6', ttl=2) as lock:
+            assert lock.is_acquired() is True
+        assert lock.is_acquired() is False
+
 
 class TestUtils(object):
     def test_increment_last_byte(self):
