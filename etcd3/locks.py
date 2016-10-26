@@ -51,7 +51,7 @@ class Lock(object):
 
         # store uuid as bytes, since it avoids having to decode each time we
         # need to compare
-        self.uuid = str(uuid.uuid1()).decode('utf-8')
+        self.uuid = str(uuid.uuid1()).encode('utf-8')
 
         while success is not True and attempts > 0:
             attempts -= 1
