@@ -1,4 +1,5 @@
 import etcd3.etcdrpc as etcdrpc
+import etcd3.utils as utils
 
 
 class BaseCompare(object):
@@ -30,7 +31,7 @@ class BaseCompare(object):
 
     def build_message(self):
         compare = etcdrpc.Compare()
-        compare.key = self.key.encode('utf-8')
+        compare.key = utils.to_bytes(self.key)
 
         if self.op is None:
             raise ValueError('op must be one of =, < or >')
@@ -44,7 +45,7 @@ class BaseCompare(object):
 class Value(BaseCompare):
     def build_compare(self, compare):
         compare.target = etcdrpc.Compare.VALUE
-        compare.value = self.value.encode('utf-8')
+        compare.value = utils.to_bytes(self.value)
 
 
 class Version(BaseCompare):
