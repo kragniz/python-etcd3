@@ -48,3 +48,6 @@ API
 
 .. autoclass:: etcd3.Lease
     :members:
+
+.. autoclass:: etcd3.Lock
+    :members:

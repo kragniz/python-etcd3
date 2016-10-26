@@ -1,10 +1,9 @@
-import time
-
 import grpc
 
 import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions as exceptions
 import etcd3.leases as leases
+import etcd3.locks as locks
 import etcd3.members
 import etcd3.transactions as transactions
 import etcd3.utils as utils
@@ -328,17 +327,32 @@ class Etcd3Client(object):
         lease_revoke_request = etcdrpc.LeaseRevokeRequest(ID=lease_id)
         self.leasestub.LeaseRevoke(lease_revoke_request)
 
-    def keep_alive_lease(self, lease_id):
+    def refresh_lease(self, lease_id):
         keep_alive_request = etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
         request_stream = [keep_alive_request]
         for response in self.leasestub.LeaseKeepAlive(request_stream):
-            time.sleep(1)
+            yield response
 
     def get_lease_info(self, lease_id):
         # only available in etcd v3.1.0 and later
         ttl_request = etcdrpc.LeaseTimeToLiveRequest(ID=lease_id,
                                                      keys=True)
         return self.leasestub.LeaseTimeToLive(ttl_request)
+
+    def lock(self, name, ttl=60):
+        """
+        Create a new lock.
+
+        :param name: name of the lock
+        :type name: string or bytes
+        :param ttl: length of time for the lock to live for in seconds. The
+                    lock will be released after this time elapses, unless
+                    refreshed
+        :type ttl: int
+        :returns: new lock
+        :rtype: :class:`.Lock`
+        """
+        return locks.Lock(name, ttl=ttl, etcd_client=self)
 
     def add_member(self, urls):
         """
