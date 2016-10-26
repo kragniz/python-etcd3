@@ -5,6 +5,7 @@ from etcd3.client import Etcd3Client
 from etcd3.client import Transactions
 from etcd3.client import client
 from etcd3.leases import Lease
+from etcd3.locks import Lock
 from etcd3.members import Member
 
 __author__ = 'Louis Taylor'
@@ -14,6 +15,7 @@ __version__ = '0.2.2'
 __all__ = (
     'Etcd3Client',
     'Lease',
+    'Lock',
     'Member',
     'Transactions',
     'client',
