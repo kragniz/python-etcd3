@@ -1,3 +1,4 @@
+import time
 import uuid
 
 import etcd3.exceptions as exceptions
@@ -69,6 +70,9 @@ class Lock(object):
                     self.etcd_client.transactions.get(self.key)
                 ]
             )
+            if success is not True:
+                time.sleep(1)
+
         return success
 
     def release(self):
