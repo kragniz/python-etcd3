@@ -329,11 +329,11 @@ class Etcd3Client(object):
         lease_revoke_request = etcdrpc.LeaseRevokeRequest(ID=lease_id)
         self.leasestub.LeaseRevoke(lease_revoke_request)
 
-    def keep_alive_lease(self, lease_id):
+    def refresh_lease(self, lease_id):
         keep_alive_request = etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
         request_stream = [keep_alive_request]
         for response in self.leasestub.LeaseKeepAlive(request_stream):
-            time.sleep(1)
+            yield response
 
     def get_lease_info(self, lease_id):
         # only available in etcd v3.1.0 and later

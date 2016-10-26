@@ -19,6 +19,10 @@ class Lease(object):
         """Revoke this lease."""
         self.etcd_client.revoke_lease(self.id)
 
+    def refresh(self):
+        """Refresh the time to live for this lease."""
+        return list(self.etcd_client.refresh_lease(self.id))
+
     @property
     def remaining_ttl(self):
         return self._get_lease_info().TTL

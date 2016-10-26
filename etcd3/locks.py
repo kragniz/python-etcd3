@@ -15,11 +15,12 @@ class Lock(object):
             self.etcd_client = etcd_client
 
         self.key = lock_prefix + self.name
+        self.lease = None
         self.uuid = None
 
     def acquire(self):
         print('acquiring', self.name)
-        lease = self.etcd_client.lease(self.ttl)
+        self.lease = self.etcd_client.lease(self.ttl)
 
         success = False
         attempts = 10
@@ -35,7 +36,8 @@ class Lock(object):
                     self.etcd_client.transactions.create(self.key) == 0
                 ],
                 success=[
-                    self.etcd_client.transactions.put(self.key, self.uuid, lease=lease)
+                    self.etcd_client.transactions.put(self.key, self.uuid,
+                                                      lease=self.lease)
                 ],
                 failure=[
                     self.etcd_client.transactions.get(self.key)
@@ -54,8 +56,17 @@ class Lock(object):
         )
         return success
 
+    def refresh(self):
+        """Refresh the time to live on this lock."""
+        if self.lease is not None:
+            return self.lease.refresh()
+        else:
+            raise ValueError('No lease associated with this lock - have you '
+                             'acquired the lock yet?')
+
     def __enter__(self):
         self.acquire()
+        return self
 
     def __exit__(self, exception_type, exception_value, traceback):
         self.release()
