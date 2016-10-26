@@ -1,5 +1,7 @@
 import uuid
 
+import etcd3.exceptions as exceptions
+
 lock_prefix = '/locks/'
 
 
@@ -22,7 +24,9 @@ class Lock(object):
         success = False
         attempts = 10
 
-        self.uuid = str(uuid.uuid1())
+        # store uuid as bytes, since it avoids having to decode each time we
+        # need to compare
+        self.uuid = str(uuid.uuid1()).decode('utf-8')
 
         while success is not True and attempts > 0:
             attempts -= 1
@@ -46,8 +50,7 @@ class Lock(object):
         print('releasing', self.name)
         success, _ = self.etcd_client.transaction(
             compare=[
-                self.etcd_client.transactions.value(self.key) ==
-                self.uuid.decode('utf-8')
+                self.etcd_client.transactions.value(self.key) == self.uuid
             ],
             success=[self.etcd_client.transactions.delete(self.key)],
             failure=[]
@@ -61,6 +64,18 @@ class Lock(object):
         else:
             raise ValueError('No lease associated with this lock - have you '
                              'acquired the lock yet?')
+
+    def is_acquired(self):
+        """Check if this lock is currently acquired."""
+        try:
+            uuid = self.etcd_client.get(self.key)
+        except exceptions.KeyNotFoundError:
+            return False
+
+        if uuid == self.uuid:
+            return True
+        else:
+            return False
 
     def __enter__(self):
         self.acquire()
