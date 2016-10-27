@@ -279,6 +279,14 @@ class TestEtcd3(object):
             assert lock.is_acquired() is True
         assert lock.is_acquired() is False
 
+    def test_lock_contended(self, etcd):
+        lock1 = etcd.lock('lock-7', ttl=2)
+        lock1.acquire()
+        lock2 = etcd.lock('lock-7', ttl=2)
+        lock2.acquire()
+        assert lock1.is_acquired() is False
+        assert lock2.is_acquired() is True
+
 
 class TestUtils(object):
     def test_increment_last_byte(self):
