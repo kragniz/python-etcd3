@@ -45,8 +45,6 @@ class Lock(object):
 
     def acquire(self):
         """Acquire the lock."""
-        self.lease = self.etcd_client.lease(self.ttl)
-
         success = False
         attempts = 10
 
@@ -56,6 +54,9 @@ class Lock(object):
 
         while success is not True and attempts > 0:
             attempts -= 1
+
+            self.lease = self.etcd_client.lease(self.ttl)
+
             # TODO: save the created revision so we can check it later to make
             # sure we still have the lock
             success, _ = self.etcd_client.transaction(
