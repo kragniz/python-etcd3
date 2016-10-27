@@ -31,21 +31,13 @@ If you're interested in using this library, please get involved.
 * Free software: Apache Software License 2.0
 * Documentation: https://python-etcd3.readthedocs.io.
 
-This project is developed using Readme Driven Development, the most hip
-development methodology.
-
-Fictitious example of api usage:
+Basic usage:
 
 .. code-block:: python
 
     import etcd3
 
     etcd = etcd3.client()
-    # or
-    etcd = etcd3.client(username='root',
-                        password='hunter2',
-                        host='127.0.0.1',
-                        port=1234)
 
     etcd.get('foo')
     etcd.put('bar', 'doot')
@@ -58,10 +50,6 @@ Fictitious example of api usage:
 
     with etcd.lock('doot-machine') as lock:
         # do something
-
-    # watching
-    for event in etcd.watch('some-key'):
-        print(event)
 
     # transactions
     etcd.transaction(
@@ -76,11 +64,3 @@ Fictitious example of api usage:
             etcd.transactions.put('/doot/testing', 'failure'),
         ]
     )
-
-    # admin stuff
-    member_id = etcd.add_member('newMember', peer_urls=['https://127.0.0.1:12345'])
-    etcd.update_member(member_id, peer_urls=['https://127.0.0.1:12345'])
-    etcd.remove_member(member_id)
-    for member in etcd.members:
-        print(member.id, member.name, member.peer_addresses)
-        member.remove()
