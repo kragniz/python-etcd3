@@ -156,6 +156,14 @@ class Etcd3Client(object):
         """
         Save a value to etcd.
 
+        Example usage:
+
+        .. code-block:: python
+
+            >>> import etcd3
+            >>> etcd = etcd3.client()
+            >>> etcd.put('/thing/key', 'hello world')
+
         :param key: key in etcd to set
         :param value: value to set key to
         :type value: bytes
