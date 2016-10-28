@@ -79,6 +79,15 @@ class Etcd3Client(object):
         """
         Get the value of a key from etcd.
 
+        example usage:
+
+        .. code-block:: python
+
+            >>> import etcd3
+            >>> etcd = etcd3.client()
+            >>> etcd.get('/thing/key')
+            'hello world'
+
         :param key: key in etcd to get
         :returns: value of key
         :rtype: bytes
