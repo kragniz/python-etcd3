@@ -4,7 +4,7 @@ bumpversion==0.5.3
 coverage==4.2
 flake8-import-order==0.10
 flake8==3.0.4
-grpcio-tools==1.0.0
+grpcio-tools==1.0.1
 hypothesis==3.5.3
 pip==8.1.2
 pytest==3.0.3
