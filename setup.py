@@ -18,6 +18,7 @@ def load_reqs(filename):
             if not re.match('\s*#', line)
         ]
 
+
 requirements = load_reqs('requirements.txt')
 test_requirements = load_reqs('test-requirements.txt')
 
