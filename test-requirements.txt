@@ -8,6 +8,6 @@ grpcio-tools==1.0.1
 hypothesis==3.6.0
 pip==9.0.1
 pytest==3.0.4
-tox==2.4.1
+tox==2.5.0
 wheel==0.29.0
 flake8-docstrings==1.0.2
