@@ -64,3 +64,19 @@ Basic usage:
             etcd.transactions.put('/doot/testing', 'failure'),
         ]
     )
+
+    # watch key
+    watch_count = 0
+    for (event, cancel) in etcd.watch("/doot/watch"):
+        print event
+        watch_count += 1
+        if watch_count > 10:
+            cancel()
+
+    # watch prefix
+    watch_count = 0
+    for (event, cancel) in etcd.watch_prefix("/doot/watch/prefix/"):
+        print event
+        watch_count += 1
+        if watch_count > 10:
+            cancel()
