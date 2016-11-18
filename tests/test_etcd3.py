@@ -89,7 +89,7 @@ class TestEtcd3(object):
         with pytest.raises(etcd3.exceptions.KeyNotFoundError):
             etcd.get('/doot/delete_this')
 
-    def test_watch_key(slef, etcd):
+    def test_watch_key(self, etcd):
         def update_etcd(v):
             etcdctl('put', '/doot/watch', v)
             out = etcdctl('get', '/doot/watch')
@@ -133,7 +133,7 @@ class TestEtcd3(object):
 
         t.join()
 
-    def test_watch_prefix(slef, etcd):
+    def test_watch_prefix(self, etcd):
         def update_etcd(v):
             etcdctl('put', '/doot/watch/prefix/' + v, v)
             out = etcdctl('get', '/doot/watch/prefix/' + v)
