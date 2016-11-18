@@ -93,7 +93,8 @@ class TestEtcd3(object):
         def update_etcd(v):
             etcdctl('put', '/doot/watch', v)
             out = etcdctl('get', '/doot/watch')
-            assert base64.b64decode(out['kvs'][0]['value']).decode('utf-8') == v
+            assert base64.b64decode(out['kvs'][0]['value']) == \
+                utils.to_bytes(v)
 
         def update_key():
             # sleep to make watch can get the event
@@ -112,17 +113,18 @@ class TestEtcd3(object):
 
         key_change_count = 0
         for (event, cancel) in etcd.watch('/doot/watch'):
-            if key_change_count == 0: # first time will not have any events
+            if key_change_count == 0:   # first time will not have any events
                 assert event.created is True
                 assert len(event.events) == 0
             else:
                 assert event.created is False
                 assert len(event.events) == 1
-                assert event.events[0].kv.value.decode('utf-8') == str(key_change_count)
+                assert event.events[0].kv.value == \
+                    utils.to_bytes(str(key_change_count))
 
             # if cancel worked, we should not receive event 4
             if len(event.events) == 1:
-                assert event.events[0].kv.value.decode('utf-8') != "4"
+                assert event.events[0].kv.value != utils.to_bytes('4')
 
             key_change_count += 1
             if key_change_count > 3:
@@ -135,7 +137,8 @@ class TestEtcd3(object):
         def update_etcd(v):
             etcdctl('put', '/doot/watch/prefix/'+v, v)
             out = etcdctl('get', '/doot/watch/prefix/'+v)
-            assert base64.b64decode(out['kvs'][0]['value']).decode('utf-8') == v
+            assert base64.b64decode(out['kvs'][0]['value']) == \
+                utils.to_bytes(v)
 
         def update_key():
             # sleep to make watch can get the event
@@ -154,17 +157,18 @@ class TestEtcd3(object):
 
         key_change_count = 0
         for (event, cancel) in etcd.watch_prefix('/doot/watch/prefix/'):
-            if key_change_count == 0: # first time will not have any events
+            if key_change_count == 0:   # first time will not have any events
                 assert event.created is True
                 assert len(event.events) == 0
             else:
                 assert event.created is False
                 assert len(event.events) == 1
-                assert event.events[0].kv.value.decode('utf-8') == str(key_change_count)
+                assert event.events[0].kv.value ==  \
+                    utils.to_bytes(str(key_change_count))
 
             # if cancel worked, we should not receive event 4
             if len(event.events) == 1:
-                assert event.events[0].kv.value.decode('utf-8') != "4"
+                assert event.events[0].kv.value != utils.to_bytes('4')
 
             key_change_count += 1
             if key_change_count > 3:

@@ -255,24 +255,27 @@ class Etcd3Client(object):
 
         :param key: the key wants to watch
 
-        :returns: streams of (event, cancel) tuples.
-                  loop `event` to get the events of key change, use `cancel` to cancel the watch request
+        :returns: streams of (event, cancel) tuples
+                  loop `event` to get the events of key changes and
+                  use `cancel` to cancel the watch request
         """
         cv = threading.Condition()
+
         def cancel_watch():
             cv.acquire()
             cv.notify()
             cv.release()
 
-        request = self._build_watch_request(cv, key, 
-                    range_end=range_end, 
-                    start_revision=start_revision, 
-                    progress_notify=progress_notify, 
+        request = self._build_watch_request(
+                    cv, key,
+                    range_end=range_end,
+                    start_revision=start_revision,
+                    progress_notify=progress_notify,
                     filters=filters, prev_kv=prev_kv)
         watcher = self.watchstub.Watch(request)
         for event in watcher:
             yield (event, cancel_watch)
- 
+
     def watch_prefix(self, key_prefix,
                      start_revision=None,
                      progress_notify=False,
@@ -284,18 +287,22 @@ class Etcd3Client(object):
         :param key_prefix: the key prefix wants to watch
 
         :returns: streams of (event, cancel) tuples.
-                  loop `event` to get the events of key change, use `cancel` to cancel the watch request
+                  loop `event` to get the events of key changes and
+                  use `cancel` to cancel the watch request
         """
         cv = threading.Condition()
+
         def cancel_watch():
             cv.acquire()
             cv.notify()
             cv.release()
 
-        request = self._build_watch_request(cv, key_prefix,
-                    range_end=utils.increment_last_byte(utils.to_bytes(key_prefix)), 
-                    start_revision=start_revision, 
-                    progress_notify=progress_notify, 
+        range_end = utils.increment_last_byte(utils.to_bytes(key_prefix))
+        request = self._build_watch_request(
+                    cv, key_prefix,
+                    range_end=range_end,
+                    start_revision=start_revision,
+                    progress_notify=progress_notify,
                     filters=filters, prev_kv=prev_kv)
         watcher = self.watchstub.Watch(request)
         for event in watcher:
