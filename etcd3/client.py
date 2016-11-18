@@ -267,11 +267,11 @@ class Etcd3Client(object):
             cv.release()
 
         request = self._build_watch_request(
-                    cv, key,
-                    range_end=range_end,
-                    start_revision=start_revision,
-                    progress_notify=progress_notify,
-                    filters=filters, prev_kv=prev_kv)
+            cv, key,
+            range_end=range_end,
+            start_revision=start_revision,
+            progress_notify=progress_notify,
+            filters=filters, prev_kv=prev_kv)
         watcher = self.watchstub.Watch(request)
         for event in watcher:
             yield (event, cancel_watch)
@@ -299,11 +299,11 @@ class Etcd3Client(object):
 
         range_end = utils.increment_last_byte(utils.to_bytes(key_prefix))
         request = self._build_watch_request(
-                    cv, key_prefix,
-                    range_end=range_end,
-                    start_revision=start_revision,
-                    progress_notify=progress_notify,
-                    filters=filters, prev_kv=prev_kv)
+            cv, key_prefix,
+            range_end=range_end,
+            start_revision=start_revision,
+            progress_notify=progress_notify,
+            filters=filters, prev_kv=prev_kv)
         watcher = self.watchstub.Watch(request)
         for event in watcher:
             yield (event, cancel_watch)

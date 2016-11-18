@@ -135,8 +135,8 @@ class TestEtcd3(object):
 
     def test_watch_prefix(slef, etcd):
         def update_etcd(v):
-            etcdctl('put', '/doot/watch/prefix/'+v, v)
-            out = etcdctl('get', '/doot/watch/prefix/'+v)
+            etcdctl('put', '/doot/watch/prefix/' + v, v)
+            out = etcdctl('get', '/doot/watch/prefix/' + v)
             assert base64.b64decode(out['kvs'][0]['value']) == \
                 utils.to_bytes(v)
 
