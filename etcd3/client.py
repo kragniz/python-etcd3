@@ -1,3 +1,4 @@
+import threading
 import grpc
 
 import etcd3.etcdrpc as etcdrpc
@@ -27,6 +28,7 @@ class Etcd3Client(object):
             host=host, port=port)
         )
         self.kvstub = etcdrpc.KVStub(self.channel)
+        self.watchstub = etcdrpc.WatchStub(self.channel)
         self.clusterstub = etcdrpc.ClusterStub(self.channel)
         self.leasestub = etcdrpc.LeaseStub(self.channel)
         self.transactions = Transactions()
@@ -216,6 +218,95 @@ class Etcd3Client(object):
         compact_request = etcdrpc.CompactionRequest(revision=revision,
                                                     physical=physical)
         self.kvstub.Compact(compact_request)
+
+    def _build_watch_request(self, cv, key,
+                             range_end=None,
+                             start_revision=None,
+                             progress_notify=False,
+                             filters=None,
+                             prev_kv=False):
+        cv.acquire()
+        create_watch = etcdrpc.WatchCreateRequest()
+        create_watch.key = utils.to_bytes(key)
+        if range_end is not None:
+            create_watch.range_end = utils.to_bytes(range_end)
+        if start_revision is not None:
+            create_watch.start_revision = start_revision
+        if progress_notify:
+            create_watch.progress_notify = progress_notify
+        if filters is not None:
+            create_watch.filters = filters
+        if prev_kv:
+            create_watch.prev_kv = prev_kv
+        create_watch.progress_notify = True
+        watch_requests = etcdrpc.WatchRequest(create_request=create_watch)
+        yield watch_requests
+        cv.wait()
+        cv.release()
+
+    def watch(self, key,
+              range_end=None,
+              start_revision=None,
+              progress_notify=False,
+              filters=None,
+              prev_kv=False):
+        """
+        Watch a key.
+
+        :param key: the key wants to watch
+
+        :returns: streams of (event, cancel) tuples
+                  loop `event` to get the events of key changes and
+                  use `cancel` to cancel the watch request
+        """
+        cv = threading.Condition()
+
+        def cancel_watch():
+            cv.acquire()
+            cv.notify()
+            cv.release()
+
+        request = self._build_watch_request(
+            cv, key,
+            range_end=range_end,
+            start_revision=start_revision,
+            progress_notify=progress_notify,
+            filters=filters, prev_kv=prev_kv)
+        watcher = self.watchstub.Watch(request)
+        for event in watcher:
+            yield (event, cancel_watch)
+
+    def watch_prefix(self, key_prefix,
+                     start_revision=None,
+                     progress_notify=False,
+                     filters=None,
+                     prev_kv=False):
+        """
+        Watch a range of key with a prefix.
+
+        :param key_prefix: the key prefix wants to watch
+
+        :returns: streams of (event, cancel) tuples.
+                  loop `event` to get the events of key changes and
+                  use `cancel` to cancel the watch request
+        """
+        cv = threading.Condition()
+
+        def cancel_watch():
+            cv.acquire()
+            cv.notify()
+            cv.release()
+
+        range_end = utils.increment_last_byte(utils.to_bytes(key_prefix))
+        request = self._build_watch_request(
+            cv, key_prefix,
+            range_end=range_end,
+            start_revision=start_revision,
+            progress_notify=progress_notify,
+            filters=filters, prev_kv=prev_kv)
+        watcher = self.watchstub.Watch(request)
+        for event in watcher:
+            yield (event, cancel_watch)
 
     def _ops_to_requests(self, ops):
         """
