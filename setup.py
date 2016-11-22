@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+
 from setuptools import setup
 
 with open('README.rst') as readme_file:

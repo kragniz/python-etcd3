@@ -8,12 +8,14 @@ import base64
 import json
 import os
 import subprocess
-import time
 import threading
+import time
 
 from hypothesis import given
 from hypothesis.strategies import characters
+
 import pytest
+
 import six
 from six.moves.urllib.parse import urlparse
 
