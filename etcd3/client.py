@@ -254,11 +254,18 @@ class Etcd3Client(object):
         """
         Watch a key.
 
-        :param key: the key wants to watch
+        Example usage:
 
-        :returns: streams of (event, cancel) tuples
-                  loop `event` to get the events of key changes and
-                  use `cancel` to cancel the watch request
+        .. code-block:: python
+
+            for (event, cancel) in etcd.watch('/doot/key'):
+                print(event)
+
+        :param key: key to watch
+
+        :returns: Iterator of ``(event, cancel)`` tuples.
+                  Use ``event`` to get the events of key changes and ``cancel``
+                  to cancel the watch request
         """
         cv = threading.Condition()
 
@@ -283,13 +290,20 @@ class Etcd3Client(object):
                      filters=None,
                      prev_kv=False):
         """
-        Watch a range of key with a prefix.
+        Watch a range of keys with a prefix.
 
-        :param key_prefix: the key prefix wants to watch
+        Example usage:
 
-        :returns: streams of (event, cancel) tuples.
-                  loop `event` to get the events of key changes and
-                  use `cancel` to cancel the watch request
+        .. code-block:: python
+
+            for (event, cancel) in etcd.watch_prefix('/doot/keys'):
+                print(event)
+
+        :param key_prefix: key prefix to watch
+
+        :returns: Iterator of ``(event, cancel)`` tuples.
+                  Use ``event`` to get the events of key changes and ``cancel``
+                  to cancel the watch request
         """
         cv = threading.Condition()
 
