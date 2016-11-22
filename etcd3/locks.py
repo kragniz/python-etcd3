@@ -11,7 +11,7 @@ class Lock(object):
     A distributed lock.
 
     This can be used as a context manager, with the lock being acquired and
-    release as you would expect:
+    released as you would expect:
 
     .. code-block:: python
 
