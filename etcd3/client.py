@@ -32,6 +32,7 @@ class Etcd3Client(object):
         self.watchstub = etcdrpc.WatchStub(self.channel)
         self.clusterstub = etcdrpc.ClusterStub(self.channel)
         self.leasestub = etcdrpc.LeaseStub(self.channel)
+        self.maintenancestub = etcdrpc.MaintenanceStub(self.channel)
         self.transactions = Transactions()
 
     def _build_get_range_request(self, key,
@@ -516,6 +517,10 @@ class Etcd3Client(object):
                                                     physical=physical)
         self.kvstub.Compact(compact_request)
 
+    def defragment(self):
+        """Defragment a member's backend database to recover storage space."""
+        defrag_request = etcdrpc.DefragmentRequest()
+        self.maintenancestub.Defragment(defrag_request)
 
 
 def client(host='localhost', port=2379):
