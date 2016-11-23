@@ -32,6 +32,7 @@ class Etcd3Client(object):
         self.watchstub = etcdrpc.WatchStub(self.channel)
         self.clusterstub = etcdrpc.ClusterStub(self.channel)
         self.leasestub = etcdrpc.LeaseStub(self.channel)
+        self.watchstub = etcdrpc.WatchStub(self.channel)
         self.transactions = Transactions()
 
     def _build_get_range_request(self, key,
@@ -515,6 +516,29 @@ class Etcd3Client(object):
                                        member.peerURLs,
                                        member.clientURLs,
                                        etcd_client=self)
+
+    def _build_create_watch_request(self, key,
+                                    range_end=None,
+                                    start_revision=None,
+                                    progress_notify=None,
+                                    filters=None,
+                                    prev_kv=None):
+        watch_request = etcdrpc.WatchCreateRequest()
+
+        watch_request.key = utils.to_bytes(key)
+
+        if range_end is not None:
+            watch_request.range_end = utils.to_bytes(range_end)
+
+        return watch_request
+
+    def watch(self, key):
+        create_watch = self._build_create_watch_request(key)
+        watch_requests = [etcdrpc.WatchRequest(create_request=create_watch)]
+
+        watcher = self.watchstub.Watch(watch_requests)
+        for event in watcher:
+            yield event
 
 
 def client(host='localhost', port=2379):
