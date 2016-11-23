@@ -214,12 +214,6 @@ class Etcd3Client(object):
         )
         return self.kvstub.DeleteRange(delete_request)
 
-    def compact(self, revision, physical=False):
-        """Compact the event history in etcd."""
-        compact_request = etcdrpc.CompactionRequest(revision=revision,
-                                                    physical=physical)
-        self.kvstub.Compact(compact_request)
-
     def _build_watch_request(self, cv, key,
                              range_end=None,
                              start_revision=None,
@@ -515,6 +509,13 @@ class Etcd3Client(object):
                                        member.peerURLs,
                                        member.clientURLs,
                                        etcd_client=self)
+
+    def compact(self, revision, physical=False):
+        """Compact the event history in etcd."""
+        compact_request = etcdrpc.CompactionRequest(revision=revision,
+                                                    physical=physical)
+        self.kvstub.Compact(compact_request)
+
 
 
 def client(host='localhost', port=2379):
