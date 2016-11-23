@@ -241,7 +241,6 @@ class Etcd3Client(object):
         cv.release()
 
     def watch(self, key,
-              range_end=None,
               start_revision=None,
               progress_notify=False,
               filters=None,
@@ -271,7 +270,6 @@ class Etcd3Client(object):
 
         request = self._build_watch_request(
             cv, key,
-            range_end=range_end,
             start_revision=start_revision,
             progress_notify=progress_notify,
             filters=filters, prev_kv=prev_kv)
