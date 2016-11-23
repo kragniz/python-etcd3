@@ -240,6 +240,29 @@ class Etcd3Client(object):
         cv.wait()
         cv.release()
 
+    def _build_watch_iterator(self, key_prefix,
+                              range_end=None,
+                              start_revision=None,
+                              progress_notify=False,
+                              filters=None,
+                              prev_kv=False):
+        cv = threading.Condition()
+
+        def cancel_watch():
+            cv.acquire()
+            cv.notify()
+            cv.release()
+
+        request = self._build_watch_request(
+            cv, key_prefix,
+            range_end=range_end,
+            start_revision=start_revision,
+            progress_notify=progress_notify,
+            filters=filters, prev_kv=prev_kv)
+        watcher = self.watchstub.Watch(request)
+        for event in watcher:
+            yield (event, cancel_watch)
+
     def watch(self, key,
               start_revision=None,
               progress_notify=False,
@@ -261,21 +284,11 @@ class Etcd3Client(object):
                   Use ``event`` to get the events of key changes and ``cancel``
                   to cancel the watch request
         """
-        cv = threading.Condition()
-
-        def cancel_watch():
-            cv.acquire()
-            cv.notify()
-            cv.release()
-
-        request = self._build_watch_request(
-            cv, key,
-            start_revision=start_revision,
-            progress_notify=progress_notify,
-            filters=filters, prev_kv=prev_kv)
-        watcher = self.watchstub.Watch(request)
-        for event in watcher:
-            yield (event, cancel_watch)
+        return self._build_watch_iterator(key,
+                                          start_revision=start_revision,
+                                          progress_notify=progress_notify,
+                                          filters=filters,
+                                          prev_kv=prev_kv)
 
     def watch_prefix(self, key_prefix,
                      start_revision=None,
@@ -298,23 +311,13 @@ class Etcd3Client(object):
                   Use ``event`` to get the events of key changes and ``cancel``
                   to cancel the watch request
         """
-        cv = threading.Condition()
-
-        def cancel_watch():
-            cv.acquire()
-            cv.notify()
-            cv.release()
-
         range_end = utils.increment_last_byte(utils.to_bytes(key_prefix))
-        request = self._build_watch_request(
-            cv, key_prefix,
-            range_end=range_end,
-            start_revision=start_revision,
-            progress_notify=progress_notify,
-            filters=filters, prev_kv=prev_kv)
-        watcher = self.watchstub.Watch(request)
-        for event in watcher:
-            yield (event, cancel_watch)
+        return self._build_watch_iterator(key_prefix,
+                                          range_end=range_end,
+                                          start_revision=start_revision,
+                                          progress_notify=progress_notify,
+                                          filters=filters,
+                                          prev_kv=prev_kv)
 
     def _ops_to_requests(self, ops):
         """
