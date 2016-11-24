@@ -513,7 +513,18 @@ class Etcd3Client(object):
                                        etcd_client=self)
 
     def compact(self, revision, physical=False):
-        """Compact the event history in etcd."""
+        """
+        Compact the event history in etcd up to a given revision.
+
+        All superseded keys with a revision less than the compaction revision
+        will be removed.
+
+        :param revision: revision for the compaction operation
+        :param physical: if set to True, the request will wait until the
+                         compaction is physically applied to the local database
+                         such that compacted entries are totally removed from
+                         the backend database
+        """
         compact_request = etcdrpc.CompactionRequest(revision=revision,
                                                     physical=physical)
         self.kvstub.Compact(compact_request)
