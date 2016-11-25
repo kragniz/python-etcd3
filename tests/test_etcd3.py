@@ -101,35 +101,29 @@ class TestEtcd3(object):
         def update_key():
             # sleep to make watch can get the event
             time.sleep(3)
+            update_etcd('0')
+            time.sleep(1)
             update_etcd('1')
             time.sleep(1)
             update_etcd('2')
             time.sleep(1)
             update_etcd('3')
             time.sleep(1)
-            update_etcd('4')
-            time.sleep(1)
 
         t = threading.Thread(name="update_key", target=update_key)
         t.start()
 
-        key_change_count = 0
-        for (event, cancel) in etcd.watch('/doot/watch'):
-            if key_change_count == 0:   # first time will not have any events
-                assert event.created is True
-                assert len(event.events) == 0
-            else:
-                assert event.created is False
-                assert len(event.events) == 1
-                assert event.events[0].kv.value == \
-                    utils.to_bytes(str(key_change_count))
+        change_count = 0
+        for (event, cancel) in etcd.watch(b'/doot/watch'):
+            assert event.key == b'/doot/watch'
+            assert event.value == \
+                utils.to_bytes(str(change_count))
 
-            # if cancel worked, we should not receive event 4
-            if len(event.events) == 1:
-                assert event.events[0].kv.value != utils.to_bytes('4')
+            # if cancel worked, we should not receive event 3
+            assert event.value != utils.to_bytes('3')
 
-            key_change_count += 1
-            if key_change_count > 3:
+            change_count += 1
+            if change_count > 2:
                 # if cancel not work, we will block in this for-loop forever
                 cancel()
 
@@ -145,35 +139,30 @@ class TestEtcd3(object):
         def update_key():
             # sleep to make watch can get the event
             time.sleep(3)
+            update_etcd('0')
+            time.sleep(1)
             update_etcd('1')
             time.sleep(1)
             update_etcd('2')
             time.sleep(1)
             update_etcd('3')
             time.sleep(1)
-            update_etcd('4')
-            time.sleep(1)
 
         t = threading.Thread(name="update_key_prefix", target=update_key)
         t.start()
 
-        key_change_count = 0
+        change_count = 0
         for (event, cancel) in etcd.watch_prefix('/doot/watch/prefix/'):
-            if key_change_count == 0:   # first time will not have any events
-                assert event.created is True
-                assert len(event.events) == 0
-            else:
-                assert event.created is False
-                assert len(event.events) == 1
-                assert event.events[0].kv.value ==  \
-                    utils.to_bytes(str(key_change_count))
+            assert event.key == \
+                utils.to_bytes('/doot/watch/prefix/{}'.format(change_count))
+            assert event.value == \
+                utils.to_bytes(str(change_count))
 
-            # if cancel worked, we should not receive event 4
-            if len(event.events) == 1:
-                assert event.events[0].kv.value != utils.to_bytes('4')
+            # if cancel worked, we should not receive event 3
+            assert event.value != utils.to_bytes('3')
 
-            key_change_count += 1
-            if key_change_count > 3:
+            change_count += 1
+            if change_count > 2:
                 # if cancel not work, we will block in this for-loop forever
                 cancel()
 
