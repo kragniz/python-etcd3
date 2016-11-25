@@ -3,6 +3,7 @@ import threading
 import grpc
 
 import etcd3.etcdrpc as etcdrpc
+import etcd3.events as events
 import etcd3.exceptions as exceptions
 import etcd3.leases as leases
 import etcd3.locks as locks
@@ -262,7 +263,8 @@ class Etcd3Client(object):
         watcher = self.watchstub.Watch(request)
         for event in watcher:
             for e in event.events:
-                yield (e, cancel_watch)
+                event_obj = events.PutEvent(e.kv.key, e.kv.value, e.kv.version)
+                yield (event_obj, cancel_watch)
 
     def watch(self, key,
               start_revision=None,
@@ -319,6 +321,36 @@ class Etcd3Client(object):
                                           progress_notify=progress_notify,
                                           filters=filters,
                                           prev_kv=prev_kv)
+
+    def add_watch_callback(self, key, callback,
+                           start_revision=None,
+                           progress_notify=False,
+                           filters=None,
+                           prev_kv=False):
+        class Watcher(threading.Thread):
+            def __init__(self, iterator, callback):
+                super(Watcher, self).__init__()
+                self.iterator = iterator
+                self.callback = callback
+
+            def run(self):
+                for (event, cancel) in self.iterator:
+                    self._cancel = cancel
+                    self.callback(event)
+
+            def cancel(self):
+                self._cancel()
+
+        iterator = self._build_watch_iterator(
+            key,
+            start_revision=start_revision,
+            progress_notify=progress_notify,
+            filters=filters,
+            prev_kv=prev_kv)
+
+        thread = Watcher(iterator, callback)
+        thread.start()
+        return thread
 
     def _ops_to_requests(self, ops):
         """
