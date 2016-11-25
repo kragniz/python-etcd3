@@ -261,7 +261,8 @@ class Etcd3Client(object):
             filters=filters, prev_kv=prev_kv)
         watcher = self.watchstub.Watch(request)
         for event in watcher:
-            yield (event, cancel_watch)
+            for e in event.events:
+                yield (e, cancel_watch)
 
     def watch(self, key,
               start_revision=None,
