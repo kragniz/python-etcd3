@@ -114,7 +114,8 @@ class TestEtcd3(object):
         t.start()
 
         change_count = 0
-        for (event, cancel) in etcd.watch(b'/doot/watch'):
+        events_iterator, cancel = etcd.watch(b'/doot/watch')
+        for event in events_iterator:
             assert event.key == b'/doot/watch'
             assert event.value == \
                 utils.to_bytes(str(change_count))
@@ -152,7 +153,8 @@ class TestEtcd3(object):
         t.start()
 
         change_count = 0
-        for (event, cancel) in etcd.watch_prefix('/doot/watch/prefix/'):
+        events_iterator, cancel = etcd.watch_prefix('/doot/watch/prefix/')
+        for event in events_iterator:
             assert event.key == \
                 utils.to_bytes('/doot/watch/prefix/{}'.format(change_count))
             assert event.value == \

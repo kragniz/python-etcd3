@@ -67,16 +67,27 @@ Basic usage:
 
     # watch key
     watch_count = 0
-    for (event, cancel) in etcd.watch("/doot/watch"):
-        print event
+    events_iterator, cancel = etcd.watch("/doot/watch")
+    for event in events_iterator:
+        print(event)
         watch_count += 1
         if watch_count > 10:
             cancel()
 
     # watch prefix
     watch_count = 0
-    for (event, cancel) in etcd.watch_prefix("/doot/watch/prefix/"):
-        print event
+    events_iterator, cancel = etcd.watch_prefix("/doot/watch/prefix/")
+    for event in events_iterator:
+        print(event)
         watch_count += 1
         if watch_count > 10:
             cancel()
+
+    # recieve watch events via callback function
+    def watch_callback(event):
+        print(event)
+
+    watch_id = etcd.add_watch_callback("/anotherkey", watch_callback)
+
+    # cancel watch
+    etcd.cancel_watch(watch_id)

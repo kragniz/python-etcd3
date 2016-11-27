@@ -2,14 +2,16 @@ import threading
 
 import grpc
 
+from six.moves import queue
+
 import etcd3.etcdrpc as etcdrpc
-import etcd3.events as events
 import etcd3.exceptions as exceptions
 import etcd3.leases as leases
 import etcd3.locks as locks
 import etcd3.members
 import etcd3.transactions as transactions
 import etcd3.utils as utils
+import etcd3.watch as watch
 
 
 class Transactions(object):
@@ -30,7 +32,7 @@ class Etcd3Client(object):
             host=host, port=port)
         )
         self.kvstub = etcdrpc.KVStub(self.channel)
-        self.watchstub = etcdrpc.WatchStub(self.channel)
+        self.watcher = watch.Watcher(etcdrpc.WatchStub(self.channel))
         self.clusterstub = etcdrpc.ClusterStub(self.channel)
         self.leasestub = etcdrpc.LeaseStub(self.channel)
         self.maintenancestub = etcdrpc.MaintenanceStub(self.channel)
@@ -216,141 +218,106 @@ class Etcd3Client(object):
         )
         return self.kvstub.DeleteRange(delete_request)
 
-    def _build_watch_request(self, cv, key,
-                             range_end=None,
-                             start_revision=None,
-                             progress_notify=False,
-                             filters=None,
-                             prev_kv=False):
-        cv.acquire()
-        create_watch = etcdrpc.WatchCreateRequest()
-        create_watch.key = utils.to_bytes(key)
-        if range_end is not None:
-            create_watch.range_end = utils.to_bytes(range_end)
-        if start_revision is not None:
-            create_watch.start_revision = start_revision
-        if progress_notify:
-            create_watch.progress_notify = progress_notify
-        if filters is not None:
-            create_watch.filters = filters
-        if prev_kv:
-            create_watch.prev_kv = prev_kv
-        create_watch.progress_notify = True
-        watch_requests = etcdrpc.WatchRequest(create_request=create_watch)
-        yield watch_requests
-        cv.wait()
-        cv.release()
+    def add_watch_callback(self, *args, **kwargs):
+        """
+        Watch a key or range of keys and call a callback on every event.
 
-    def _build_watch_iterator(self, key_prefix,
-                              range_end=None,
-                              start_revision=None,
-                              progress_notify=False,
-                              filters=None,
-                              prev_kv=False):
-        cv = threading.Condition()
+        :param key: key to watch
+        :param callback: callback function
 
-        def cancel_watch():
-            cv.acquire()
-            cv.notify()
-            cv.release()
+        :returns: watch_id. Later it could be used for cancelling watch.
+        """
+        return self.watcher.add_callback(*args, **kwargs)
 
-        request = self._build_watch_request(
-            cv, key_prefix,
-            range_end=range_end,
-            start_revision=start_revision,
-            progress_notify=progress_notify,
-            filters=filters, prev_kv=prev_kv)
-        watcher = self.watchstub.Watch(request)
-        for event in watcher:
-            for e in event.events:
-                event_obj = events.PutEvent(e.kv.key, e.kv.value, e.kv.version)
-                yield (event_obj, cancel_watch)
+    def cancel_watch(self, watch_id):
+        """
+        Stop watching a key or range of keys.
 
-    def watch(self, key,
-              start_revision=None,
-              progress_notify=False,
-              filters=None,
-              prev_kv=False):
+        :param watch_id: watch_id returned by ``add_watch_callback`` method
+        """
+        self.watcher.cancel(watch_id)
+
+    def watch(self, key, **kwargs):
         """
         Watch a key.
 
         Example usage:
 
         .. code-block:: python
-
-            for (event, cancel) in etcd.watch('/doot/key'):
+            events_iterator, cancel = etcd.watch('/doot/key')
+            for event in events_iterator:
                 print(event)
 
         :param key: key to watch
 
-        :returns: Iterator of ``(event, cancel)`` tuples.
-                  Use ``event`` to get the events of key changes and ``cancel``
-                  to cancel the watch request
+        :returns: tuple of ``events_iterator`` and ``cancel``.
+                  Use ``events_iterator`` to get the events of key changes
+                  and ``cancel`` to cancel the watch request
         """
-        return self._build_watch_iterator(key,
-                                          start_revision=start_revision,
-                                          progress_notify=progress_notify,
-                                          filters=filters,
-                                          prev_kv=prev_kv)
+        event_queue = queue.Queue()
 
-    def watch_prefix(self, key_prefix,
-                     start_revision=None,
-                     progress_notify=False,
-                     filters=None,
-                     prev_kv=False):
+        def callback(event):
+            event_queue.put(event)
+
+        watch_id = self.add_watch_callback(key, callback, **kwargs)
+        canceled = threading.Event()
+
+        def cancel():
+            canceled.set()
+            event_queue.put(None)
+            self.cancel_watch(watch_id)
+
+        def iterator():
+            while not canceled.is_set():
+                event = event_queue.get()
+                if event is None:
+                    canceled.set()
+                if not canceled.is_set():
+                    yield event
+
+        return iterator(), cancel
+
+    def watch_prefix(self, key_prefix, **kwargs):
+        """The same as ``watch``, but watches a range of keys with a prefix."""
+        kwargs['range_end'] = \
+            utils.increment_last_byte(utils.to_bytes(key_prefix))
+        return self.watch(key_prefix, **kwargs)
+
+    def watch_once(self, key, timeout=None, **kwargs):
         """
-        Watch a range of keys with a prefix.
+        Watch a key and stops after the first event.
 
-        Example usage:
+        :param key: key to watch
+        :param timeout: (optional) timeout in seconds.
+        :returns: ``Event``
 
-        .. code-block:: python
-
-            for (event, cancel) in etcd.watch_prefix('/doot/keys'):
-                print(event)
-
-        :param key_prefix: key prefix to watch
-
-        :returns: Iterator of ``(event, cancel)`` tuples.
-                  Use ``event`` to get the events of key changes and ``cancel``
-                  to cancel the watch request
+        If the timeout was specified and event didn't arrived method
+        will raise ``WatchTimedOut`` exception.
         """
-        range_end = utils.increment_last_byte(utils.to_bytes(key_prefix))
-        return self._build_watch_iterator(key_prefix,
-                                          range_end=range_end,
-                                          start_revision=start_revision,
-                                          progress_notify=progress_notify,
-                                          filters=filters,
-                                          prev_kv=prev_kv)
+        event_queue = queue.Queue()
 
-    def add_watch_callback(self, key, callback,
-                           start_revision=None,
-                           progress_notify=False,
-                           filters=None,
-                           prev_kv=False):
-        class Watcher(threading.Thread):
-            def __init__(self, iterator, callback):
-                super(Watcher, self).__init__()
-                self.iterator = iterator
-                self.callback = callback
+        def callback(event):
+            event_queue.put(event)
 
-            def run(self):
-                for (event, cancel) in self.iterator:
-                    self._cancel = cancel
-                    self.callback(event)
+        watch_id = self.add_watch_callback(key, callback, **kwargs)
 
-            def cancel(self):
-                self._cancel()
+        try:
+            return event_queue.get(timeout=timeout)
+        except queue.Empty:
+            raise exceptions.WatchTimedOut()
+        finally:
+            self.cancel_watch(watch_id)
 
-        iterator = self._build_watch_iterator(
-            key,
-            start_revision=start_revision,
-            progress_notify=progress_notify,
-            filters=filters,
-            prev_kv=prev_kv)
+    def watch_prefix_once(self, key_prefix, timeout=None, **kwargs):
+        """
+        The same as ``watch_once``, but watches a range of keys with a prefix.
 
-        thread = Watcher(iterator, callback)
-        thread.start()
-        return thread
+        If the timeout was specified and event didn't arrived method
+        will raise ``WatchTimedOut`` exception.
+        """
+        kwargs['range_end'] = \
+            utils.increment_last_byte(utils.to_bytes(key_prefix))
+        return self.watch_once(key_prefix, timeout=timeout, **kwargs)
 
     def _ops_to_requests(self, ops):
         """
