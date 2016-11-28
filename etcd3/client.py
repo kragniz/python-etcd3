@@ -229,14 +229,6 @@ class Etcd3Client(object):
         """
         return self.watcher.add_callback(*args, **kwargs)
 
-    def cancel_watch(self, watch_id):
-        """
-        Stop watching a key or range of keys.
-
-        :param watch_id: watch_id returned by ``add_watch_callback`` method
-        """
-        self.watcher.cancel(watch_id)
-
     def watch(self, key, **kwargs):
         """
         Watch a key.
@@ -287,12 +279,12 @@ class Etcd3Client(object):
         """
         Watch a key and stops after the first event.
 
+        If the timeout was specified and event didn't arrived method
+        will raise ``WatchTimedOut`` exception.
+
         :param key: key to watch
         :param timeout: (optional) timeout in seconds.
         :returns: ``Event``
-
-        If the timeout was specified and event didn't arrived method
-        will raise ``WatchTimedOut`` exception.
         """
         event_queue = queue.Queue()
 
@@ -318,6 +310,14 @@ class Etcd3Client(object):
         kwargs['range_end'] = \
             utils.increment_last_byte(utils.to_bytes(key_prefix))
         return self.watch_once(key_prefix, timeout=timeout, **kwargs)
+
+    def cancel_watch(self, watch_id):
+        """
+        Stop watching a key or range of keys.
+
+        :param watch_id: watch_id returned by ``add_watch_callback`` method
+        """
+        self.watcher.cancel(watch_id)
 
     def _ops_to_requests(self, ops):
         """

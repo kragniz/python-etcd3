@@ -9,6 +9,23 @@ import etcd3.events as events
 import etcd3.utils as utils
 
 
+class Watch(object):
+
+    def __init__(self, watch_id, iterator=None, etcd_client=None):
+        self.watch_id = watch_id
+        self.etcd_client = etcd_client
+        self.iterator = iterator
+
+    def cancel(self):
+        self.etcd_client.cancel_watch(self.watch_id)
+
+    def iterator(self):
+        if self.iterator is not None:
+            return self.iterator
+        else:
+            raise
+
+
 class Watcher(threading.Thread):
 
     def __init__(self, watchstub):
