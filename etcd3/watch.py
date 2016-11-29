@@ -30,25 +30,25 @@ class Watcher(threading.Thread):
 
     def __init__(self, watchstub):
         threading.Thread.__init__(self)
-        self.__watch_id_callbacks = {}
-        self.__watch_id_queue = queue.Queue()
-        self.__watch_id_lock = threading.Lock()
-        self.__watch_requests_queue = queue.Queue()
-        self.__watch_response_iterator = \
-            watchstub.Watch(self.__requests_iterator)
-        self.__callback = None
+        self._watch_id_callbacks = {}
+        self._watch_id_queue = queue.Queue()
+        self._watch_id_lock = threading.Lock()
+        self._watch_requests_queue = queue.Queue()
+        self._watch_response_iterator = \
+            watchstub.Watch(self._requests_iterator)
+        self._callback = None
         self.daemon = True
         self.start()
 
     def run(self):
         try:
-            for response in self.__watch_response_iterator:
+            for response in self._watch_response_iterator:
                 if response.created:
-                    self.__watch_id_callbacks[response.watch_id] = \
-                        self.__callback
-                    self.__watch_id_queue.put(response.watch_id)
+                    self._watch_id_callbacks[response.watch_id] = \
+                        self._callback
+                    self._watch_id_queue.put(response.watch_id)
 
-                callback = self.__watch_id_callbacks.get(response.watch_id)
+                callback = self._watch_id_callbacks.get(response.watch_id)
                 if callback:
                     for event in response.events:
                         callback(events.new_event(event))
@@ -56,9 +56,9 @@ class Watcher(threading.Thread):
             self.stop()
 
     @property
-    def __requests_iterator(self):
+    def _requests_iterator(self):
         while True:
-            request, self.__callback = self.__watch_requests_queue.get()
+            request, self._callback = self._watch_requests_queue.get()
             if request is None:
                 break
             yield request
@@ -69,7 +69,7 @@ class Watcher(threading.Thread):
                      progress_notify=False,
                      filters=None,
                      prev_kv=False):
-        with self.__watch_id_lock:
+        with self._watch_id_lock:
             create_watch = etcdrpc.WatchCreateRequest()
             create_watch.key = utils.to_bytes(key)
             if range_end is not None:
@@ -83,16 +83,16 @@ class Watcher(threading.Thread):
             if prev_kv:
                 create_watch.prev_kv = prev_kv
             request = etcdrpc.WatchRequest(create_request=create_watch)
-            self.__watch_requests_queue.put((request, callback))
-            return self.__watch_id_queue.get()
+            self._watch_requests_queue.put((request, callback))
+            return self._watch_id_queue.get()
 
     def cancel(self, watch_id):
         if watch_id is not None:
-            self.__watch_id_callbacks.pop(watch_id, None)
+            self._watch_id_callbacks.pop(watch_id, None)
             cancel_watch = etcdrpc.WatchCancelRequest()
             cancel_watch.watch_id = watch_id
             request = etcdrpc.WatchRequest(cancel_request=cancel_watch)
-            self.__watch_requests_queue.put((request, None))
+            self._watch_requests_queue.put((request, None))
 
     def stop(self):
-        self.__watch_requests_queue.put((None, None))
+        self._watch_requests_queue.put((None, None))

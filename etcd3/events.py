@@ -2,12 +2,12 @@ class Event(object):
 
     def __init__(self, event):
         self.key = event.kv.key
-        self.__event = event
+        self._event = event
 
     def __getattr__(self, name):
         if name.startswith('prev_'):
-            return getattr(self.__event.prev_kv, name[5:])
-        return getattr(self.__event.kv, name)
+            return getattr(self._event.prev_kv, name[5:])
+        return getattr(self._event.kv, name)
 
     def __str__(self):
         return '{type} key={key} value={value}'.format(type=self.__class__,
