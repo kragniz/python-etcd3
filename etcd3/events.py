@@ -23,12 +23,6 @@ class DeleteEvent(Event):
     pass
 
 
-event_classes = {
-    'PUT': PutEvent,
-    'DELETE': DeleteEvent
-}
-
-
 def new_event(event):
     """
     Wrap a raw gRPC event in a friendlier containing class.
@@ -37,4 +31,11 @@ def new_event(event):
     returns a new instance.
     """
     op_name = event.EventType.DESCRIPTOR.values_by_number[event.type].name
-    return event_classes[op_name](event)
+    if op_name == 'PUT':
+        cls = PutEvent
+    elif op_name == 'DELETE':
+        cls = DeleteEvent
+    else:
+        raise Exception('Invalid op_name')
+
+    return cls(event)
