@@ -1,5 +1,4 @@
 class Event(object):
-    __impl = {}
 
     def __init__(self, event):
         self.key = event.kv.key
