@@ -140,7 +140,7 @@ class Etcd3Client(object):
 
         :param key_prefix: first key in range
 
-        :returns: sequence of (key, value) tuples
+        :returns: sequence of (value, metadata) tuples
         """
         range_request = self._build_get_range_request(
             key=key_prefix,
@@ -154,7 +154,7 @@ class Etcd3Client(object):
             raise exceptions.KeyNotFoundError('no keys found')
         else:
             for kv in range_response.kvs:
-                yield (kv.key, kv.value)
+                yield (kv.value, KVMetadata(kv))
 
     def get_all(self, sort_order=None, sort_target='key'):
         """

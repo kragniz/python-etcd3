@@ -214,7 +214,7 @@ class TestEtcd3(object):
 
         values = list(etcd.get_prefix('/doot/range'))
         assert len(values) == 20
-        for key, value in values:
+        for value, _ in values:
             assert value == b'i am a range'
 
     def test_all_not_found_error(self, etcd):
@@ -250,14 +250,14 @@ class TestEtcd3(object):
             etcdctl('put', '/doot/{}'.format(k), v)
 
         keys = ''
-        for key, value in etcd.get_prefix('/doot', sort_order='ascend'):
-            keys += remove_prefix(key.decode('utf-8'), '/doot/')
+        for value, meta in etcd.get_prefix('/doot', sort_order='ascend'):
+            keys += remove_prefix(meta.key.decode('utf-8'), '/doot/')
 
         assert keys == initial_keys
 
         reverse_keys = ''
-        for key, value in etcd.get_prefix('/doot', sort_order='descend'):
-            reverse_keys += remove_prefix(key.decode('utf-8'), '/doot/')
+        for value, meta in etcd.get_prefix('/doot', sort_order='descend'):
+            reverse_keys += remove_prefix(meta.key.decode('utf-8'), '/doot/')
 
         assert reverse_keys == ''.join(reversed(initial_keys))
 
