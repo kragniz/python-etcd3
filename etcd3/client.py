@@ -31,20 +31,20 @@ class Etcd3Client(object):
                  ca_cert=None, cert_key=None, cert_cert=None):
         url = '{host}:{port}'.format(host=host, port=port)
 
-        if cert_cert is not None \
-                and cert_key is not None \
-                and ca_cert is not None:
-            with open(ca_cert) as ca_cert_file:
-                with open(cert_key) as cert_key_file:
-                    with open(cert_cert) as cert_cert_file:
-                        credentials = grpc.ssl_channel_credentials(
-                            ca_cert_file.read(),
-                            cert_key_file.read(),
-                            cert_cert_file.read()
-                        )
-
-                        self.channel = grpc.secure_channel(url, credentials)
+        cert_params = [c is not None for c in (cert_cert, cert_key, ca_cert)]
+        if all(cert_params):
+            # all the cert parameters are set
+            credentials = self._get_secure_creds(ca_cert,
+                                                 cert_key,
+                                                 cert_cert)
+            self.uses_secure_channel = True
+            self.channel = grpc.secure_channel(url, credentials)
+        elif any(cert_params):
+            # some of the cert parameters are set
+            raise ValueError('the parameters cert_cert, cert_key and ca_cert '
+                             'must all be set to use a secure channel')
         else:
+            self.uses_secure_channel = False
             self.channel = grpc.insecure_channel(url)
 
         self.kvstub = etcdrpc.KVStub(self.channel)
@@ -53,6 +53,16 @@ class Etcd3Client(object):
         self.leasestub = etcdrpc.LeaseStub(self.channel)
         self.maintenancestub = etcdrpc.MaintenanceStub(self.channel)
         self.transactions = Transactions()
+
+    def _get_secure_creds(self, ca_cert, cert_key, cert_cert):
+        with open(ca_cert, 'rb') as ca_cert_file:
+            with open(cert_key, 'rb') as cert_key_file:
+                with open(cert_cert, 'rb') as cert_cert_file:
+                    return grpc.ssl_channel_credentials(
+                        ca_cert_file.read(),
+                        cert_key_file.read(),
+                        cert_cert_file.read()
+                    )
 
     def _build_get_range_request(self, key,
                                  range_end=None,
@@ -551,6 +561,11 @@ class Etcd3Client(object):
         self.maintenancestub.Defragment(defrag_request)
 
 
-def client(host='localhost', port=2379):
+def client(host='localhost', port=2379,
+           ca_cert=None, cert_key=None, cert_cert=None):
     """Return an instance of an Etcd3Client."""
-    return Etcd3Client(host=host, port=port)
+    return Etcd3Client(host=host,
+                       port=port,
+                       ca_cert=ca_cert,
+                       cert_key=cert_key,
+                       cert_cert=cert_cert)
