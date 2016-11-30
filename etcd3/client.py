@@ -26,6 +26,15 @@ class Transactions(object):
         self.delete = transactions.Delete
 
 
+class KVMetadata(object):
+    def __init__(self, keyvalue):
+        self.key = keyvalue.key
+        self.create_revision = keyvalue.create_revision
+        self.mod_revision = keyvalue.mod_revision
+        self.version = keyvalue.version
+        self.lease_id = keyvalue.lease
+
+
 class Etcd3Client(object):
     def __init__(self, host='localhost', port=2379,
                  ca_cert=None, cert_key=None, cert_cert=None):
@@ -112,8 +121,8 @@ class Etcd3Client(object):
         Get the value of a key from etcd.
 
         :param key: key in etcd to get
-        :returns: value of key
-        :rtype: bytes
+        :returns: value of key and metadata
+        :rtype: bytes, ``KVMetadata``
         """
         range_request = self._build_get_range_request(key)
         range_response = self.kvstub.Range(range_request)
@@ -122,8 +131,8 @@ class Etcd3Client(object):
             raise exceptions.KeyNotFoundError(
                 'the key "{}" was not found'.format(key))
         else:
-            # smells funny - there must be a cleaner way to get the value?
-            return range_response.kvs.pop().value
+            kv = range_response.kvs.pop()
+            return kv.value, KVMetadata(kv)
 
     def get_prefix(self, key_prefix, sort_order=None, sort_target='key'):
         """

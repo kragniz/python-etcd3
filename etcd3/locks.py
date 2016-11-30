@@ -98,7 +98,7 @@ class Lock(object):
     def is_acquired(self):
         """Check if this lock is currently acquired."""
         try:
-            uuid = self.etcd_client.get(self.key)
+            uuid, _ = self.etcd_client.get(self.key)
         except exceptions.KeyNotFoundError:
             return False
 

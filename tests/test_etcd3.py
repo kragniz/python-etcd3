@@ -65,13 +65,13 @@ class TestEtcd3(object):
     @given(characters(blacklist_categories=['Cs', 'Cc']))
     def test_get_key(self, etcd, string):
         etcdctl('put', '/doot/a_key', string)
-        returned = etcd.get('/doot/a_key')
+        returned, _ = etcd.get('/doot/a_key')
         assert returned == string.encode('utf-8')
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
     def test_get_random_key(self, etcd, string):
         etcdctl('put', '/doot/' + string, 'dootdoot')
-        returned = etcd.get('/doot/' + string)
+        returned, _ = etcd.get('/doot/' + string)
         assert returned == b'dootdoot'
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
@@ -84,7 +84,8 @@ class TestEtcd3(object):
     def test_delete_key(self, etcd):
         etcdctl('put', '/doot/delete_this', 'delete pls')
 
-        assert etcd.get('/doot/delete_this') == b'delete pls'
+        v, _ = etcd.get('/doot/delete_this')
+        assert v == b'delete pls'
 
         etcd.delete('/doot/delete_this')
 
@@ -193,13 +194,15 @@ class TestEtcd3(object):
     def test_replace_success(self, etcd):
         etcd.put('/doot/thing', 'toot')
         status = etcd.replace('/doot/thing', 'toot', 'doot')
-        assert etcd.get('/doot/thing') == b'doot'
+        v, _ = etcd.get('/doot/thing')
+        assert v == b'doot'
         assert status is True
 
     def test_replace_fail(self, etcd):
         etcd.put('/doot/thing', 'boot')
         status = etcd.replace('/doot/thing', 'toot', 'doot')
-        assert etcd.get('/doot/thing') == b'boot'
+        v, _ = etcd.get('/doot/thing')
+        assert v == b'boot'
         assert status is False
 
     def test_get_prefix(self, etcd):
@@ -288,7 +291,8 @@ class TestEtcd3(object):
         lease = etcd.lease(1)
         etcd.put(key, 'this is a lease', lease=lease)
         assert lease.keys == [utils.to_bytes(key)]
-        assert etcd.get(key) == b'this is a lease'
+        v, _ = etcd.get(key)
+        assert v == b'this is a lease'
         assert lease.remaining_ttl <= lease.granted_ttl
 
         # wait for the lease to expire
@@ -311,12 +315,12 @@ class TestEtcd3(object):
     def test_lock_acquire(self, etcd):
         lock = etcd.lock('lock-1', ttl=10)
         assert lock.acquire() is True
-        assert etcd.get(lock.key) is not None
+        assert etcd.get(lock.key)[0] is not None
 
     def test_lock_release(self, etcd):
         lock = etcd.lock('lock-2', ttl=10)
         assert lock.acquire() is True
-        assert etcd.get(lock.key) is not None
+        assert etcd.get(lock.key)[0] is not None
         assert lock.release() is True
         with pytest.raises(etcd3.exceptions.KeyNotFoundError):
             etcd.get(lock.key)
@@ -324,7 +328,7 @@ class TestEtcd3(object):
     def test_lock_expire(self, etcd):
         lock = etcd.lock('lock-3', ttl=2)
         assert lock.acquire() is True
-        assert etcd.get(lock.key) is not None
+        assert etcd.get(lock.key)[0] is not None
         # wait for the lease to expire
         time.sleep(6)
         with pytest.raises(etcd3.exceptions.KeyNotFoundError):
@@ -333,14 +337,14 @@ class TestEtcd3(object):
     def test_lock_refresh(self, etcd):
         lock = etcd.lock('lock-4', ttl=2)
         assert lock.acquire() is True
-        assert etcd.get(lock.key) is not None
+        assert etcd.get(lock.key)[0] is not None
         # sleep for the same total time as test_lock_expire, but refresh each
         # second
         for _ in range(6):
             time.sleep(1)
             lock.refresh()
 
-        assert etcd.get(lock.key) is not None
+        assert etcd.get(lock.key)[0] is not None
 
     def test_lock_is_acquired(self, etcd):
         lock1 = etcd.lock('lock-5', ttl=2)
