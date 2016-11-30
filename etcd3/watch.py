@@ -28,14 +28,15 @@ class Watch(object):
 
 class Watcher(threading.Thread):
 
-    def __init__(self, watchstub):
+    def __init__(self, watchstub, timeout=None):
         threading.Thread.__init__(self)
+        self.timeout = timeout
         self._watch_id_callbacks = {}
         self._watch_id_queue = queue.Queue()
         self._watch_id_lock = threading.Lock()
         self._watch_requests_queue = queue.Queue()
         self._watch_response_iterator = \
-            watchstub.Watch(self._requests_iterator)
+            watchstub.Watch(self._requests_iterator, self.timeout)
         self._callback = None
         self.daemon = True
         self.start()
