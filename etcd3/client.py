@@ -27,10 +27,26 @@ class Transactions(object):
 
 
 class Etcd3Client(object):
-    def __init__(self, host='localhost', port=2379):
-        self.channel = grpc.insecure_channel('{host}:{port}'.format(
-            host=host, port=port)
-        )
+    def __init__(self, host='localhost', port=2379,
+                 ca_cert=None, cert_key=None, cert_cert=None):
+        url = '{host}:{port}'.format(host=host, port=port)
+
+        if cert_cert is not None \
+                and cert_key is not None \
+                and ca_cert is not None:
+            with open(ca_cert) as ca_cert_file:
+                with open(cert_key) as cert_key_file:
+                    with open(cert_cert) as cert_cert_file:
+                        credentials = grpc.ssl_channel_credentials(
+                            ca_cert_file.read(),
+                            cert_key_file.read(),
+                            cert_cert_file.read()
+                        )
+
+                        self.channel = grpc.secure_channel(url, credentials)
+        else:
+            self.channel = grpc.insecure_channel(url)
+
         self.kvstub = etcdrpc.KVStub(self.channel)
         self.watcher = watch.Watcher(etcdrpc.WatchStub(self.channel))
         self.clusterstub = etcdrpc.ClusterStub(self.channel)

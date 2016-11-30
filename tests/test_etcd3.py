@@ -10,9 +10,12 @@ import os
 import subprocess
 import threading
 import time
+from contextlib import contextmanager
 
 from hypothesis import given
 from hypothesis.strategies import characters
+
+import mock
 
 import pytest
 
@@ -478,3 +481,38 @@ class TestCompares(object):
         create_compare = tx.create(key) > -12
         assert create_compare.op == etcdrpc.Compare.GREATER
         assert create_compare.build_message().target == etcdrpc.Compare.CREATE
+
+    def test_secure_channel(self):
+        ca_cert_file_mock = mock.MagicMock(
+            read=mock.MagicMock(return_value="ca_cert"))
+        cert_cert_file_mock = mock.MagicMock(
+            read=mock.MagicMock(return_value="cert_cert"))
+        cert_key_file_mock = mock.MagicMock(
+            read=mock.MagicMock(return_value="cert_key"))
+
+        def openfile(path, mode):
+            mapping = {"ca_cert_file": ca_cert_file_mock,
+                       "cert_key_file": cert_key_file_mock,
+                       "cert_cert_file": cert_cert_file_mock}
+            return mapping[path]
+
+        open_mock = mock.MagicMock(side_effect=openfile)
+
+        @contextmanager
+        def patch_open():
+            try:
+                yield mock.patch("__builtin__.open", open_mock)
+            except ImportError:
+                yield mock.patch("builtins.open", open_mock)
+
+        grpc_credentials_mock = mock.MagicMock()
+        with patch_open():
+            with mock.patch("grpc.ssl_channel_credentials",
+                            grpc_credentials_mock):
+                etcd3.client(ca_cert="ca_cert_file",
+                             cert_key="cert_key_file",
+                             cert_cert="cert_cert_file")
+
+        grpc_credentials_mock.assert_called_once_with("ca_cert",
+                                                      "cert_key",
+                                                      "cert_cert")
