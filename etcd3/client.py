@@ -160,7 +160,7 @@ class Etcd3Client(object):
         """
         Get all keys currently stored in etcd.
 
-        :returns: sequence of (key, value) tuples
+        :returns: sequence of (value, metadata) tuples
         """
         range_request = self._build_get_range_request(
             key=b'\0',
@@ -175,7 +175,7 @@ class Etcd3Client(object):
             raise exceptions.KeyNotFoundError('no keys')
         else:
             for kv in range_response.kvs:
-                yield (kv.key, kv.value)
+                yield (kv.value, KVMetadata(kv))
 
     def _build_put_request(self, key, value, lease=None):
         put_request = etcdrpc.PutRequest()

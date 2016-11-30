@@ -236,7 +236,7 @@ class TestEtcd3(object):
             etcdctl('put', '/doot/notrange{}'.format(i), 'i am in all')
         values = list(etcd.get_all())
         assert len(values) == 25
-        for key, value in values:
+        for value, _ in values:
             assert value == b'i am in all'
 
     def test_sort_order(self, etcd):
