@@ -37,7 +37,7 @@ class KVMetadata(object):
 
 class Etcd3Client(object):
     def __init__(self, host='localhost', port=2379,
-                 ca_cert=None, cert_key=None, cert_cert=None):
+                 ca_cert=None, cert_key=None, cert_cert=None, timeout=None):
         url = '{host}:{port}'.format(host=host, port=port)
 
         cert_params = [c is not None for c in (cert_cert, cert_key, ca_cert)]
@@ -56,8 +56,10 @@ class Etcd3Client(object):
             self.uses_secure_channel = False
             self.channel = grpc.insecure_channel(url)
 
+        self.timeout = timeout
         self.kvstub = etcdrpc.KVStub(self.channel)
-        self.watcher = watch.Watcher(etcdrpc.WatchStub(self.channel))
+        self.watcher = watch.Watcher(etcdrpc.WatchStub(self.channel),
+                                     timeout=self.timeout)
         self.clusterstub = etcdrpc.ClusterStub(self.channel)
         self.leasestub = etcdrpc.LeaseStub(self.channel)
         self.maintenancestub = etcdrpc.MaintenanceStub(self.channel)
@@ -125,7 +127,7 @@ class Etcd3Client(object):
         :rtype: bytes, ``KVMetadata``
         """
         range_request = self._build_get_range_request(key)
-        range_response = self.kvstub.Range(range_request)
+        range_response = self.kvstub.Range(range_request, self.timeout)
 
         if range_response.count < 1:
             raise exceptions.KeyNotFoundError(
@@ -148,7 +150,7 @@ class Etcd3Client(object):
             sort_order=sort_order,
         )
 
-        range_response = self.kvstub.Range(range_request)
+        range_response = self.kvstub.Range(range_request, self.timeout)
 
         if range_response.count < 1:
             raise exceptions.KeyNotFoundError('no keys found')
@@ -169,7 +171,7 @@ class Etcd3Client(object):
             sort_target=sort_target,
         )
 
-        range_response = self.kvstub.Range(range_request)
+        range_response = self.kvstub.Range(range_request, self.timeout)
 
         if range_response.count < 1:
             raise exceptions.KeyNotFoundError('no keys')
@@ -195,7 +197,7 @@ class Etcd3Client(object):
         :type lease: either :class:`.Lease`, or int (ID of lease)
         """
         put_request = self._build_put_request(key, value, lease=lease)
-        self.kvstub.Put(put_request)
+        self.kvstub.Put(put_request, self.timeout)
 
     def replace(self, key, initial_value, new_value):
         """
@@ -243,7 +245,7 @@ class Etcd3Client(object):
         :param key: key in etcd to delete
         """
         delete_request = self._build_delete_request(key)
-        self.kvstub.DeleteRange(delete_request)
+        self.kvstub.DeleteRange(delete_request, self.timeout)
 
     def delete_prefix(self, prefix):
         """Delete a range of keys with a prefix in etcd."""
@@ -251,7 +253,7 @@ class Etcd3Client(object):
             prefix,
             range_end=utils.increment_last_byte(utils.to_bytes(prefix))
         )
-        return self.kvstub.DeleteRange(delete_request)
+        return self.kvstub.DeleteRange(delete_request, self.timeout)
 
     def add_watch_callback(self, *args, **kwargs):
         """
@@ -418,7 +420,7 @@ class Etcd3Client(object):
         transaction_request = etcdrpc.TxnRequest(compare=compare,
                                                  success=success_ops,
                                                  failure=failure_ops)
-        txn_response = self.kvstub.Txn(transaction_request)
+        txn_response = self.kvstub.Txn(transaction_request, self.timeout)
 
         responses = []
         for response in txn_response.responses:
@@ -450,7 +452,8 @@ class Etcd3Client(object):
         :rtype: :class:`.Lease`
         """
         lease_grant_request = etcdrpc.LeaseGrantRequest(TTL=ttl, ID=lease_id)
-        lease_grant_response = self.leasestub.LeaseGrant(lease_grant_request)
+        lease_grant_response = self.leasestub.LeaseGrant(lease_grant_request,
+                                                         self.timeout)
         return leases.Lease(lease_id=lease_grant_response.ID,
                             ttl=lease_grant_response.TTL,
                             etcd_client=self)
@@ -462,19 +465,20 @@ class Etcd3Client(object):
         :param lease_id: ID of the lease to revoke.
         """
         lease_revoke_request = etcdrpc.LeaseRevokeRequest(ID=lease_id)
-        self.leasestub.LeaseRevoke(lease_revoke_request)
+        self.leasestub.LeaseRevoke(lease_revoke_request, self.timeout)
 
     def refresh_lease(self, lease_id):
         keep_alive_request = etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
         request_stream = [keep_alive_request]
-        for response in self.leasestub.LeaseKeepAlive(request_stream):
+        for response in self.leasestub.LeaseKeepAlive(request_stream,
+                                                      self.timeout):
             yield response
 
     def get_lease_info(self, lease_id):
         # only available in etcd v3.1.0 and later
         ttl_request = etcdrpc.LeaseTimeToLiveRequest(ID=lease_id,
                                                      keys=True)
-        return self.leasestub.LeaseTimeToLive(ttl_request)
+        return self.leasestub.LeaseTimeToLive(ttl_request, self.timeout)
 
     def lock(self, name, ttl=60):
         """
@@ -500,7 +504,8 @@ class Etcd3Client(object):
         """
         member_add_request = etcdrpc.MemberAddRequest(peerURLs=urls)
 
-        member_add_response = self.clusterstub.MemberAdd(member_add_request)
+        member_add_response = self.clusterstub.MemberAdd(member_add_request,
+                                                         self.timeout)
         member = member_add_response.member
         return etcd3.members.Member(member.ID,
                                     member.name,
@@ -515,7 +520,7 @@ class Etcd3Client(object):
         :param member_id: ID of the member to remove
         """
         member_rm_request = etcdrpc.MemberRemoveRequest(ID=member_id)
-        self.clusterstub.MemberRemove(member_rm_request)
+        self.clusterstub.MemberRemove(member_rm_request, self.timeout)
 
     def update_member(self, member_id, peer_urls):
         """
@@ -527,7 +532,7 @@ class Etcd3Client(object):
         """
         member_update_request = etcdrpc.MemberUpdateRequest(ID=member_id,
                                                             peerURLs=peer_urls)
-        self.clusterstub.MemberUpdate(member_update_request)
+        self.clusterstub.MemberUpdate(member_update_request, self.timeout)
 
     @property
     def members(self):
@@ -538,7 +543,8 @@ class Etcd3Client(object):
 
         """
         member_list_request = etcdrpc.MemberListRequest()
-        member_list_response = self.clusterstub.MemberList(member_list_request)
+        member_list_response = self.clusterstub.MemberList(member_list_request,
+                                                           self.timeout)
 
         for member in member_list_response.members:
             yield etcd3.members.Member(member.ID,
@@ -562,7 +568,7 @@ class Etcd3Client(object):
         """
         compact_request = etcdrpc.CompactionRequest(revision=revision,
                                                     physical=physical)
-        self.kvstub.Compact(compact_request)
+        self.kvstub.Compact(compact_request, self.timeout)
 
     def defragment(self):
         """Defragment a member's backend database to recover storage space."""
@@ -571,10 +577,11 @@ class Etcd3Client(object):
 
 
 def client(host='localhost', port=2379,
-           ca_cert=None, cert_key=None, cert_cert=None):
+           ca_cert=None, cert_key=None, cert_cert=None, timeout=None):
     """Return an instance of an Etcd3Client."""
     return Etcd3Client(host=host,
                        port=port,
                        ca_cert=ca_cert,
                        cert_key=cert_key,
-                       cert_cert=cert_cert)
+                       cert_cert=cert_cert,
+                       timeout=timeout)
