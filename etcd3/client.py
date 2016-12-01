@@ -431,7 +431,7 @@ class Etcd3Client(object):
             elif response_type == 'response_range':
                 range_kvs = []
                 for kv in response.response_range.kvs:
-                    range_kvs.append((kv.key, kv.value))
+                    range_kvs.append((kv.value, KVMetadata(kv)))
 
                 responses.append(range_kvs)
 
