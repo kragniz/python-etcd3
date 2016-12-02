@@ -48,23 +48,17 @@ class Lock(object):
         success = False
         attempts = 10
 
-        # store uuid as bytes, since it avoids having to decode each time we
-        # need to compare
-        self.uuid = str(uuid.uuid1()).encode('utf-8')
-
         while success is not True and attempts > 0:
             attempts -= 1
 
             self.lease = self.etcd_client.lease(self.ttl)
 
-            # TODO: save the created revision so we can check it later to make
-            # sure we still have the lock
             success, _ = self.etcd_client.transaction(
                 compare=[
                     self.etcd_client.transactions.create(self.key) == 0
                 ],
                 success=[
-                    self.etcd_client.transactions.put(self.key, self.uuid,
+                    self.etcd_client.transactions.put(self.key, '',
                                                       lease=self.lease)
                 ],
                 failure=[
