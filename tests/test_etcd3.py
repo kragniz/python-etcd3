@@ -8,11 +8,14 @@ import base64
 import json
 import os
 import subprocess
+import threading
 import time
 
 from hypothesis import given
 from hypothesis.strategies import characters
+
 import pytest
+
 import six
 from six.moves.urllib.parse import urlparse
 
@@ -62,13 +65,13 @@ class TestEtcd3(object):
     @given(characters(blacklist_categories=['Cs', 'Cc']))
     def test_get_key(self, etcd, string):
         etcdctl('put', '/doot/a_key', string)
-        returned = etcd.get('/doot/a_key')
+        returned, _ = etcd.get('/doot/a_key')
         assert returned == string.encode('utf-8')
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
     def test_get_random_key(self, etcd, string):
         etcdctl('put', '/doot/' + string, 'dootdoot')
-        returned = etcd.get('/doot/' + string)
+        returned, _ = etcd.get('/doot/' + string)
         assert returned == b'dootdoot'
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
@@ -81,12 +84,92 @@ class TestEtcd3(object):
     def test_delete_key(self, etcd):
         etcdctl('put', '/doot/delete_this', 'delete pls')
 
-        assert etcd.get('/doot/delete_this') == b'delete pls'
+        v, _ = etcd.get('/doot/delete_this')
+        assert v == b'delete pls'
 
         etcd.delete('/doot/delete_this')
 
         with pytest.raises(etcd3.exceptions.KeyNotFoundError):
             etcd.get('/doot/delete_this')
+
+    def test_watch_key(self, etcd):
+        def update_etcd(v):
+            etcdctl('put', '/doot/watch', v)
+            out = etcdctl('get', '/doot/watch')
+            assert base64.b64decode(out['kvs'][0]['value']) == \
+                utils.to_bytes(v)
+
+        def update_key():
+            # sleep to make watch can get the event
+            time.sleep(3)
+            update_etcd('0')
+            time.sleep(1)
+            update_etcd('1')
+            time.sleep(1)
+            update_etcd('2')
+            time.sleep(1)
+            update_etcd('3')
+            time.sleep(1)
+
+        t = threading.Thread(name="update_key", target=update_key)
+        t.start()
+
+        change_count = 0
+        events_iterator, cancel = etcd.watch(b'/doot/watch')
+        for event in events_iterator:
+            assert event.key == b'/doot/watch'
+            assert event.value == \
+                utils.to_bytes(str(change_count))
+
+            # if cancel worked, we should not receive event 3
+            assert event.value != utils.to_bytes('3')
+
+            change_count += 1
+            if change_count > 2:
+                # if cancel not work, we will block in this for-loop forever
+                cancel()
+
+        t.join()
+
+    def test_watch_prefix(self, etcd):
+        def update_etcd(v):
+            etcdctl('put', '/doot/watch/prefix/' + v, v)
+            out = etcdctl('get', '/doot/watch/prefix/' + v)
+            assert base64.b64decode(out['kvs'][0]['value']) == \
+                utils.to_bytes(v)
+
+        def update_key():
+            # sleep to make watch can get the event
+            time.sleep(3)
+            update_etcd('0')
+            time.sleep(1)
+            update_etcd('1')
+            time.sleep(1)
+            update_etcd('2')
+            time.sleep(1)
+            update_etcd('3')
+            time.sleep(1)
+
+        t = threading.Thread(name="update_key_prefix", target=update_key)
+        t.start()
+
+        change_count = 0
+        events_iterator, cancel = etcd.watch_prefix('/doot/watch/prefix/')
+        for event in events_iterator:
+            assert event.key == \
+                utils.to_bytes('/doot/watch/prefix/{}'.format(change_count))
+            assert event.value == \
+                utils.to_bytes(str(change_count))
+
+            # if cancel worked, we should not receive event 3
+            assert event.value != utils.to_bytes('3')
+
+            change_count += 1
+            if change_count > 2:
+                # if cancel not work, we will block in this for-loop forever
+                cancel()
+
+        t.join()
 
     def test_transaction_success(self, etcd):
         etcdctl('put', '/doot/txn', 'dootdoot')
@@ -111,13 +194,15 @@ class TestEtcd3(object):
     def test_replace_success(self, etcd):
         etcd.put('/doot/thing', 'toot')
         status = etcd.replace('/doot/thing', 'toot', 'doot')
-        assert etcd.get('/doot/thing') == b'doot'
+        v, _ = etcd.get('/doot/thing')
+        assert v == b'doot'
         assert status is True
 
     def test_replace_fail(self, etcd):
         etcd.put('/doot/thing', 'boot')
         status = etcd.replace('/doot/thing', 'toot', 'doot')
-        assert etcd.get('/doot/thing') == b'boot'
+        v, _ = etcd.get('/doot/thing')
+        assert v == b'boot'
         assert status is False
 
     def test_get_prefix(self, etcd):
@@ -129,7 +214,7 @@ class TestEtcd3(object):
 
         values = list(etcd.get_prefix('/doot/range'))
         assert len(values) == 20
-        for key, value in values:
+        for value, _ in values:
             assert value == b'i am a range'
 
     def test_all_not_found_error(self, etcd):
@@ -151,7 +236,7 @@ class TestEtcd3(object):
             etcdctl('put', '/doot/notrange{}'.format(i), 'i am in all')
         values = list(etcd.get_all())
         assert len(values) == 25
-        for key, value in values:
+        for value, _ in values:
             assert value == b'i am in all'
 
     def test_sort_order(self, etcd):
@@ -165,14 +250,14 @@ class TestEtcd3(object):
             etcdctl('put', '/doot/{}'.format(k), v)
 
         keys = ''
-        for key, value in etcd.get_prefix('/doot', sort_order='ascend'):
-            keys += remove_prefix(key.decode('utf-8'), '/doot/')
+        for value, meta in etcd.get_prefix('/doot', sort_order='ascend'):
+            keys += remove_prefix(meta.key.decode('utf-8'), '/doot/')
 
         assert keys == initial_keys
 
         reverse_keys = ''
-        for key, value in etcd.get_prefix('/doot', sort_order='descend'):
-            reverse_keys += remove_prefix(key.decode('utf-8'), '/doot/')
+        for value, meta in etcd.get_prefix('/doot', sort_order='descend'):
+            reverse_keys += remove_prefix(meta.key.decode('utf-8'), '/doot/')
 
         assert reverse_keys == ''.join(reversed(initial_keys))
 
@@ -206,7 +291,8 @@ class TestEtcd3(object):
         lease = etcd.lease(1)
         etcd.put(key, 'this is a lease', lease=lease)
         assert lease.keys == [utils.to_bytes(key)]
-        assert etcd.get(key) == b'this is a lease'
+        v, _ = etcd.get(key)
+        assert v == b'this is a lease'
         assert lease.remaining_ttl <= lease.granted_ttl
 
         # wait for the lease to expire
@@ -225,6 +311,67 @@ class TestEtcd3(object):
             for client_url in member.client_urls:
                 assert client_url.startswith('http://')
             assert isinstance(member.id, int_types) is True
+
+    def test_lock_acquire(self, etcd):
+        lock = etcd.lock('lock-1', ttl=10)
+        assert lock.acquire() is True
+        assert etcd.get(lock.key)[0] is not None
+
+    def test_lock_release(self, etcd):
+        lock = etcd.lock('lock-2', ttl=10)
+        assert lock.acquire() is True
+        assert etcd.get(lock.key)[0] is not None
+        assert lock.release() is True
+        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
+            etcd.get(lock.key)
+
+    def test_lock_expire(self, etcd):
+        lock = etcd.lock('lock-3', ttl=2)
+        assert lock.acquire() is True
+        assert etcd.get(lock.key)[0] is not None
+        # wait for the lease to expire
+        time.sleep(6)
+        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
+            etcd.get(lock.key)
+
+    def test_lock_refresh(self, etcd):
+        lock = etcd.lock('lock-4', ttl=2)
+        assert lock.acquire() is True
+        assert etcd.get(lock.key)[0] is not None
+        # sleep for the same total time as test_lock_expire, but refresh each
+        # second
+        for _ in range(6):
+            time.sleep(1)
+            lock.refresh()
+
+        assert etcd.get(lock.key)[0] is not None
+
+    def test_lock_is_acquired(self, etcd):
+        lock1 = etcd.lock('lock-5', ttl=2)
+        assert lock1.is_acquired() is False
+
+        lock2 = etcd.lock('lock-5', ttl=2)
+        lock2.acquire()
+        assert lock2.is_acquired() is True
+        lock2.release()
+
+        lock3 = etcd.lock('lock-5', ttl=2)
+        lock3.acquire()
+        assert lock3.is_acquired() is True
+        assert lock2.is_acquired() is False
+
+    def test_lock_context_manager(self, etcd):
+        with etcd.lock('lock-6', ttl=2) as lock:
+            assert lock.is_acquired() is True
+        assert lock.is_acquired() is False
+
+    def test_lock_contended(self, etcd):
+        lock1 = etcd.lock('lock-7', ttl=2)
+        lock1.acquire()
+        lock2 = etcd.lock('lock-7', ttl=2)
+        lock2.acquire()
+        assert lock1.is_acquired() is False
+        assert lock2.is_acquired() is True
 
 
 class TestUtils(object):
@@ -275,6 +422,12 @@ class TestClient(object):
             assert range_request.sort_order == expected
         with pytest.raises(ValueError):
             etcd._build_get_range_request(key, sort_order='feelsbadman')
+
+    def test_secure_channel(self):
+        client = etcd3.client(ca_cert="tests/ca.crt",
+                              cert_key="tests/client.key",
+                              cert_cert="tests/client.crt")
+        assert client.uses_secure_channel is True
 
 
 class TestCompares(object):

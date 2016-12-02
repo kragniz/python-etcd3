@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+
 from setuptools import setup
 
 with open('README.rst') as readme_file:
@@ -18,12 +19,13 @@ def load_reqs(filename):
             if not re.match('\s*#', line)
         ]
 
+
 requirements = load_reqs('requirements.txt')
 test_requirements = load_reqs('test-requirements.txt')
 
 setup(
     name='etcd3',
-    version='0.2.2',
+    version='0.3.1',
     description="Python client for the etcd3 API",
     long_description=readme + '\n\n' + history,
     author="Louis Taylor",
