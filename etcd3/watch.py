@@ -36,7 +36,7 @@ class Watcher(threading.Thread):
         self._watch_id_lock = threading.Lock()
         self._watch_requests_queue = queue.Queue()
         self._watch_response_iterator = \
-            watchstub.Watch(self._requests_iterator, self.timeout)
+            watchstub.Watch(self._requests_iterator)
         self._callback = None
         self.daemon = True
         self.start()
