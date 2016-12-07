@@ -136,7 +136,12 @@ class Etcd3Client(object):
         :rtype: bytes, ``KVMetadata``
         """
         range_request = self._build_get_range_request(key)
-        range_response = self.kvstub.Range(range_request, self.timeout)
+        try:
+            range_response = self.kvstub.Range(range_request, self.timeout)
+        except grpc.RpcError as exc:
+            if exc.exception().code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                raise exceptions.ConnectionTimedOut(exc)
+            raise
 
         if range_response.count < 1:
             raise exceptions.KeyNotFoundError(
@@ -159,7 +164,12 @@ class Etcd3Client(object):
             sort_order=sort_order,
         )
 
-        range_response = self.kvstub.Range(range_request, self.timeout)
+        try:
+            range_response = self.kvstub.Range(range_request, self.timeout)
+        except grpc.RpcError as exc:
+            if exc.exception().code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                raise exceptions.ConnectionTimedOut(exc)
+            raise
 
         if range_response.count < 1:
             raise exceptions.KeyNotFoundError('no keys found')
@@ -180,7 +190,12 @@ class Etcd3Client(object):
             sort_target=sort_target,
         )
 
-        range_response = self.kvstub.Range(range_request, self.timeout)
+        try:
+            range_response = self.kvstub.Range(range_request, self.timeout)
+        except grpc.RpcError as exc:
+            if exc.exception().code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                raise exceptions.ConnectionTimedOut(exc)
+            raise
 
         if range_response.count < 1:
             raise exceptions.KeyNotFoundError('no keys')
@@ -214,7 +229,12 @@ class Etcd3Client(object):
         :type lease: either :class:`.Lease`, or int (ID of lease)
         """
         put_request = self._build_put_request(key, value, lease=lease)
-        self.kvstub.Put(put_request, self.timeout)
+        try:
+            self.kvstub.Put(put_request, self.timeout)
+        except grpc.RpcError as exc:
+            if exc.exception().code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                raise exceptions.ConnectionTimedOut(exc)
+            raise
 
     def replace(self, key, initial_value, new_value):
         """
@@ -262,7 +282,12 @@ class Etcd3Client(object):
         :param key: key in etcd to delete
         """
         delete_request = self._build_delete_request(key)
-        self.kvstub.DeleteRange(delete_request, self.timeout)
+        try:
+            self.kvstub.DeleteRange(delete_request, self.timeout)
+        except grpc.RpcError as exc:
+            if exc.exception().code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                raise exceptions.ConnectionTimedOut(exc)
+            raise
 
     def delete_prefix(self, prefix):
         """Delete a range of keys with a prefix in etcd."""
@@ -270,7 +295,12 @@ class Etcd3Client(object):
             prefix,
             range_end=utils.increment_last_byte(utils.to_bytes(prefix))
         )
-        return self.kvstub.DeleteRange(delete_request, self.timeout)
+        try:
+            return self.kvstub.DeleteRange(delete_request, self.timeout)
+        except grpc.RpcError as exc:
+            if exc.exception().code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                raise exceptions.ConnectionTimedOut(exc)
+            raise
 
     def add_watch_callback(self, *args, **kwargs):
         """
@@ -437,7 +467,12 @@ class Etcd3Client(object):
         transaction_request = etcdrpc.TxnRequest(compare=compare,
                                                  success=success_ops,
                                                  failure=failure_ops)
-        txn_response = self.kvstub.Txn(transaction_request, self.timeout)
+        try:
+            txn_response = self.kvstub.Txn(transaction_request, self.timeout)
+        except grpc.RpcError as exc:
+            if exc.exception().code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                raise exceptions.ConnectionTimedOut(exc)
+            raise
 
         responses = []
         for response in txn_response.responses:
@@ -585,7 +620,12 @@ class Etcd3Client(object):
         """
         compact_request = etcdrpc.CompactionRequest(revision=revision,
                                                     physical=physical)
-        self.kvstub.Compact(compact_request, self.timeout)
+        try:
+            self.kvstub.Compact(compact_request, self.timeout)
+        except grpc.RpcError as exc:
+            if exc.exception().code() == grpc.StatusCode.DEADLINE_EXCEEDED:
+                raise exceptions.ConnectionTimedOut(exc)
+            raise
 
     def defragment(self):
         """Defragment a member's backend database to recover storage space."""
