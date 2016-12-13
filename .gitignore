@@ -60,3 +60,4 @@ target/
 
 # Editor files
 .sw?
+.idea/

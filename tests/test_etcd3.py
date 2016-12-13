@@ -21,6 +21,7 @@ from six.moves.urllib.parse import urlparse
 
 import etcd3
 import etcd3.etcdrpc as etcdrpc
+import etcd3.exceptions
 import etcd3.utils as utils
 
 
@@ -49,9 +50,12 @@ class TestEtcd3(object):
     @pytest.fixture
     def etcd(self):
         endpoint = os.environ.get('ETCD_ENDPOINT', None)
+        timeout = 5
         if endpoint:
             url = urlparse(endpoint)
-            yield etcd3.client(host=url.hostname, port=url.port)
+            yield etcd3.client(host=url.hostname,
+                               port=url.port,
+                               timeout=timeout)
         else:
             yield etcd3.client()
 
@@ -170,6 +174,20 @@ class TestEtcd3(object):
                 cancel()
 
         t.join()
+
+    def test_sequential_watch_prefix_once(self, etcd):
+        try:
+            etcd.watch_prefix_once('/doot/', 1)
+        except etcd3.exceptions.WatchTimedOut:
+            pass
+        try:
+            etcd.watch_prefix_once('/doot/', 1)
+        except etcd3.exceptions.WatchTimedOut:
+            pass
+        try:
+            etcd.watch_prefix_once('/doot/', 1)
+        except etcd3.exceptions.WatchTimedOut:
+            pass
 
     def test_transaction_success(self, etcd):
         etcdctl('put', '/doot/txn', 'dootdoot')
