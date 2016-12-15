@@ -11,8 +11,12 @@ import subprocess
 import threading
 import time
 
+import grpc
+
 from hypothesis import given
 from hypothesis.strategies import characters
+
+import mock
 
 import pytest
 
@@ -390,6 +394,39 @@ class TestEtcd3(object):
         lock2.acquire()
         assert lock1.is_acquired() is False
         assert lock2.is_acquired() is True
+
+    def test_proper_exception_on_internal_error(self, etcd):
+        class MockedException(grpc.RpcError):
+            def code(self):
+                return grpc.StatusCode.INTERNAL
+        kv_mock = mock.MagicMock()
+        kv_mock.Range.side_effect = MockedException()
+        etcd.kvstub = kv_mock
+
+        with pytest.raises(etcd3.exceptions.InternalServerErrorException):
+            etcd.get("foo")
+
+    def test_proper_exception_on_connection_failure(self, etcd):
+        class MockedException(grpc.RpcError):
+            def code(self):
+                return grpc.StatusCode.UNAVAILABLE
+        kv_mock = mock.MagicMock()
+        kv_mock.Range.side_effect = MockedException()
+        etcd.kvstub = kv_mock
+
+        with pytest.raises(etcd3.exceptions.ConnectionFailedException):
+            etcd.get("foo")
+
+    def test_proper_exception_on_connection_timeout(self, etcd):
+        class MockedException(grpc.RpcError):
+            def code(self):
+                return grpc.StatusCode.DEADLINE_EXCEEDED
+        kv_mock = mock.MagicMock()
+        kv_mock.Range.side_effect = MockedException()
+        etcd.kvstub = kv_mock
+
+        with pytest.raises(etcd3.exceptions.ConnectionTimeoutException):
+            etcd.get("foo")
 
 
 class TestUtils(object):
