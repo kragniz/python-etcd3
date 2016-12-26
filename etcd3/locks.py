@@ -1,7 +1,6 @@
 import time
 import uuid
 
-import etcd3.exceptions as exceptions
 
 lock_prefix = '/locks/'
 
