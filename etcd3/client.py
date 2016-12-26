@@ -161,7 +161,7 @@ class Etcd3Client(object):
         range_response = self.kvstub.Range(range_request, self.timeout)
 
         if range_response.count < 1:
-            yield from ()
+            return
         else:
             for kv in range_response.kvs:
                 yield (kv.value, KVMetadata(kv))
@@ -182,7 +182,7 @@ class Etcd3Client(object):
         range_response = self.kvstub.Range(range_request, self.timeout)
 
         if range_response.count < 1:
-            yield from ()
+            return
         else:
             for kv in range_response.kvs:
                 yield (kv.value, KVMetadata(kv))
