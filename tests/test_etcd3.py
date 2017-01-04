@@ -11,8 +11,12 @@ import subprocess
 import threading
 import time
 
+import grpc
+
 from hypothesis import given
 from hypothesis.strategies import characters
+
+import mock
 
 import pytest
 
@@ -46,6 +50,13 @@ def etcdctl(*args):
 
 
 class TestEtcd3(object):
+
+    class MockedException(grpc.RpcError):
+        def __init__(self, code):
+            self._code = code
+
+        def code(self):
+            return self._code
 
     @pytest.fixture
     def etcd(self):
@@ -390,6 +401,42 @@ class TestEtcd3(object):
         lock2.acquire()
         assert lock1.is_acquired() is False
         assert lock2.is_acquired() is True
+
+    def test_internal_exception_on_internal_error(self, etcd):
+        exception = self.MockedException(grpc.StatusCode.INTERNAL)
+        kv_mock = mock.MagicMock()
+        kv_mock.Range.side_effect = exception
+        etcd.kvstub = kv_mock
+
+        with pytest.raises(etcd3.exceptions.InternalServerErrorException):
+            etcd.get("foo")
+
+    def test_connection_failure_exception_on_connection_failure(self, etcd):
+        exception = self.MockedException(grpc.StatusCode.UNAVAILABLE)
+        kv_mock = mock.MagicMock()
+        kv_mock.Range.side_effect = exception
+        etcd.kvstub = kv_mock
+
+        with pytest.raises(etcd3.exceptions.ConnectionFailedException):
+            etcd.get("foo")
+
+    def test_connection_timeout_exception_on_connection_timeout(self, etcd):
+        exception = self.MockedException(grpc.StatusCode.DEADLINE_EXCEEDED)
+        kv_mock = mock.MagicMock()
+        kv_mock.Range.side_effect = exception
+        etcd.kvstub = kv_mock
+
+        with pytest.raises(etcd3.exceptions.ConnectionTimeoutException):
+            etcd.get("foo")
+
+    def test_grpc_exception_on_unknown_code(self, etcd):
+        exception = self.MockedException(grpc.StatusCode.DATA_LOSS)
+        kv_mock = mock.MagicMock()
+        kv_mock.Range.side_effect = exception
+        etcd.kvstub = kv_mock
+
+        with pytest.raises(grpc.RpcError):
+            etcd.get("foo")
 
 
 class TestUtils(object):
