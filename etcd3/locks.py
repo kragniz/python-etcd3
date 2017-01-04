@@ -1,7 +1,6 @@
 import time
 import uuid
 
-import etcd3.exceptions as exceptions
 
 lock_prefix = '/locks/'
 
@@ -97,15 +96,12 @@ class Lock(object):
 
     def is_acquired(self):
         """Check if this lock is currently acquired."""
-        try:
-            uuid, _ = self.etcd_client.get(self.key)
-        except exceptions.KeyNotFoundError:
+        uuid, _ = self.etcd_client.get(self.key)
+
+        if uuid is None:
             return False
 
-        if uuid == self.uuid:
-            return True
-        else:
-            return False
+        return uuid == self.uuid
 
     def __enter__(self):
         self.acquire()

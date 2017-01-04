@@ -163,8 +163,7 @@ class Etcd3Client(object):
         range_response = self.kvstub.Range(range_request, self.timeout)
 
         if range_response.count < 1:
-            raise exceptions.KeyNotFoundError(
-                'the key "{}" was not found'.format(key))
+            return None, None
         else:
             kv = range_response.kvs.pop()
             return kv.value, KVMetadata(kv)
@@ -187,7 +186,7 @@ class Etcd3Client(object):
         range_response = self.kvstub.Range(range_request, self.timeout)
 
         if range_response.count < 1:
-            raise exceptions.KeyNotFoundError('no keys found')
+            return
         else:
             for kv in range_response.kvs:
                 yield (kv.value, KVMetadata(kv))
@@ -209,7 +208,7 @@ class Etcd3Client(object):
         range_response = self.kvstub.Range(range_request, self.timeout)
 
         if range_response.count < 1:
-            raise exceptions.KeyNotFoundError('no keys')
+            return
         else:
             for kv in range_response.kvs:
                 yield (kv.value, KVMetadata(kv))
