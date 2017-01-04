@@ -11,8 +11,12 @@ import subprocess
 import threading
 import time
 
+import grpc
+
 from hypothesis import given
 from hypothesis.strategies import characters
+
+import mock
 
 import pytest
 
@@ -47,6 +51,13 @@ def etcdctl(*args):
 
 class TestEtcd3(object):
 
+    class MockedException(grpc.RpcError):
+        def __init__(self, code):
+            self._code = code
+
+        def code(self):
+            return self._code
+
     @pytest.fixture
     def etcd(self):
         endpoint = os.environ.get('ETCD_ENDPOINT', None)
@@ -63,8 +74,9 @@ class TestEtcd3(object):
         etcdctl('del', '--prefix', '/')
 
     def test_get_unknown_key(self, etcd):
-        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
-            etcd.get('probably-invalid-key')
+        value, meta = etcd.get('probably-invalid-key')
+        assert value is None
+        assert meta is None
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
     def test_get_key(self, etcd, string):
@@ -93,8 +105,8 @@ class TestEtcd3(object):
 
         etcd.delete('/doot/delete_this')
 
-        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
-            etcd.get('/doot/delete_this')
+        v, _ = etcd.get('/doot/delete_this')
+        assert v is None
 
     def test_watch_key(self, etcd):
         def update_etcd(v):
@@ -236,15 +248,15 @@ class TestEtcd3(object):
             assert value == b'i am a range'
 
     def test_all_not_found_error(self, etcd):
-        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
-            list(etcd.get_all())
+        result = list(etcd.get_all())
+        assert not result
 
     def test_range_not_found_error(self, etcd):
         for i in range(5):
             etcdctl('put', '/doot/notrange{}'.format(i), 'i am a not range')
 
-        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
-            list(etcd.get_prefix('/doot/range'))
+        result = list(etcd.get_prefix('/doot/range'))
+        assert not result
 
     def test_get_all(self, etcd):
         for i in range(20):
@@ -315,8 +327,8 @@ class TestEtcd3(object):
 
         # wait for the lease to expire
         time.sleep(lease.granted_ttl + 2)
-        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
-            etcd.get(key)
+        v, _ = etcd.get(key)
+        assert v is None
 
     def test_member_list_single(self, etcd):
         # if tests are run against an etcd cluster rather than a single node,
@@ -340,8 +352,8 @@ class TestEtcd3(object):
         assert lock.acquire() is True
         assert etcd.get(lock.key)[0] is not None
         assert lock.release() is True
-        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
-            etcd.get(lock.key)
+        v, _ = etcd.get(lock.key)
+        assert v is None
 
     def test_lock_expire(self, etcd):
         lock = etcd.lock('lock-3', ttl=2)
@@ -349,8 +361,8 @@ class TestEtcd3(object):
         assert etcd.get(lock.key)[0] is not None
         # wait for the lease to expire
         time.sleep(6)
-        with pytest.raises(etcd3.exceptions.KeyNotFoundError):
-            etcd.get(lock.key)
+        v, _ = etcd.get(lock.key)
+        assert v is None
 
     def test_lock_refresh(self, etcd):
         lock = etcd.lock('lock-4', ttl=2)
@@ -390,6 +402,42 @@ class TestEtcd3(object):
         lock2.acquire()
         assert lock1.is_acquired() is False
         assert lock2.is_acquired() is True
+
+    def test_internal_exception_on_internal_error(self, etcd):
+        exception = self.MockedException(grpc.StatusCode.INTERNAL)
+        kv_mock = mock.MagicMock()
+        kv_mock.Range.side_effect = exception
+        etcd.kvstub = kv_mock
+
+        with pytest.raises(etcd3.exceptions.InternalServerErrorException):
+            etcd.get("foo")
+
+    def test_connection_failure_exception_on_connection_failure(self, etcd):
+        exception = self.MockedException(grpc.StatusCode.UNAVAILABLE)
+        kv_mock = mock.MagicMock()
+        kv_mock.Range.side_effect = exception
+        etcd.kvstub = kv_mock
+
+        with pytest.raises(etcd3.exceptions.ConnectionFailedException):
+            etcd.get("foo")
+
+    def test_connection_timeout_exception_on_connection_timeout(self, etcd):
+        exception = self.MockedException(grpc.StatusCode.DEADLINE_EXCEEDED)
+        kv_mock = mock.MagicMock()
+        kv_mock.Range.side_effect = exception
+        etcd.kvstub = kv_mock
+
+        with pytest.raises(etcd3.exceptions.ConnectionTimeoutException):
+            etcd.get("foo")
+
+    def test_grpc_exception_on_unknown_code(self, etcd):
+        exception = self.MockedException(grpc.StatusCode.DATA_LOSS)
+        kv_mock = mock.MagicMock()
+        kv_mock.Range.side_effect = exception
+        etcd.kvstub = kv_mock
+
+        with pytest.raises(grpc.RpcError):
+            etcd.get("foo")
 
 
 class TestUtils(object):

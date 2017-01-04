@@ -1,6 +1,8 @@
+import functools
 import threading
 
 import grpc
+import grpc._channel
 
 from six.moves import queue
 
@@ -12,6 +14,27 @@ import etcd3.members
 import etcd3.transactions as transactions
 import etcd3.utils as utils
 import etcd3.watch as watch
+
+_EXCEPTIONS_BY_CODE = {
+    grpc.StatusCode.INTERNAL: exceptions.InternalServerErrorException,
+    grpc.StatusCode.UNAVAILABLE: exceptions.ConnectionFailedException,
+    grpc.StatusCode.DEADLINE_EXCEEDED: exceptions.ConnectionTimeoutException,
+}
+
+
+def _handle_errors(f):
+    @functools.wraps(f)
+    def handler(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except grpc.RpcError as exc:
+            code = exc.code()
+            exception = _EXCEPTIONS_BY_CODE.get(code)
+            if exception is None:
+                raise
+            raise exception
+
+    return handler
 
 
 class Transactions(object):
@@ -118,6 +141,7 @@ class Etcd3Client(object):
 
         return range_request
 
+    @_handle_errors
     def get(self, key):
         """
         Get the value of a key from etcd.
@@ -139,12 +163,12 @@ class Etcd3Client(object):
         range_response = self.kvstub.Range(range_request, self.timeout)
 
         if range_response.count < 1:
-            raise exceptions.KeyNotFoundError(
-                'the key "{}" was not found'.format(key))
+            return None, None
         else:
             kv = range_response.kvs.pop()
             return kv.value, KVMetadata(kv)
 
+    @_handle_errors
     def get_prefix(self, key_prefix, sort_order=None, sort_target='key'):
         """
         Get a range of keys with a prefix.
@@ -162,11 +186,12 @@ class Etcd3Client(object):
         range_response = self.kvstub.Range(range_request, self.timeout)
 
         if range_response.count < 1:
-            raise exceptions.KeyNotFoundError('no keys found')
+            return
         else:
             for kv in range_response.kvs:
                 yield (kv.value, KVMetadata(kv))
 
+    @_handle_errors
     def get_all(self, sort_order=None, sort_target='key'):
         """
         Get all keys currently stored in etcd.
@@ -183,7 +208,7 @@ class Etcd3Client(object):
         range_response = self.kvstub.Range(range_request, self.timeout)
 
         if range_response.count < 1:
-            raise exceptions.KeyNotFoundError('no keys')
+            return
         else:
             for kv in range_response.kvs:
                 yield (kv.value, KVMetadata(kv))
@@ -195,6 +220,7 @@ class Etcd3Client(object):
         put_request.lease = utils.lease_to_id(lease)
         return put_request
 
+    @_handle_errors
     def put(self, key, value, lease=None):
         """
         Save a value to etcd.
@@ -216,6 +242,7 @@ class Etcd3Client(object):
         put_request = self._build_put_request(key, value, lease=lease)
         self.kvstub.Put(put_request, self.timeout)
 
+    @_handle_errors
     def replace(self, key, initial_value, new_value):
         """
         Atomically replace the value of a key with a new value.
@@ -255,6 +282,7 @@ class Etcd3Client(object):
 
         return delete_request
 
+    @_handle_errors
     def delete(self, key):
         """
         Delete a single key in etcd.
@@ -264,6 +292,7 @@ class Etcd3Client(object):
         delete_request = self._build_delete_request(key)
         self.kvstub.DeleteRange(delete_request, self.timeout)
 
+    @_handle_errors
     def delete_prefix(self, prefix):
         """Delete a range of keys with a prefix in etcd."""
         delete_request = self._build_delete_request(
@@ -272,6 +301,7 @@ class Etcd3Client(object):
         )
         return self.kvstub.DeleteRange(delete_request, self.timeout)
 
+    @_handle_errors
     def add_watch_callback(self, *args, **kwargs):
         """
         Watch a key or range of keys and call a callback on every event.
@@ -283,6 +313,7 @@ class Etcd3Client(object):
         """
         return self.watcher.add_callback(*args, **kwargs)
 
+    @_handle_errors
     def watch(self, key, **kwargs):
         """
         Watch a key.
@@ -323,12 +354,14 @@ class Etcd3Client(object):
 
         return iterator(), cancel
 
+    @_handle_errors
     def watch_prefix(self, key_prefix, **kwargs):
         """The same as ``watch``, but watches a range of keys with a prefix."""
         kwargs['range_end'] = \
             utils.increment_last_byte(utils.to_bytes(key_prefix))
         return self.watch(key_prefix, **kwargs)
 
+    @_handle_errors
     def watch_once(self, key, timeout=None, **kwargs):
         """
         Watch a key and stops after the first event.
@@ -354,6 +387,7 @@ class Etcd3Client(object):
         finally:
             self.cancel_watch(watch_id)
 
+    @_handle_errors
     def watch_prefix_once(self, key_prefix, timeout=None, **kwargs):
         """
         The same as ``watch_once``, but watches a range of keys with a prefix.
@@ -365,6 +399,7 @@ class Etcd3Client(object):
             utils.increment_last_byte(utils.to_bytes(key_prefix))
         return self.watch_once(key_prefix, timeout=timeout, **kwargs)
 
+    @_handle_errors
     def cancel_watch(self, watch_id):
         """
         Stop watching a key or range of keys.
@@ -402,6 +437,7 @@ class Etcd3Client(object):
                     'Unknown request class {}'.format(op.__class__))
         return request_ops
 
+    @_handle_errors
     def transaction(self, compare, success=None, failure=None):
         """
         Perform a transaction.
@@ -454,6 +490,7 @@ class Etcd3Client(object):
 
         return txn_response.succeeded, responses
 
+    @_handle_errors
     def lease(self, ttl, lease_id=None):
         """
         Create a new lease.
@@ -475,6 +512,7 @@ class Etcd3Client(object):
                             ttl=lease_grant_response.TTL,
                             etcd_client=self)
 
+    @_handle_errors
     def revoke_lease(self, lease_id):
         """
         Revoke a lease.
@@ -484,6 +522,7 @@ class Etcd3Client(object):
         lease_revoke_request = etcdrpc.LeaseRevokeRequest(ID=lease_id)
         self.leasestub.LeaseRevoke(lease_revoke_request, self.timeout)
 
+    @_handle_errors
     def refresh_lease(self, lease_id):
         keep_alive_request = etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
         request_stream = [keep_alive_request]
@@ -491,12 +530,14 @@ class Etcd3Client(object):
                                                       self.timeout):
             yield response
 
+    @_handle_errors
     def get_lease_info(self, lease_id):
         # only available in etcd v3.1.0 and later
         ttl_request = etcdrpc.LeaseTimeToLiveRequest(ID=lease_id,
                                                      keys=True)
         return self.leasestub.LeaseTimeToLive(ttl_request, self.timeout)
 
+    @_handle_errors
     def lock(self, name, ttl=60):
         """
         Create a new lock.
@@ -512,6 +553,7 @@ class Etcd3Client(object):
         """
         return locks.Lock(name, ttl=ttl, etcd_client=self)
 
+    @_handle_errors
     def add_member(self, urls):
         """
         Add a member into the cluster.
@@ -530,6 +572,7 @@ class Etcd3Client(object):
                                     member.clientURLs,
                                     etcd_client=self)
 
+    @_handle_errors
     def remove_member(self, member_id):
         """
         Remove an existing member from the cluster.
@@ -539,6 +582,7 @@ class Etcd3Client(object):
         member_rm_request = etcdrpc.MemberRemoveRequest(ID=member_id)
         self.clusterstub.MemberRemove(member_rm_request, self.timeout)
 
+    @_handle_errors
     def update_member(self, member_id, peer_urls):
         """
         Update the configuration of an existing member in the cluster.
@@ -570,6 +614,7 @@ class Etcd3Client(object):
                                        member.clientURLs,
                                        etcd_client=self)
 
+    @_handle_errors
     def compact(self, revision, physical=False):
         """
         Compact the event history in etcd up to a given revision.
@@ -587,6 +632,7 @@ class Etcd3Client(object):
                                                     physical=physical)
         self.kvstub.Compact(compact_request, self.timeout)
 
+    @_handle_errors
     def defragment(self):
         """Defragment a member's backend database to recover storage space."""
         defrag_request = etcdrpc.DefragmentRequest()
