@@ -1,6 +1,6 @@
-=====
-Usage
-=====
+=========
+API Usage
+=========
 
 To use python-etcd3 in a project:
 
