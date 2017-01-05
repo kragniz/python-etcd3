@@ -19,6 +19,7 @@ _EXCEPTIONS_BY_CODE = {
     grpc.StatusCode.INTERNAL: exceptions.InternalServerError,
     grpc.StatusCode.UNAVAILABLE: exceptions.ConnectionFailedError,
     grpc.StatusCode.DEADLINE_EXCEEDED: exceptions.ConnectionTimeoutError,
+    grpc.StatusCode.FAILED_PRECONDITION: exceptions.PreconditionFailedError,
 }
 
 

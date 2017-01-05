@@ -16,3 +16,7 @@ class ConnectionFailedError(Etcd3Exception):
 
 class ConnectionTimeoutError(Etcd3Exception):
     pass
+
+
+class PreconditionFailedError(Etcd3Exception):
+    pass
