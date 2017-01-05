@@ -409,7 +409,7 @@ class TestEtcd3(object):
         kv_mock.Range.side_effect = exception
         etcd.kvstub = kv_mock
 
-        with pytest.raises(etcd3.exceptions.InternalServerErrorException):
+        with pytest.raises(etcd3.exceptions.InternalServerError):
             etcd.get("foo")
 
     def test_connection_failure_exception_on_connection_failure(self, etcd):
@@ -418,7 +418,7 @@ class TestEtcd3(object):
         kv_mock.Range.side_effect = exception
         etcd.kvstub = kv_mock
 
-        with pytest.raises(etcd3.exceptions.ConnectionFailedException):
+        with pytest.raises(etcd3.exceptions.ConnectionFailedError):
             etcd.get("foo")
 
     def test_connection_timeout_exception_on_connection_timeout(self, etcd):
@@ -427,7 +427,7 @@ class TestEtcd3(object):
         kv_mock.Range.side_effect = exception
         etcd.kvstub = kv_mock
 
-        with pytest.raises(etcd3.exceptions.ConnectionTimeoutException):
+        with pytest.raises(etcd3.exceptions.ConnectionTimeoutError):
             etcd.get("foo")
 
     def test_grpc_exception_on_unknown_code(self, etcd):

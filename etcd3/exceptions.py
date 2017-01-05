@@ -6,13 +6,13 @@ class WatchTimedOut(Etcd3Exception):
     pass
 
 
-class InternalServerErrorException(Etcd3Exception):
+class InternalServerError(Etcd3Exception):
     pass
 
 
-class ConnectionFailedException(Etcd3Exception):
+class ConnectionFailedError(Etcd3Exception):
     pass
 
 
-class ConnectionTimeoutException(Etcd3Exception):
+class ConnectionTimeoutError(Etcd3Exception):
     pass

@@ -16,9 +16,9 @@ import etcd3.utils as utils
 import etcd3.watch as watch
 
 _EXCEPTIONS_BY_CODE = {
-    grpc.StatusCode.INTERNAL: exceptions.InternalServerErrorException,
-    grpc.StatusCode.UNAVAILABLE: exceptions.ConnectionFailedException,
-    grpc.StatusCode.DEADLINE_EXCEEDED: exceptions.ConnectionTimeoutException,
+    grpc.StatusCode.INTERNAL: exceptions.InternalServerError,
+    grpc.StatusCode.UNAVAILABLE: exceptions.ConnectionFailedError,
+    grpc.StatusCode.DEADLINE_EXCEEDED: exceptions.ConnectionTimeoutError,
 }
 
 
