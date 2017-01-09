@@ -313,7 +313,7 @@ class Etcd3Client(object):
 
     @_handle_errors
     def status(self):
-        """Defragment a member's backend database to recover storage space."""
+        """Get the status of the responding member."""
         status_request = etcdrpc.StatusRequest()
         status_response = self.maintenancestub.Status(status_request)
 
