@@ -317,9 +317,16 @@ class Etcd3Client(object):
         status_request = etcdrpc.StatusRequest()
         status_response = self.maintenancestub.Status(status_request)
 
+        for m in self.members:
+            if m.id == status_response.leader:
+                leader = m
+            else:
+                # raise exception?
+                leader = None
+
         return Status(status_response.version,
                       status_response.dbSize,
-                      status_response.leader,
+                      leader,
                       status_response.raftIndex,
                       status_response.raftTerm)
 
