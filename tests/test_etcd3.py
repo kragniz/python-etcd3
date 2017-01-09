@@ -446,7 +446,6 @@ class TestEtcd3(object):
         assert status.leader.id in [m.id for m in etcd.members]
 
 
-
 class TestUtils(object):
     def test_increment_last_byte(self):
         assert etcd3.utils.increment_last_byte(b'foo') == b'fop'
