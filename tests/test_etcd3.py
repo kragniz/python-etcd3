@@ -439,6 +439,13 @@ class TestEtcd3(object):
         with pytest.raises(grpc.RpcError):
             etcd.get("foo")
 
+    def test_status_member(self, etcd):
+        status = etcd.status()
+
+        assert isinstance(status.leader, etcd3.members.Member) is True
+        assert status.leader.id in [m.id for m in etcd.members]
+
+
 
 class TestUtils(object):
     def test_increment_last_byte(self):
