@@ -62,7 +62,7 @@ class KVMetadata(object):
 class Etcd3Client(object):
     def __init__(self, host='localhost', port=2379,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None):
-        url = '{host}:{port}'.format(host=host, port=port)
+        self.url = '{host}:{port}'.format(host=host, port=port)
 
         cert_params = [c is not None for c in (cert_cert, cert_key, ca_cert)]
         if all(cert_params):
@@ -71,14 +71,14 @@ class Etcd3Client(object):
                                                  cert_key,
                                                  cert_cert)
             self.uses_secure_channel = True
-            self.channel = grpc.secure_channel(url, credentials)
+            self.channel = grpc.secure_channel(self.url, credentials)
         elif any(cert_params):
             # some of the cert parameters are set
             raise ValueError('the parameters cert_cert, cert_key and ca_cert '
                              'must all be set to use a secure channel')
         else:
             self.uses_secure_channel = False
-            self.channel = grpc.insecure_channel(url)
+            self.channel = grpc.insecure_channel(self.url)
 
         self.timeout = timeout
         self.kvstub = etcdrpc.KVStub(self.channel)
