@@ -59,10 +59,19 @@ class KVMetadata(object):
         self.lease_id = keyvalue.lease
 
 
+class Status(object):
+    def __init__(self, version, db_size, leader, raft_index, raft_term):
+        self.version = version
+        self.db_size = db_size
+        self.leader = leader
+        self.raft_index = raft_index
+        self.raft_term = raft_term
+
+
 class Etcd3Client(object):
     def __init__(self, host='localhost', port=2379,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None):
-        self.url = '{host}:{port}'.format(host=host, port=port)
+        self._url = '{host}:{port}'.format(host=host, port=port)
 
         cert_params = [c is not None for c in (cert_cert, cert_key, ca_cert)]
         if all(cert_params):
@@ -71,14 +80,14 @@ class Etcd3Client(object):
                                                  cert_key,
                                                  cert_cert)
             self.uses_secure_channel = True
-            self.channel = grpc.secure_channel(self.url, credentials)
+            self.channel = grpc.secure_channel(self._url, credentials)
         elif any(cert_params):
             # some of the cert parameters are set
             raise ValueError('the parameters cert_cert, cert_key and ca_cert '
                              'must all be set to use a secure channel')
         else:
             self.uses_secure_channel = False
-            self.channel = grpc.insecure_channel(self.url)
+            self.channel = grpc.insecure_channel(self._url)
 
         self.timeout = timeout
         self.kvstub = etcdrpc.KVStub(self.channel)
@@ -301,6 +310,18 @@ class Etcd3Client(object):
             range_end=utils.increment_last_byte(utils.to_bytes(prefix))
         )
         return self.kvstub.DeleteRange(delete_request, self.timeout)
+
+    @_handle_errors
+    def status(self):
+        """Defragment a member's backend database to recover storage space."""
+        status_request = etcdrpc.StatusRequest()
+        status_response = self.maintenancestub.Status(status_request)
+
+        return Status(status_response.version,
+                      status_response.dbSize,
+                      status_response.leader,
+                      status_response.raftIndex,
+                      status_response.raftTerm)
 
     @_handle_errors
     def add_watch_callback(self, *args, **kwargs):
