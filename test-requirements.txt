@@ -7,7 +7,7 @@ flake8==3.2.1
 grpcio-tools==1.0.4
 hypothesis==3.6.1
 pip==9.0.1
-pytest==3.0.5
+pytest==3.0.6
 tox==2.5.0
 wheel==0.29.0
 flake8-docstrings==1.0.2
