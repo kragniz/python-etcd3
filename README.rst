@@ -21,10 +21,9 @@ python-etcd3
         :target: https://codecov.io/github/kragniz/python-etcd3?branch=master
 
 
-Python client for the etcd API v3.
+Python client for the etcd API v3, supported under python 2.7, 3.4 and 3.5.
 
-**Warning: this is a work in progress, many basic features do not have a stable
-API.**
+**Warning: the API is mostly stable, but may change in the future**
 
 If you're interested in using this library, please get involved.
 
