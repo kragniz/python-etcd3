@@ -32,13 +32,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/kragniz/etcd3
+    $ git clone git://github.com/kragniz/python-etcd3
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/kragniz/etcd3/tarball/master
+    $ curl  -OL https://github.com/kragniz/python-etcd3/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/kragniz/etcd3
-.. _tarball: https://github.com/kragniz/etcd3/tarball/master
+.. _Github repo: https://github.com/kragniz/python-etcd3
+.. _tarball: https://github.com/kragniz/python-etcd3/tarball/master
