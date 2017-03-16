@@ -1,4 +1,5 @@
 import functools
+import inspect
 import threading
 
 import grpc
@@ -35,7 +36,22 @@ def _handle_errors(f):
                 raise
             raise exception
 
-    return handler
+    @functools.wraps(f)
+    def generator_handler(*args, **kwargs):
+        try:
+            for data in f(*args, **kwargs):
+                yield data
+        except grpc.RpcError as exc:
+            code = exc.code()
+            exception = _EXCEPTIONS_BY_CODE.get(code)
+            if exception is None:
+                raise
+            raise exception
+
+    if inspect.isgeneratorfunction(f):
+        return generator_handler
+    else:
+        return handler
 
 
 class Transactions(object):
