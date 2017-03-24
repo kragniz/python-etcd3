@@ -571,7 +571,7 @@ class Etcd3Client(object):
     def refresh_lease(self, lease_id):
         keep_alive_request = etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
         request_stream = [keep_alive_request]
-        for response in self.leasestub.LeaseKeepAlive(request_stream,
+        for response in self.leasestub.LeaseKeepAlive(iter(request_stream),
                                                       self.timeout):
             yield response
 

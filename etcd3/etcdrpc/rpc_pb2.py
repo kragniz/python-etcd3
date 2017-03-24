@@ -3982,1486 +3982,1611 @@ AuthRoleRevokePermissionResponse = _reflection.GeneratedProtocolMessageType('Aut
 _sym_db.RegisterMessage(AuthRoleRevokePermissionResponse)
 
 
-import grpc
-from grpc.beta import implementations as beta_implementations
-from grpc.beta import interfaces as beta_interfaces
-from grpc.framework.common import cardinality
-from grpc.framework.interfaces.face import utilities as face_utilities
-
-
-class KVStub(object):
-  """for grpc-gateway
-
-  """
-
-  def __init__(self, channel):
-    """Constructor.
-
-    Args:
-      channel: A grpc.Channel.
-    """
-    self.Range = channel.unary_unary(
-        '/etcdserverpb.KV/Range',
-        request_serializer=RangeRequest.SerializeToString,
-        response_deserializer=RangeResponse.FromString,
-        )
-    self.Put = channel.unary_unary(
-        '/etcdserverpb.KV/Put',
-        request_serializer=PutRequest.SerializeToString,
-        response_deserializer=PutResponse.FromString,
-        )
-    self.DeleteRange = channel.unary_unary(
-        '/etcdserverpb.KV/DeleteRange',
-        request_serializer=DeleteRangeRequest.SerializeToString,
-        response_deserializer=DeleteRangeResponse.FromString,
-        )
-    self.Txn = channel.unary_unary(
-        '/etcdserverpb.KV/Txn',
-        request_serializer=TxnRequest.SerializeToString,
-        response_deserializer=TxnResponse.FromString,
-        )
-    self.Compact = channel.unary_unary(
-        '/etcdserverpb.KV/Compact',
-        request_serializer=CompactionRequest.SerializeToString,
-        response_deserializer=CompactionResponse.FromString,
-        )
-
-
-class KVServicer(object):
-  """for grpc-gateway
-
-  """
-
-  def Range(self, request, context):
-    """Range gets the keys in the range from the key-value store.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def Put(self, request, context):
-    """Put puts the given key into the key-value store.
-    A put request increments the revision of the key-value store
-    and generates one event in the event history.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def DeleteRange(self, request, context):
-    """DeleteRange deletes the given range from the key-value store.
-    A delete request increments the revision of the key-value store
-    and generates a delete event in the event history for every deleted key.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def Txn(self, request, context):
-    """Txn processes multiple requests in a single transaction.
-    A txn request increments the revision of the key-value store
-    and generates events with the same revision for every completed request.
-    It is not allowed to modify the same key several times within one txn.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def Compact(self, request, context):
-    """Compact compacts the event history in the etcd key-value store. The key-value
-    store should be periodically compacted or the event history will continue to grow
-    indefinitely.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-
-def add_KVServicer_to_server(servicer, server):
-  rpc_method_handlers = {
-      'Range': grpc.unary_unary_rpc_method_handler(
-          servicer.Range,
-          request_deserializer=RangeRequest.FromString,
-          response_serializer=RangeResponse.SerializeToString,
-      ),
-      'Put': grpc.unary_unary_rpc_method_handler(
-          servicer.Put,
-          request_deserializer=PutRequest.FromString,
-          response_serializer=PutResponse.SerializeToString,
-      ),
-      'DeleteRange': grpc.unary_unary_rpc_method_handler(
-          servicer.DeleteRange,
-          request_deserializer=DeleteRangeRequest.FromString,
-          response_serializer=DeleteRangeResponse.SerializeToString,
-      ),
-      'Txn': grpc.unary_unary_rpc_method_handler(
-          servicer.Txn,
-          request_deserializer=TxnRequest.FromString,
-          response_serializer=TxnResponse.SerializeToString,
-      ),
-      'Compact': grpc.unary_unary_rpc_method_handler(
-          servicer.Compact,
-          request_deserializer=CompactionRequest.FromString,
-          response_serializer=CompactionResponse.SerializeToString,
-      ),
-  }
-  generic_handler = grpc.method_handlers_generic_handler(
-      'etcdserverpb.KV', rpc_method_handlers)
-  server.add_generic_rpc_handlers((generic_handler,))
-
-
-class BetaKVServicer(object):
-  """for grpc-gateway
-
-  """
-  def Range(self, request, context):
-    """Range gets the keys in the range from the key-value store.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def Put(self, request, context):
-    """Put puts the given key into the key-value store.
-    A put request increments the revision of the key-value store
-    and generates one event in the event history.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def DeleteRange(self, request, context):
-    """DeleteRange deletes the given range from the key-value store.
-    A delete request increments the revision of the key-value store
-    and generates a delete event in the event history for every deleted key.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def Txn(self, request, context):
-    """Txn processes multiple requests in a single transaction.
-    A txn request increments the revision of the key-value store
-    and generates events with the same revision for every completed request.
-    It is not allowed to modify the same key several times within one txn.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def Compact(self, request, context):
-    """Compact compacts the event history in the etcd key-value store. The key-value
-    store should be periodically compacted or the event history will continue to grow
-    indefinitely.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-
-
-class BetaKVStub(object):
-  """for grpc-gateway
-
-  """
-  def Range(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """Range gets the keys in the range from the key-value store.
-    """
-    raise NotImplementedError()
-  Range.future = None
-  def Put(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """Put puts the given key into the key-value store.
-    A put request increments the revision of the key-value store
-    and generates one event in the event history.
-    """
-    raise NotImplementedError()
-  Put.future = None
-  def DeleteRange(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """DeleteRange deletes the given range from the key-value store.
-    A delete request increments the revision of the key-value store
-    and generates a delete event in the event history for every deleted key.
-    """
-    raise NotImplementedError()
-  DeleteRange.future = None
-  def Txn(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """Txn processes multiple requests in a single transaction.
-    A txn request increments the revision of the key-value store
-    and generates events with the same revision for every completed request.
-    It is not allowed to modify the same key several times within one txn.
-    """
-    raise NotImplementedError()
-  Txn.future = None
-  def Compact(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """Compact compacts the event history in the etcd key-value store. The key-value
-    store should be periodically compacted or the event history will continue to grow
-    indefinitely.
-    """
-    raise NotImplementedError()
-  Compact.future = None
-
-
-def beta_create_KV_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
-  request_deserializers = {
-    ('etcdserverpb.KV', 'Compact'): CompactionRequest.FromString,
-    ('etcdserverpb.KV', 'DeleteRange'): DeleteRangeRequest.FromString,
-    ('etcdserverpb.KV', 'Put'): PutRequest.FromString,
-    ('etcdserverpb.KV', 'Range'): RangeRequest.FromString,
-    ('etcdserverpb.KV', 'Txn'): TxnRequest.FromString,
-  }
-  response_serializers = {
-    ('etcdserverpb.KV', 'Compact'): CompactionResponse.SerializeToString,
-    ('etcdserverpb.KV', 'DeleteRange'): DeleteRangeResponse.SerializeToString,
-    ('etcdserverpb.KV', 'Put'): PutResponse.SerializeToString,
-    ('etcdserverpb.KV', 'Range'): RangeResponse.SerializeToString,
-    ('etcdserverpb.KV', 'Txn'): TxnResponse.SerializeToString,
-  }
-  method_implementations = {
-    ('etcdserverpb.KV', 'Compact'): face_utilities.unary_unary_inline(servicer.Compact),
-    ('etcdserverpb.KV', 'DeleteRange'): face_utilities.unary_unary_inline(servicer.DeleteRange),
-    ('etcdserverpb.KV', 'Put'): face_utilities.unary_unary_inline(servicer.Put),
-    ('etcdserverpb.KV', 'Range'): face_utilities.unary_unary_inline(servicer.Range),
-    ('etcdserverpb.KV', 'Txn'): face_utilities.unary_unary_inline(servicer.Txn),
-  }
-  server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
-  return beta_implementations.server(method_implementations, options=server_options)
-
-
-def beta_create_KV_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
-  request_serializers = {
-    ('etcdserverpb.KV', 'Compact'): CompactionRequest.SerializeToString,
-    ('etcdserverpb.KV', 'DeleteRange'): DeleteRangeRequest.SerializeToString,
-    ('etcdserverpb.KV', 'Put'): PutRequest.SerializeToString,
-    ('etcdserverpb.KV', 'Range'): RangeRequest.SerializeToString,
-    ('etcdserverpb.KV', 'Txn'): TxnRequest.SerializeToString,
-  }
-  response_deserializers = {
-    ('etcdserverpb.KV', 'Compact'): CompactionResponse.FromString,
-    ('etcdserverpb.KV', 'DeleteRange'): DeleteRangeResponse.FromString,
-    ('etcdserverpb.KV', 'Put'): PutResponse.FromString,
-    ('etcdserverpb.KV', 'Range'): RangeResponse.FromString,
-    ('etcdserverpb.KV', 'Txn'): TxnResponse.FromString,
-  }
-  cardinalities = {
-    'Compact': cardinality.Cardinality.UNARY_UNARY,
-    'DeleteRange': cardinality.Cardinality.UNARY_UNARY,
-    'Put': cardinality.Cardinality.UNARY_UNARY,
-    'Range': cardinality.Cardinality.UNARY_UNARY,
-    'Txn': cardinality.Cardinality.UNARY_UNARY,
-  }
-  stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-  return beta_implementations.dynamic_stub(channel, 'etcdserverpb.KV', cardinalities, options=stub_options)
-
-
-class WatchStub(object):
-
-  def __init__(self, channel):
-    """Constructor.
-
-    Args:
-      channel: A grpc.Channel.
-    """
-    self.Watch = channel.stream_stream(
-        '/etcdserverpb.Watch/Watch',
-        request_serializer=WatchRequest.SerializeToString,
-        response_deserializer=WatchResponse.FromString,
-        )
-
-
-class WatchServicer(object):
-
-  def Watch(self, request_iterator, context):
-    """Watch watches for events happening or that have happened. Both input and output
-    are streams; the input stream is for creating and canceling watchers and the output
-    stream sends events. One watch RPC can watch on multiple key ranges, streaming events
-    for several watches at once. The entire event history can be watched starting from the
-    last compaction revision.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-
-def add_WatchServicer_to_server(servicer, server):
-  rpc_method_handlers = {
-      'Watch': grpc.stream_stream_rpc_method_handler(
-          servicer.Watch,
-          request_deserializer=WatchRequest.FromString,
-          response_serializer=WatchResponse.SerializeToString,
-      ),
-  }
-  generic_handler = grpc.method_handlers_generic_handler(
-      'etcdserverpb.Watch', rpc_method_handlers)
-  server.add_generic_rpc_handlers((generic_handler,))
-
-
-class BetaWatchServicer(object):
-  def Watch(self, request_iterator, context):
-    """Watch watches for events happening or that have happened. Both input and output
-    are streams; the input stream is for creating and canceling watchers and the output
-    stream sends events. One watch RPC can watch on multiple key ranges, streaming events
-    for several watches at once. The entire event history can be watched starting from the
-    last compaction revision.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-
-
-class BetaWatchStub(object):
-  def Watch(self, request_iterator, timeout, metadata=None, with_call=False, protocol_options=None):
-    """Watch watches for events happening or that have happened. Both input and output
-    are streams; the input stream is for creating and canceling watchers and the output
-    stream sends events. One watch RPC can watch on multiple key ranges, streaming events
-    for several watches at once. The entire event history can be watched starting from the
-    last compaction revision.
-    """
-    raise NotImplementedError()
-
-
-def beta_create_Watch_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
-  request_deserializers = {
-    ('etcdserverpb.Watch', 'Watch'): WatchRequest.FromString,
-  }
-  response_serializers = {
-    ('etcdserverpb.Watch', 'Watch'): WatchResponse.SerializeToString,
-  }
-  method_implementations = {
-    ('etcdserverpb.Watch', 'Watch'): face_utilities.stream_stream_inline(servicer.Watch),
-  }
-  server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
-  return beta_implementations.server(method_implementations, options=server_options)
-
-
-def beta_create_Watch_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
-  request_serializers = {
-    ('etcdserverpb.Watch', 'Watch'): WatchRequest.SerializeToString,
-  }
-  response_deserializers = {
-    ('etcdserverpb.Watch', 'Watch'): WatchResponse.FromString,
-  }
-  cardinalities = {
-    'Watch': cardinality.Cardinality.STREAM_STREAM,
-  }
-  stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-  return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Watch', cardinalities, options=stub_options)
-
-
-class LeaseStub(object):
-
-  def __init__(self, channel):
-    """Constructor.
-
-    Args:
-      channel: A grpc.Channel.
-    """
-    self.LeaseGrant = channel.unary_unary(
-        '/etcdserverpb.Lease/LeaseGrant',
-        request_serializer=LeaseGrantRequest.SerializeToString,
-        response_deserializer=LeaseGrantResponse.FromString,
-        )
-    self.LeaseRevoke = channel.unary_unary(
-        '/etcdserverpb.Lease/LeaseRevoke',
-        request_serializer=LeaseRevokeRequest.SerializeToString,
-        response_deserializer=LeaseRevokeResponse.FromString,
-        )
-    self.LeaseKeepAlive = channel.stream_stream(
-        '/etcdserverpb.Lease/LeaseKeepAlive',
-        request_serializer=LeaseKeepAliveRequest.SerializeToString,
-        response_deserializer=LeaseKeepAliveResponse.FromString,
-        )
-    self.LeaseTimeToLive = channel.unary_unary(
-        '/etcdserverpb.Lease/LeaseTimeToLive',
-        request_serializer=LeaseTimeToLiveRequest.SerializeToString,
-        response_deserializer=LeaseTimeToLiveResponse.FromString,
-        )
-
-
-class LeaseServicer(object):
-
-  def LeaseGrant(self, request, context):
-    """LeaseGrant creates a lease which expires if the server does not receive a keepAlive
-    within a given time to live period. All keys attached to the lease will be expired and
-    deleted if the lease expires. Each expired key generates a delete event in the event history.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def LeaseRevoke(self, request, context):
-    """LeaseRevoke revokes a lease. All keys attached to the lease will expire and be deleted.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def LeaseKeepAlive(self, request_iterator, context):
-    """LeaseKeepAlive keeps the lease alive by streaming keep alive requests from the client
-    to the server and streaming keep alive responses from the server to the client.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def LeaseTimeToLive(self, request, context):
-    """LeaseTimeToLive retrieves lease information.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-
-def add_LeaseServicer_to_server(servicer, server):
-  rpc_method_handlers = {
-      'LeaseGrant': grpc.unary_unary_rpc_method_handler(
-          servicer.LeaseGrant,
-          request_deserializer=LeaseGrantRequest.FromString,
-          response_serializer=LeaseGrantResponse.SerializeToString,
-      ),
-      'LeaseRevoke': grpc.unary_unary_rpc_method_handler(
-          servicer.LeaseRevoke,
-          request_deserializer=LeaseRevokeRequest.FromString,
-          response_serializer=LeaseRevokeResponse.SerializeToString,
-      ),
-      'LeaseKeepAlive': grpc.stream_stream_rpc_method_handler(
-          servicer.LeaseKeepAlive,
-          request_deserializer=LeaseKeepAliveRequest.FromString,
-          response_serializer=LeaseKeepAliveResponse.SerializeToString,
-      ),
-      'LeaseTimeToLive': grpc.unary_unary_rpc_method_handler(
-          servicer.LeaseTimeToLive,
-          request_deserializer=LeaseTimeToLiveRequest.FromString,
-          response_serializer=LeaseTimeToLiveResponse.SerializeToString,
-      ),
-  }
-  generic_handler = grpc.method_handlers_generic_handler(
-      'etcdserverpb.Lease', rpc_method_handlers)
-  server.add_generic_rpc_handlers((generic_handler,))
-
-
-class BetaLeaseServicer(object):
-  def LeaseGrant(self, request, context):
-    """LeaseGrant creates a lease which expires if the server does not receive a keepAlive
-    within a given time to live period. All keys attached to the lease will be expired and
-    deleted if the lease expires. Each expired key generates a delete event in the event history.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def LeaseRevoke(self, request, context):
-    """LeaseRevoke revokes a lease. All keys attached to the lease will expire and be deleted.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def LeaseKeepAlive(self, request_iterator, context):
-    """LeaseKeepAlive keeps the lease alive by streaming keep alive requests from the client
-    to the server and streaming keep alive responses from the server to the client.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def LeaseTimeToLive(self, request, context):
-    """LeaseTimeToLive retrieves lease information.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-
-
-class BetaLeaseStub(object):
-  def LeaseGrant(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """LeaseGrant creates a lease which expires if the server does not receive a keepAlive
-    within a given time to live period. All keys attached to the lease will be expired and
-    deleted if the lease expires. Each expired key generates a delete event in the event history.
-    """
-    raise NotImplementedError()
-  LeaseGrant.future = None
-  def LeaseRevoke(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """LeaseRevoke revokes a lease. All keys attached to the lease will expire and be deleted.
-    """
-    raise NotImplementedError()
-  LeaseRevoke.future = None
-  def LeaseKeepAlive(self, request_iterator, timeout, metadata=None, with_call=False, protocol_options=None):
-    """LeaseKeepAlive keeps the lease alive by streaming keep alive requests from the client
-    to the server and streaming keep alive responses from the server to the client.
-    """
-    raise NotImplementedError()
-  def LeaseTimeToLive(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """LeaseTimeToLive retrieves lease information.
-    """
-    raise NotImplementedError()
-  LeaseTimeToLive.future = None
-
-
-def beta_create_Lease_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
-  request_deserializers = {
-    ('etcdserverpb.Lease', 'LeaseGrant'): LeaseGrantRequest.FromString,
-    ('etcdserverpb.Lease', 'LeaseKeepAlive'): LeaseKeepAliveRequest.FromString,
-    ('etcdserverpb.Lease', 'LeaseRevoke'): LeaseRevokeRequest.FromString,
-    ('etcdserverpb.Lease', 'LeaseTimeToLive'): LeaseTimeToLiveRequest.FromString,
-  }
-  response_serializers = {
-    ('etcdserverpb.Lease', 'LeaseGrant'): LeaseGrantResponse.SerializeToString,
-    ('etcdserverpb.Lease', 'LeaseKeepAlive'): LeaseKeepAliveResponse.SerializeToString,
-    ('etcdserverpb.Lease', 'LeaseRevoke'): LeaseRevokeResponse.SerializeToString,
-    ('etcdserverpb.Lease', 'LeaseTimeToLive'): LeaseTimeToLiveResponse.SerializeToString,
-  }
-  method_implementations = {
-    ('etcdserverpb.Lease', 'LeaseGrant'): face_utilities.unary_unary_inline(servicer.LeaseGrant),
-    ('etcdserverpb.Lease', 'LeaseKeepAlive'): face_utilities.stream_stream_inline(servicer.LeaseKeepAlive),
-    ('etcdserverpb.Lease', 'LeaseRevoke'): face_utilities.unary_unary_inline(servicer.LeaseRevoke),
-    ('etcdserverpb.Lease', 'LeaseTimeToLive'): face_utilities.unary_unary_inline(servicer.LeaseTimeToLive),
-  }
-  server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
-  return beta_implementations.server(method_implementations, options=server_options)
-
-
-def beta_create_Lease_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
-  request_serializers = {
-    ('etcdserverpb.Lease', 'LeaseGrant'): LeaseGrantRequest.SerializeToString,
-    ('etcdserverpb.Lease', 'LeaseKeepAlive'): LeaseKeepAliveRequest.SerializeToString,
-    ('etcdserverpb.Lease', 'LeaseRevoke'): LeaseRevokeRequest.SerializeToString,
-    ('etcdserverpb.Lease', 'LeaseTimeToLive'): LeaseTimeToLiveRequest.SerializeToString,
-  }
-  response_deserializers = {
-    ('etcdserverpb.Lease', 'LeaseGrant'): LeaseGrantResponse.FromString,
-    ('etcdserverpb.Lease', 'LeaseKeepAlive'): LeaseKeepAliveResponse.FromString,
-    ('etcdserverpb.Lease', 'LeaseRevoke'): LeaseRevokeResponse.FromString,
-    ('etcdserverpb.Lease', 'LeaseTimeToLive'): LeaseTimeToLiveResponse.FromString,
-  }
-  cardinalities = {
-    'LeaseGrant': cardinality.Cardinality.UNARY_UNARY,
-    'LeaseKeepAlive': cardinality.Cardinality.STREAM_STREAM,
-    'LeaseRevoke': cardinality.Cardinality.UNARY_UNARY,
-    'LeaseTimeToLive': cardinality.Cardinality.UNARY_UNARY,
-  }
-  stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-  return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Lease', cardinalities, options=stub_options)
-
-
-class ClusterStub(object):
-
-  def __init__(self, channel):
-    """Constructor.
-
-    Args:
-      channel: A grpc.Channel.
-    """
-    self.MemberAdd = channel.unary_unary(
-        '/etcdserverpb.Cluster/MemberAdd',
-        request_serializer=MemberAddRequest.SerializeToString,
-        response_deserializer=MemberAddResponse.FromString,
-        )
-    self.MemberRemove = channel.unary_unary(
-        '/etcdserverpb.Cluster/MemberRemove',
-        request_serializer=MemberRemoveRequest.SerializeToString,
-        response_deserializer=MemberRemoveResponse.FromString,
-        )
-    self.MemberUpdate = channel.unary_unary(
-        '/etcdserverpb.Cluster/MemberUpdate',
-        request_serializer=MemberUpdateRequest.SerializeToString,
-        response_deserializer=MemberUpdateResponse.FromString,
-        )
-    self.MemberList = channel.unary_unary(
-        '/etcdserverpb.Cluster/MemberList',
-        request_serializer=MemberListRequest.SerializeToString,
-        response_deserializer=MemberListResponse.FromString,
-        )
-
-
-class ClusterServicer(object):
-
-  def MemberAdd(self, request, context):
-    """MemberAdd adds a member into the cluster.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def MemberRemove(self, request, context):
-    """MemberRemove removes an existing member from the cluster.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def MemberUpdate(self, request, context):
-    """MemberUpdate updates the member configuration.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def MemberList(self, request, context):
-    """MemberList lists all the members in the cluster.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-
-def add_ClusterServicer_to_server(servicer, server):
-  rpc_method_handlers = {
-      'MemberAdd': grpc.unary_unary_rpc_method_handler(
-          servicer.MemberAdd,
-          request_deserializer=MemberAddRequest.FromString,
-          response_serializer=MemberAddResponse.SerializeToString,
-      ),
-      'MemberRemove': grpc.unary_unary_rpc_method_handler(
-          servicer.MemberRemove,
-          request_deserializer=MemberRemoveRequest.FromString,
-          response_serializer=MemberRemoveResponse.SerializeToString,
-      ),
-      'MemberUpdate': grpc.unary_unary_rpc_method_handler(
-          servicer.MemberUpdate,
-          request_deserializer=MemberUpdateRequest.FromString,
-          response_serializer=MemberUpdateResponse.SerializeToString,
-      ),
-      'MemberList': grpc.unary_unary_rpc_method_handler(
-          servicer.MemberList,
-          request_deserializer=MemberListRequest.FromString,
-          response_serializer=MemberListResponse.SerializeToString,
-      ),
-  }
-  generic_handler = grpc.method_handlers_generic_handler(
-      'etcdserverpb.Cluster', rpc_method_handlers)
-  server.add_generic_rpc_handlers((generic_handler,))
-
-
-class BetaClusterServicer(object):
-  def MemberAdd(self, request, context):
-    """MemberAdd adds a member into the cluster.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def MemberRemove(self, request, context):
-    """MemberRemove removes an existing member from the cluster.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def MemberUpdate(self, request, context):
-    """MemberUpdate updates the member configuration.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def MemberList(self, request, context):
-    """MemberList lists all the members in the cluster.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-
-
-class BetaClusterStub(object):
-  def MemberAdd(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """MemberAdd adds a member into the cluster.
-    """
-    raise NotImplementedError()
-  MemberAdd.future = None
-  def MemberRemove(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """MemberRemove removes an existing member from the cluster.
-    """
-    raise NotImplementedError()
-  MemberRemove.future = None
-  def MemberUpdate(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """MemberUpdate updates the member configuration.
-    """
-    raise NotImplementedError()
-  MemberUpdate.future = None
-  def MemberList(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """MemberList lists all the members in the cluster.
-    """
-    raise NotImplementedError()
-  MemberList.future = None
-
-
-def beta_create_Cluster_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
-  request_deserializers = {
-    ('etcdserverpb.Cluster', 'MemberAdd'): MemberAddRequest.FromString,
-    ('etcdserverpb.Cluster', 'MemberList'): MemberListRequest.FromString,
-    ('etcdserverpb.Cluster', 'MemberRemove'): MemberRemoveRequest.FromString,
-    ('etcdserverpb.Cluster', 'MemberUpdate'): MemberUpdateRequest.FromString,
-  }
-  response_serializers = {
-    ('etcdserverpb.Cluster', 'MemberAdd'): MemberAddResponse.SerializeToString,
-    ('etcdserverpb.Cluster', 'MemberList'): MemberListResponse.SerializeToString,
-    ('etcdserverpb.Cluster', 'MemberRemove'): MemberRemoveResponse.SerializeToString,
-    ('etcdserverpb.Cluster', 'MemberUpdate'): MemberUpdateResponse.SerializeToString,
-  }
-  method_implementations = {
-    ('etcdserverpb.Cluster', 'MemberAdd'): face_utilities.unary_unary_inline(servicer.MemberAdd),
-    ('etcdserverpb.Cluster', 'MemberList'): face_utilities.unary_unary_inline(servicer.MemberList),
-    ('etcdserverpb.Cluster', 'MemberRemove'): face_utilities.unary_unary_inline(servicer.MemberRemove),
-    ('etcdserverpb.Cluster', 'MemberUpdate'): face_utilities.unary_unary_inline(servicer.MemberUpdate),
-  }
-  server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
-  return beta_implementations.server(method_implementations, options=server_options)
-
-
-def beta_create_Cluster_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
-  request_serializers = {
-    ('etcdserverpb.Cluster', 'MemberAdd'): MemberAddRequest.SerializeToString,
-    ('etcdserverpb.Cluster', 'MemberList'): MemberListRequest.SerializeToString,
-    ('etcdserverpb.Cluster', 'MemberRemove'): MemberRemoveRequest.SerializeToString,
-    ('etcdserverpb.Cluster', 'MemberUpdate'): MemberUpdateRequest.SerializeToString,
-  }
-  response_deserializers = {
-    ('etcdserverpb.Cluster', 'MemberAdd'): MemberAddResponse.FromString,
-    ('etcdserverpb.Cluster', 'MemberList'): MemberListResponse.FromString,
-    ('etcdserverpb.Cluster', 'MemberRemove'): MemberRemoveResponse.FromString,
-    ('etcdserverpb.Cluster', 'MemberUpdate'): MemberUpdateResponse.FromString,
-  }
-  cardinalities = {
-    'MemberAdd': cardinality.Cardinality.UNARY_UNARY,
-    'MemberList': cardinality.Cardinality.UNARY_UNARY,
-    'MemberRemove': cardinality.Cardinality.UNARY_UNARY,
-    'MemberUpdate': cardinality.Cardinality.UNARY_UNARY,
-  }
-  stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-  return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Cluster', cardinalities, options=stub_options)
-
-
-class MaintenanceStub(object):
-
-  def __init__(self, channel):
-    """Constructor.
-
-    Args:
-      channel: A grpc.Channel.
-    """
-    self.Alarm = channel.unary_unary(
-        '/etcdserverpb.Maintenance/Alarm',
-        request_serializer=AlarmRequest.SerializeToString,
-        response_deserializer=AlarmResponse.FromString,
-        )
-    self.Status = channel.unary_unary(
-        '/etcdserverpb.Maintenance/Status',
-        request_serializer=StatusRequest.SerializeToString,
-        response_deserializer=StatusResponse.FromString,
-        )
-    self.Defragment = channel.unary_unary(
-        '/etcdserverpb.Maintenance/Defragment',
-        request_serializer=DefragmentRequest.SerializeToString,
-        response_deserializer=DefragmentResponse.FromString,
-        )
-    self.Hash = channel.unary_unary(
-        '/etcdserverpb.Maintenance/Hash',
-        request_serializer=HashRequest.SerializeToString,
-        response_deserializer=HashResponse.FromString,
-        )
-    self.Snapshot = channel.unary_stream(
-        '/etcdserverpb.Maintenance/Snapshot',
-        request_serializer=SnapshotRequest.SerializeToString,
-        response_deserializer=SnapshotResponse.FromString,
-        )
-
-
-class MaintenanceServicer(object):
-
-  def Alarm(self, request, context):
-    """Alarm activates, deactivates, and queries alarms regarding cluster health.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def Status(self, request, context):
-    """Status gets the status of the member.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def Defragment(self, request, context):
-    """Defragment defragments a member's backend database to recover storage space.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def Hash(self, request, context):
-    """Hash returns the hash of the local KV state for consistency checking purpose.
-    This is designed for testing; do not use this in production when there
-    are ongoing transactions.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def Snapshot(self, request, context):
-    """Snapshot sends a snapshot of the entire backend from a member over a stream to a client.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-
-def add_MaintenanceServicer_to_server(servicer, server):
-  rpc_method_handlers = {
-      'Alarm': grpc.unary_unary_rpc_method_handler(
-          servicer.Alarm,
-          request_deserializer=AlarmRequest.FromString,
-          response_serializer=AlarmResponse.SerializeToString,
-      ),
-      'Status': grpc.unary_unary_rpc_method_handler(
-          servicer.Status,
-          request_deserializer=StatusRequest.FromString,
-          response_serializer=StatusResponse.SerializeToString,
-      ),
-      'Defragment': grpc.unary_unary_rpc_method_handler(
-          servicer.Defragment,
-          request_deserializer=DefragmentRequest.FromString,
-          response_serializer=DefragmentResponse.SerializeToString,
-      ),
-      'Hash': grpc.unary_unary_rpc_method_handler(
-          servicer.Hash,
-          request_deserializer=HashRequest.FromString,
-          response_serializer=HashResponse.SerializeToString,
-      ),
-      'Snapshot': grpc.unary_stream_rpc_method_handler(
-          servicer.Snapshot,
-          request_deserializer=SnapshotRequest.FromString,
-          response_serializer=SnapshotResponse.SerializeToString,
-      ),
-  }
-  generic_handler = grpc.method_handlers_generic_handler(
-      'etcdserverpb.Maintenance', rpc_method_handlers)
-  server.add_generic_rpc_handlers((generic_handler,))
-
-
-class BetaMaintenanceServicer(object):
-  def Alarm(self, request, context):
-    """Alarm activates, deactivates, and queries alarms regarding cluster health.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def Status(self, request, context):
-    """Status gets the status of the member.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def Defragment(self, request, context):
-    """Defragment defragments a member's backend database to recover storage space.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def Hash(self, request, context):
-    """Hash returns the hash of the local KV state for consistency checking purpose.
-    This is designed for testing; do not use this in production when there
-    are ongoing transactions.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def Snapshot(self, request, context):
-    """Snapshot sends a snapshot of the entire backend from a member over a stream to a client.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-
-
-class BetaMaintenanceStub(object):
-  def Alarm(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """Alarm activates, deactivates, and queries alarms regarding cluster health.
-    """
-    raise NotImplementedError()
-  Alarm.future = None
-  def Status(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """Status gets the status of the member.
-    """
-    raise NotImplementedError()
-  Status.future = None
-  def Defragment(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """Defragment defragments a member's backend database to recover storage space.
-    """
-    raise NotImplementedError()
-  Defragment.future = None
-  def Hash(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """Hash returns the hash of the local KV state for consistency checking purpose.
-    This is designed for testing; do not use this in production when there
-    are ongoing transactions.
-    """
-    raise NotImplementedError()
-  Hash.future = None
-  def Snapshot(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """Snapshot sends a snapshot of the entire backend from a member over a stream to a client.
-    """
-    raise NotImplementedError()
-
-
-def beta_create_Maintenance_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
-  request_deserializers = {
-    ('etcdserverpb.Maintenance', 'Alarm'): AlarmRequest.FromString,
-    ('etcdserverpb.Maintenance', 'Defragment'): DefragmentRequest.FromString,
-    ('etcdserverpb.Maintenance', 'Hash'): HashRequest.FromString,
-    ('etcdserverpb.Maintenance', 'Snapshot'): SnapshotRequest.FromString,
-    ('etcdserverpb.Maintenance', 'Status'): StatusRequest.FromString,
-  }
-  response_serializers = {
-    ('etcdserverpb.Maintenance', 'Alarm'): AlarmResponse.SerializeToString,
-    ('etcdserverpb.Maintenance', 'Defragment'): DefragmentResponse.SerializeToString,
-    ('etcdserverpb.Maintenance', 'Hash'): HashResponse.SerializeToString,
-    ('etcdserverpb.Maintenance', 'Snapshot'): SnapshotResponse.SerializeToString,
-    ('etcdserverpb.Maintenance', 'Status'): StatusResponse.SerializeToString,
-  }
-  method_implementations = {
-    ('etcdserverpb.Maintenance', 'Alarm'): face_utilities.unary_unary_inline(servicer.Alarm),
-    ('etcdserverpb.Maintenance', 'Defragment'): face_utilities.unary_unary_inline(servicer.Defragment),
-    ('etcdserverpb.Maintenance', 'Hash'): face_utilities.unary_unary_inline(servicer.Hash),
-    ('etcdserverpb.Maintenance', 'Snapshot'): face_utilities.unary_stream_inline(servicer.Snapshot),
-    ('etcdserverpb.Maintenance', 'Status'): face_utilities.unary_unary_inline(servicer.Status),
-  }
-  server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
-  return beta_implementations.server(method_implementations, options=server_options)
-
-
-def beta_create_Maintenance_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
-  request_serializers = {
-    ('etcdserverpb.Maintenance', 'Alarm'): AlarmRequest.SerializeToString,
-    ('etcdserverpb.Maintenance', 'Defragment'): DefragmentRequest.SerializeToString,
-    ('etcdserverpb.Maintenance', 'Hash'): HashRequest.SerializeToString,
-    ('etcdserverpb.Maintenance', 'Snapshot'): SnapshotRequest.SerializeToString,
-    ('etcdserverpb.Maintenance', 'Status'): StatusRequest.SerializeToString,
-  }
-  response_deserializers = {
-    ('etcdserverpb.Maintenance', 'Alarm'): AlarmResponse.FromString,
-    ('etcdserverpb.Maintenance', 'Defragment'): DefragmentResponse.FromString,
-    ('etcdserverpb.Maintenance', 'Hash'): HashResponse.FromString,
-    ('etcdserverpb.Maintenance', 'Snapshot'): SnapshotResponse.FromString,
-    ('etcdserverpb.Maintenance', 'Status'): StatusResponse.FromString,
-  }
-  cardinalities = {
-    'Alarm': cardinality.Cardinality.UNARY_UNARY,
-    'Defragment': cardinality.Cardinality.UNARY_UNARY,
-    'Hash': cardinality.Cardinality.UNARY_UNARY,
-    'Snapshot': cardinality.Cardinality.UNARY_STREAM,
-    'Status': cardinality.Cardinality.UNARY_UNARY,
-  }
-  stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-  return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Maintenance', cardinalities, options=stub_options)
-
-
-class AuthStub(object):
-
-  def __init__(self, channel):
-    """Constructor.
-
-    Args:
-      channel: A grpc.Channel.
-    """
-    self.AuthEnable = channel.unary_unary(
-        '/etcdserverpb.Auth/AuthEnable',
-        request_serializer=AuthEnableRequest.SerializeToString,
-        response_deserializer=AuthEnableResponse.FromString,
-        )
-    self.AuthDisable = channel.unary_unary(
-        '/etcdserverpb.Auth/AuthDisable',
-        request_serializer=AuthDisableRequest.SerializeToString,
-        response_deserializer=AuthDisableResponse.FromString,
-        )
-    self.Authenticate = channel.unary_unary(
-        '/etcdserverpb.Auth/Authenticate',
-        request_serializer=AuthenticateRequest.SerializeToString,
-        response_deserializer=AuthenticateResponse.FromString,
-        )
-    self.UserAdd = channel.unary_unary(
-        '/etcdserverpb.Auth/UserAdd',
-        request_serializer=AuthUserAddRequest.SerializeToString,
-        response_deserializer=AuthUserAddResponse.FromString,
-        )
-    self.UserGet = channel.unary_unary(
-        '/etcdserverpb.Auth/UserGet',
-        request_serializer=AuthUserGetRequest.SerializeToString,
-        response_deserializer=AuthUserGetResponse.FromString,
-        )
-    self.UserList = channel.unary_unary(
-        '/etcdserverpb.Auth/UserList',
-        request_serializer=AuthUserListRequest.SerializeToString,
-        response_deserializer=AuthUserListResponse.FromString,
-        )
-    self.UserDelete = channel.unary_unary(
-        '/etcdserverpb.Auth/UserDelete',
-        request_serializer=AuthUserDeleteRequest.SerializeToString,
-        response_deserializer=AuthUserDeleteResponse.FromString,
-        )
-    self.UserChangePassword = channel.unary_unary(
-        '/etcdserverpb.Auth/UserChangePassword',
-        request_serializer=AuthUserChangePasswordRequest.SerializeToString,
-        response_deserializer=AuthUserChangePasswordResponse.FromString,
-        )
-    self.UserGrantRole = channel.unary_unary(
-        '/etcdserverpb.Auth/UserGrantRole',
-        request_serializer=AuthUserGrantRoleRequest.SerializeToString,
-        response_deserializer=AuthUserGrantRoleResponse.FromString,
-        )
-    self.UserRevokeRole = channel.unary_unary(
-        '/etcdserverpb.Auth/UserRevokeRole',
-        request_serializer=AuthUserRevokeRoleRequest.SerializeToString,
-        response_deserializer=AuthUserRevokeRoleResponse.FromString,
-        )
-    self.RoleAdd = channel.unary_unary(
-        '/etcdserverpb.Auth/RoleAdd',
-        request_serializer=AuthRoleAddRequest.SerializeToString,
-        response_deserializer=AuthRoleAddResponse.FromString,
-        )
-    self.RoleGet = channel.unary_unary(
-        '/etcdserverpb.Auth/RoleGet',
-        request_serializer=AuthRoleGetRequest.SerializeToString,
-        response_deserializer=AuthRoleGetResponse.FromString,
-        )
-    self.RoleList = channel.unary_unary(
-        '/etcdserverpb.Auth/RoleList',
-        request_serializer=AuthRoleListRequest.SerializeToString,
-        response_deserializer=AuthRoleListResponse.FromString,
-        )
-    self.RoleDelete = channel.unary_unary(
-        '/etcdserverpb.Auth/RoleDelete',
-        request_serializer=AuthRoleDeleteRequest.SerializeToString,
-        response_deserializer=AuthRoleDeleteResponse.FromString,
-        )
-    self.RoleGrantPermission = channel.unary_unary(
-        '/etcdserverpb.Auth/RoleGrantPermission',
-        request_serializer=AuthRoleGrantPermissionRequest.SerializeToString,
-        response_deserializer=AuthRoleGrantPermissionResponse.FromString,
-        )
-    self.RoleRevokePermission = channel.unary_unary(
-        '/etcdserverpb.Auth/RoleRevokePermission',
-        request_serializer=AuthRoleRevokePermissionRequest.SerializeToString,
-        response_deserializer=AuthRoleRevokePermissionResponse.FromString,
-        )
-
-
-class AuthServicer(object):
-
-  def AuthEnable(self, request, context):
-    """AuthEnable enables authentication.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def AuthDisable(self, request, context):
-    """AuthDisable disables authentication.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def Authenticate(self, request, context):
-    """Authenticate processes an authenticate request.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def UserAdd(self, request, context):
-    """UserAdd adds a new user.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def UserGet(self, request, context):
-    """UserGet gets detailed user information.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def UserList(self, request, context):
-    """UserList gets a list of all users.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def UserDelete(self, request, context):
-    """UserDelete deletes a specified user.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def UserChangePassword(self, request, context):
-    """UserChangePassword changes the password of a specified user.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def UserGrantRole(self, request, context):
-    """UserGrant grants a role to a specified user.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def UserRevokeRole(self, request, context):
-    """UserRevokeRole revokes a role of specified user.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def RoleAdd(self, request, context):
-    """RoleAdd adds a new role.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def RoleGet(self, request, context):
-    """RoleGet gets detailed role information.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def RoleList(self, request, context):
-    """RoleList gets lists of all roles.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def RoleDelete(self, request, context):
-    """RoleDelete deletes a specified role.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def RoleGrantPermission(self, request, context):
-    """RoleGrantPermission grants a permission of a specified key or range to a specified role.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def RoleRevokePermission(self, request, context):
-    """RoleRevokePermission revokes a key or range permission of a specified role.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-
-def add_AuthServicer_to_server(servicer, server):
-  rpc_method_handlers = {
-      'AuthEnable': grpc.unary_unary_rpc_method_handler(
-          servicer.AuthEnable,
-          request_deserializer=AuthEnableRequest.FromString,
-          response_serializer=AuthEnableResponse.SerializeToString,
-      ),
-      'AuthDisable': grpc.unary_unary_rpc_method_handler(
-          servicer.AuthDisable,
-          request_deserializer=AuthDisableRequest.FromString,
-          response_serializer=AuthDisableResponse.SerializeToString,
-      ),
-      'Authenticate': grpc.unary_unary_rpc_method_handler(
-          servicer.Authenticate,
-          request_deserializer=AuthenticateRequest.FromString,
-          response_serializer=AuthenticateResponse.SerializeToString,
-      ),
-      'UserAdd': grpc.unary_unary_rpc_method_handler(
-          servicer.UserAdd,
-          request_deserializer=AuthUserAddRequest.FromString,
-          response_serializer=AuthUserAddResponse.SerializeToString,
-      ),
-      'UserGet': grpc.unary_unary_rpc_method_handler(
-          servicer.UserGet,
-          request_deserializer=AuthUserGetRequest.FromString,
-          response_serializer=AuthUserGetResponse.SerializeToString,
-      ),
-      'UserList': grpc.unary_unary_rpc_method_handler(
-          servicer.UserList,
-          request_deserializer=AuthUserListRequest.FromString,
-          response_serializer=AuthUserListResponse.SerializeToString,
-      ),
-      'UserDelete': grpc.unary_unary_rpc_method_handler(
-          servicer.UserDelete,
-          request_deserializer=AuthUserDeleteRequest.FromString,
-          response_serializer=AuthUserDeleteResponse.SerializeToString,
-      ),
-      'UserChangePassword': grpc.unary_unary_rpc_method_handler(
-          servicer.UserChangePassword,
-          request_deserializer=AuthUserChangePasswordRequest.FromString,
-          response_serializer=AuthUserChangePasswordResponse.SerializeToString,
-      ),
-      'UserGrantRole': grpc.unary_unary_rpc_method_handler(
-          servicer.UserGrantRole,
-          request_deserializer=AuthUserGrantRoleRequest.FromString,
-          response_serializer=AuthUserGrantRoleResponse.SerializeToString,
-      ),
-      'UserRevokeRole': grpc.unary_unary_rpc_method_handler(
-          servicer.UserRevokeRole,
-          request_deserializer=AuthUserRevokeRoleRequest.FromString,
-          response_serializer=AuthUserRevokeRoleResponse.SerializeToString,
-      ),
-      'RoleAdd': grpc.unary_unary_rpc_method_handler(
-          servicer.RoleAdd,
-          request_deserializer=AuthRoleAddRequest.FromString,
-          response_serializer=AuthRoleAddResponse.SerializeToString,
-      ),
-      'RoleGet': grpc.unary_unary_rpc_method_handler(
-          servicer.RoleGet,
-          request_deserializer=AuthRoleGetRequest.FromString,
-          response_serializer=AuthRoleGetResponse.SerializeToString,
-      ),
-      'RoleList': grpc.unary_unary_rpc_method_handler(
-          servicer.RoleList,
-          request_deserializer=AuthRoleListRequest.FromString,
-          response_serializer=AuthRoleListResponse.SerializeToString,
-      ),
-      'RoleDelete': grpc.unary_unary_rpc_method_handler(
-          servicer.RoleDelete,
-          request_deserializer=AuthRoleDeleteRequest.FromString,
-          response_serializer=AuthRoleDeleteResponse.SerializeToString,
-      ),
-      'RoleGrantPermission': grpc.unary_unary_rpc_method_handler(
-          servicer.RoleGrantPermission,
-          request_deserializer=AuthRoleGrantPermissionRequest.FromString,
-          response_serializer=AuthRoleGrantPermissionResponse.SerializeToString,
-      ),
-      'RoleRevokePermission': grpc.unary_unary_rpc_method_handler(
-          servicer.RoleRevokePermission,
-          request_deserializer=AuthRoleRevokePermissionRequest.FromString,
-          response_serializer=AuthRoleRevokePermissionResponse.SerializeToString,
-      ),
-  }
-  generic_handler = grpc.method_handlers_generic_handler(
-      'etcdserverpb.Auth', rpc_method_handlers)
-  server.add_generic_rpc_handlers((generic_handler,))
-
-
-class BetaAuthServicer(object):
-  def AuthEnable(self, request, context):
-    """AuthEnable enables authentication.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def AuthDisable(self, request, context):
-    """AuthDisable disables authentication.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def Authenticate(self, request, context):
-    """Authenticate processes an authenticate request.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def UserAdd(self, request, context):
-    """UserAdd adds a new user.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def UserGet(self, request, context):
-    """UserGet gets detailed user information.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def UserList(self, request, context):
-    """UserList gets a list of all users.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def UserDelete(self, request, context):
-    """UserDelete deletes a specified user.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def UserChangePassword(self, request, context):
-    """UserChangePassword changes the password of a specified user.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def UserGrantRole(self, request, context):
-    """UserGrant grants a role to a specified user.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def UserRevokeRole(self, request, context):
-    """UserRevokeRole revokes a role of specified user.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def RoleAdd(self, request, context):
-    """RoleAdd adds a new role.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def RoleGet(self, request, context):
-    """RoleGet gets detailed role information.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def RoleList(self, request, context):
-    """RoleList gets lists of all roles.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def RoleDelete(self, request, context):
-    """RoleDelete deletes a specified role.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def RoleGrantPermission(self, request, context):
-    """RoleGrantPermission grants a permission of a specified key or range to a specified role.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-  def RoleRevokePermission(self, request, context):
-    """RoleRevokePermission revokes a key or range permission of a specified role.
-    """
-    context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-
-
-class BetaAuthStub(object):
-  def AuthEnable(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """AuthEnable enables authentication.
-    """
-    raise NotImplementedError()
-  AuthEnable.future = None
-  def AuthDisable(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """AuthDisable disables authentication.
-    """
-    raise NotImplementedError()
-  AuthDisable.future = None
-  def Authenticate(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """Authenticate processes an authenticate request.
-    """
-    raise NotImplementedError()
-  Authenticate.future = None
-  def UserAdd(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """UserAdd adds a new user.
-    """
-    raise NotImplementedError()
-  UserAdd.future = None
-  def UserGet(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """UserGet gets detailed user information.
-    """
-    raise NotImplementedError()
-  UserGet.future = None
-  def UserList(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """UserList gets a list of all users.
-    """
-    raise NotImplementedError()
-  UserList.future = None
-  def UserDelete(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """UserDelete deletes a specified user.
-    """
-    raise NotImplementedError()
-  UserDelete.future = None
-  def UserChangePassword(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """UserChangePassword changes the password of a specified user.
-    """
-    raise NotImplementedError()
-  UserChangePassword.future = None
-  def UserGrantRole(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """UserGrant grants a role to a specified user.
-    """
-    raise NotImplementedError()
-  UserGrantRole.future = None
-  def UserRevokeRole(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """UserRevokeRole revokes a role of specified user.
-    """
-    raise NotImplementedError()
-  UserRevokeRole.future = None
-  def RoleAdd(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """RoleAdd adds a new role.
-    """
-    raise NotImplementedError()
-  RoleAdd.future = None
-  def RoleGet(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """RoleGet gets detailed role information.
-    """
-    raise NotImplementedError()
-  RoleGet.future = None
-  def RoleList(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """RoleList gets lists of all roles.
-    """
-    raise NotImplementedError()
-  RoleList.future = None
-  def RoleDelete(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """RoleDelete deletes a specified role.
-    """
-    raise NotImplementedError()
-  RoleDelete.future = None
-  def RoleGrantPermission(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """RoleGrantPermission grants a permission of a specified key or range to a specified role.
-    """
-    raise NotImplementedError()
-  RoleGrantPermission.future = None
-  def RoleRevokePermission(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-    """RoleRevokePermission revokes a key or range permission of a specified role.
-    """
-    raise NotImplementedError()
-  RoleRevokePermission.future = None
-
-
-def beta_create_Auth_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
-  request_deserializers = {
-    ('etcdserverpb.Auth', 'AuthDisable'): AuthDisableRequest.FromString,
-    ('etcdserverpb.Auth', 'AuthEnable'): AuthEnableRequest.FromString,
-    ('etcdserverpb.Auth', 'Authenticate'): AuthenticateRequest.FromString,
-    ('etcdserverpb.Auth', 'RoleAdd'): AuthRoleAddRequest.FromString,
-    ('etcdserverpb.Auth', 'RoleDelete'): AuthRoleDeleteRequest.FromString,
-    ('etcdserverpb.Auth', 'RoleGet'): AuthRoleGetRequest.FromString,
-    ('etcdserverpb.Auth', 'RoleGrantPermission'): AuthRoleGrantPermissionRequest.FromString,
-    ('etcdserverpb.Auth', 'RoleList'): AuthRoleListRequest.FromString,
-    ('etcdserverpb.Auth', 'RoleRevokePermission'): AuthRoleRevokePermissionRequest.FromString,
-    ('etcdserverpb.Auth', 'UserAdd'): AuthUserAddRequest.FromString,
-    ('etcdserverpb.Auth', 'UserChangePassword'): AuthUserChangePasswordRequest.FromString,
-    ('etcdserverpb.Auth', 'UserDelete'): AuthUserDeleteRequest.FromString,
-    ('etcdserverpb.Auth', 'UserGet'): AuthUserGetRequest.FromString,
-    ('etcdserverpb.Auth', 'UserGrantRole'): AuthUserGrantRoleRequest.FromString,
-    ('etcdserverpb.Auth', 'UserList'): AuthUserListRequest.FromString,
-    ('etcdserverpb.Auth', 'UserRevokeRole'): AuthUserRevokeRoleRequest.FromString,
-  }
-  response_serializers = {
-    ('etcdserverpb.Auth', 'AuthDisable'): AuthDisableResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'AuthEnable'): AuthEnableResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'Authenticate'): AuthenticateResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'RoleAdd'): AuthRoleAddResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'RoleDelete'): AuthRoleDeleteResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'RoleGet'): AuthRoleGetResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'RoleGrantPermission'): AuthRoleGrantPermissionResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'RoleList'): AuthRoleListResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'RoleRevokePermission'): AuthRoleRevokePermissionResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'UserAdd'): AuthUserAddResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'UserChangePassword'): AuthUserChangePasswordResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'UserDelete'): AuthUserDeleteResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'UserGet'): AuthUserGetResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'UserGrantRole'): AuthUserGrantRoleResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'UserList'): AuthUserListResponse.SerializeToString,
-    ('etcdserverpb.Auth', 'UserRevokeRole'): AuthUserRevokeRoleResponse.SerializeToString,
-  }
-  method_implementations = {
-    ('etcdserverpb.Auth', 'AuthDisable'): face_utilities.unary_unary_inline(servicer.AuthDisable),
-    ('etcdserverpb.Auth', 'AuthEnable'): face_utilities.unary_unary_inline(servicer.AuthEnable),
-    ('etcdserverpb.Auth', 'Authenticate'): face_utilities.unary_unary_inline(servicer.Authenticate),
-    ('etcdserverpb.Auth', 'RoleAdd'): face_utilities.unary_unary_inline(servicer.RoleAdd),
-    ('etcdserverpb.Auth', 'RoleDelete'): face_utilities.unary_unary_inline(servicer.RoleDelete),
-    ('etcdserverpb.Auth', 'RoleGet'): face_utilities.unary_unary_inline(servicer.RoleGet),
-    ('etcdserverpb.Auth', 'RoleGrantPermission'): face_utilities.unary_unary_inline(servicer.RoleGrantPermission),
-    ('etcdserverpb.Auth', 'RoleList'): face_utilities.unary_unary_inline(servicer.RoleList),
-    ('etcdserverpb.Auth', 'RoleRevokePermission'): face_utilities.unary_unary_inline(servicer.RoleRevokePermission),
-    ('etcdserverpb.Auth', 'UserAdd'): face_utilities.unary_unary_inline(servicer.UserAdd),
-    ('etcdserverpb.Auth', 'UserChangePassword'): face_utilities.unary_unary_inline(servicer.UserChangePassword),
-    ('etcdserverpb.Auth', 'UserDelete'): face_utilities.unary_unary_inline(servicer.UserDelete),
-    ('etcdserverpb.Auth', 'UserGet'): face_utilities.unary_unary_inline(servicer.UserGet),
-    ('etcdserverpb.Auth', 'UserGrantRole'): face_utilities.unary_unary_inline(servicer.UserGrantRole),
-    ('etcdserverpb.Auth', 'UserList'): face_utilities.unary_unary_inline(servicer.UserList),
-    ('etcdserverpb.Auth', 'UserRevokeRole'): face_utilities.unary_unary_inline(servicer.UserRevokeRole),
-  }
-  server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
-  return beta_implementations.server(method_implementations, options=server_options)
-
-
-def beta_create_Auth_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
-  request_serializers = {
-    ('etcdserverpb.Auth', 'AuthDisable'): AuthDisableRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'AuthEnable'): AuthEnableRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'Authenticate'): AuthenticateRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'RoleAdd'): AuthRoleAddRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'RoleDelete'): AuthRoleDeleteRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'RoleGet'): AuthRoleGetRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'RoleGrantPermission'): AuthRoleGrantPermissionRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'RoleList'): AuthRoleListRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'RoleRevokePermission'): AuthRoleRevokePermissionRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'UserAdd'): AuthUserAddRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'UserChangePassword'): AuthUserChangePasswordRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'UserDelete'): AuthUserDeleteRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'UserGet'): AuthUserGetRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'UserGrantRole'): AuthUserGrantRoleRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'UserList'): AuthUserListRequest.SerializeToString,
-    ('etcdserverpb.Auth', 'UserRevokeRole'): AuthUserRevokeRoleRequest.SerializeToString,
-  }
-  response_deserializers = {
-    ('etcdserverpb.Auth', 'AuthDisable'): AuthDisableResponse.FromString,
-    ('etcdserverpb.Auth', 'AuthEnable'): AuthEnableResponse.FromString,
-    ('etcdserverpb.Auth', 'Authenticate'): AuthenticateResponse.FromString,
-    ('etcdserverpb.Auth', 'RoleAdd'): AuthRoleAddResponse.FromString,
-    ('etcdserverpb.Auth', 'RoleDelete'): AuthRoleDeleteResponse.FromString,
-    ('etcdserverpb.Auth', 'RoleGet'): AuthRoleGetResponse.FromString,
-    ('etcdserverpb.Auth', 'RoleGrantPermission'): AuthRoleGrantPermissionResponse.FromString,
-    ('etcdserverpb.Auth', 'RoleList'): AuthRoleListResponse.FromString,
-    ('etcdserverpb.Auth', 'RoleRevokePermission'): AuthRoleRevokePermissionResponse.FromString,
-    ('etcdserverpb.Auth', 'UserAdd'): AuthUserAddResponse.FromString,
-    ('etcdserverpb.Auth', 'UserChangePassword'): AuthUserChangePasswordResponse.FromString,
-    ('etcdserverpb.Auth', 'UserDelete'): AuthUserDeleteResponse.FromString,
-    ('etcdserverpb.Auth', 'UserGet'): AuthUserGetResponse.FromString,
-    ('etcdserverpb.Auth', 'UserGrantRole'): AuthUserGrantRoleResponse.FromString,
-    ('etcdserverpb.Auth', 'UserList'): AuthUserListResponse.FromString,
-    ('etcdserverpb.Auth', 'UserRevokeRole'): AuthUserRevokeRoleResponse.FromString,
-  }
-  cardinalities = {
-    'AuthDisable': cardinality.Cardinality.UNARY_UNARY,
-    'AuthEnable': cardinality.Cardinality.UNARY_UNARY,
-    'Authenticate': cardinality.Cardinality.UNARY_UNARY,
-    'RoleAdd': cardinality.Cardinality.UNARY_UNARY,
-    'RoleDelete': cardinality.Cardinality.UNARY_UNARY,
-    'RoleGet': cardinality.Cardinality.UNARY_UNARY,
-    'RoleGrantPermission': cardinality.Cardinality.UNARY_UNARY,
-    'RoleList': cardinality.Cardinality.UNARY_UNARY,
-    'RoleRevokePermission': cardinality.Cardinality.UNARY_UNARY,
-    'UserAdd': cardinality.Cardinality.UNARY_UNARY,
-    'UserChangePassword': cardinality.Cardinality.UNARY_UNARY,
-    'UserDelete': cardinality.Cardinality.UNARY_UNARY,
-    'UserGet': cardinality.Cardinality.UNARY_UNARY,
-    'UserGrantRole': cardinality.Cardinality.UNARY_UNARY,
-    'UserList': cardinality.Cardinality.UNARY_UNARY,
-    'UserRevokeRole': cardinality.Cardinality.UNARY_UNARY,
-  }
-  stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-  return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Auth', cardinalities, options=stub_options)
+try:
+  # THESE ELEMENTS WILL BE DEPRECATED.
+  # Please use the generated *_pb2_grpc.py files instead.
+  import grpc
+  from grpc.framework.common import cardinality
+  from grpc.framework.interfaces.face import utilities as face_utilities
+  from grpc.beta import implementations as beta_implementations
+  from grpc.beta import interfaces as beta_interfaces
+
+
+  class KVStub(object):
+    """for grpc-gateway
+
+    """
+
+    def __init__(self, channel):
+      """Constructor.
+
+      Args:
+        channel: A grpc.Channel.
+      """
+      self.Range = channel.unary_unary(
+          '/etcdserverpb.KV/Range',
+          request_serializer=RangeRequest.SerializeToString,
+          response_deserializer=RangeResponse.FromString,
+          )
+      self.Put = channel.unary_unary(
+          '/etcdserverpb.KV/Put',
+          request_serializer=PutRequest.SerializeToString,
+          response_deserializer=PutResponse.FromString,
+          )
+      self.DeleteRange = channel.unary_unary(
+          '/etcdserverpb.KV/DeleteRange',
+          request_serializer=DeleteRangeRequest.SerializeToString,
+          response_deserializer=DeleteRangeResponse.FromString,
+          )
+      self.Txn = channel.unary_unary(
+          '/etcdserverpb.KV/Txn',
+          request_serializer=TxnRequest.SerializeToString,
+          response_deserializer=TxnResponse.FromString,
+          )
+      self.Compact = channel.unary_unary(
+          '/etcdserverpb.KV/Compact',
+          request_serializer=CompactionRequest.SerializeToString,
+          response_deserializer=CompactionResponse.FromString,
+          )
+
+
+  class KVServicer(object):
+    """for grpc-gateway
+
+    """
+
+    def Range(self, request, context):
+      """Range gets the keys in the range from the key-value store.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def Put(self, request, context):
+      """Put puts the given key into the key-value store.
+      A put request increments the revision of the key-value store
+      and generates one event in the event history.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def DeleteRange(self, request, context):
+      """DeleteRange deletes the given range from the key-value store.
+      A delete request increments the revision of the key-value store
+      and generates a delete event in the event history for every deleted key.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def Txn(self, request, context):
+      """Txn processes multiple requests in a single transaction.
+      A txn request increments the revision of the key-value store
+      and generates events with the same revision for every completed request.
+      It is not allowed to modify the same key several times within one txn.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def Compact(self, request, context):
+      """Compact compacts the event history in the etcd key-value store. The key-value
+      store should be periodically compacted or the event history will continue to grow
+      indefinitely.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+
+  def add_KVServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+        'Range': grpc.unary_unary_rpc_method_handler(
+            servicer.Range,
+            request_deserializer=RangeRequest.FromString,
+            response_serializer=RangeResponse.SerializeToString,
+        ),
+        'Put': grpc.unary_unary_rpc_method_handler(
+            servicer.Put,
+            request_deserializer=PutRequest.FromString,
+            response_serializer=PutResponse.SerializeToString,
+        ),
+        'DeleteRange': grpc.unary_unary_rpc_method_handler(
+            servicer.DeleteRange,
+            request_deserializer=DeleteRangeRequest.FromString,
+            response_serializer=DeleteRangeResponse.SerializeToString,
+        ),
+        'Txn': grpc.unary_unary_rpc_method_handler(
+            servicer.Txn,
+            request_deserializer=TxnRequest.FromString,
+            response_serializer=TxnResponse.SerializeToString,
+        ),
+        'Compact': grpc.unary_unary_rpc_method_handler(
+            servicer.Compact,
+            request_deserializer=CompactionRequest.FromString,
+            response_serializer=CompactionResponse.SerializeToString,
+        ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+        'etcdserverpb.KV', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+  class WatchStub(object):
+
+    def __init__(self, channel):
+      """Constructor.
+
+      Args:
+        channel: A grpc.Channel.
+      """
+      self.Watch = channel.stream_stream(
+          '/etcdserverpb.Watch/Watch',
+          request_serializer=WatchRequest.SerializeToString,
+          response_deserializer=WatchResponse.FromString,
+          )
+
+
+  class WatchServicer(object):
+
+    def Watch(self, request_iterator, context):
+      """Watch watches for events happening or that have happened. Both input and output
+      are streams; the input stream is for creating and canceling watchers and the output
+      stream sends events. One watch RPC can watch on multiple key ranges, streaming events
+      for several watches at once. The entire event history can be watched starting from the
+      last compaction revision.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+
+  def add_WatchServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+        'Watch': grpc.stream_stream_rpc_method_handler(
+            servicer.Watch,
+            request_deserializer=WatchRequest.FromString,
+            response_serializer=WatchResponse.SerializeToString,
+        ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+        'etcdserverpb.Watch', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+  class LeaseStub(object):
+
+    def __init__(self, channel):
+      """Constructor.
+
+      Args:
+        channel: A grpc.Channel.
+      """
+      self.LeaseGrant = channel.unary_unary(
+          '/etcdserverpb.Lease/LeaseGrant',
+          request_serializer=LeaseGrantRequest.SerializeToString,
+          response_deserializer=LeaseGrantResponse.FromString,
+          )
+      self.LeaseRevoke = channel.unary_unary(
+          '/etcdserverpb.Lease/LeaseRevoke',
+          request_serializer=LeaseRevokeRequest.SerializeToString,
+          response_deserializer=LeaseRevokeResponse.FromString,
+          )
+      self.LeaseKeepAlive = channel.stream_stream(
+          '/etcdserverpb.Lease/LeaseKeepAlive',
+          request_serializer=LeaseKeepAliveRequest.SerializeToString,
+          response_deserializer=LeaseKeepAliveResponse.FromString,
+          )
+      self.LeaseTimeToLive = channel.unary_unary(
+          '/etcdserverpb.Lease/LeaseTimeToLive',
+          request_serializer=LeaseTimeToLiveRequest.SerializeToString,
+          response_deserializer=LeaseTimeToLiveResponse.FromString,
+          )
+
+
+  class LeaseServicer(object):
+
+    def LeaseGrant(self, request, context):
+      """LeaseGrant creates a lease which expires if the server does not receive a keepAlive
+      within a given time to live period. All keys attached to the lease will be expired and
+      deleted if the lease expires. Each expired key generates a delete event in the event history.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def LeaseRevoke(self, request, context):
+      """LeaseRevoke revokes a lease. All keys attached to the lease will expire and be deleted.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def LeaseKeepAlive(self, request_iterator, context):
+      """LeaseKeepAlive keeps the lease alive by streaming keep alive requests from the client
+      to the server and streaming keep alive responses from the server to the client.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def LeaseTimeToLive(self, request, context):
+      """LeaseTimeToLive retrieves lease information.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+
+  def add_LeaseServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+        'LeaseGrant': grpc.unary_unary_rpc_method_handler(
+            servicer.LeaseGrant,
+            request_deserializer=LeaseGrantRequest.FromString,
+            response_serializer=LeaseGrantResponse.SerializeToString,
+        ),
+        'LeaseRevoke': grpc.unary_unary_rpc_method_handler(
+            servicer.LeaseRevoke,
+            request_deserializer=LeaseRevokeRequest.FromString,
+            response_serializer=LeaseRevokeResponse.SerializeToString,
+        ),
+        'LeaseKeepAlive': grpc.stream_stream_rpc_method_handler(
+            servicer.LeaseKeepAlive,
+            request_deserializer=LeaseKeepAliveRequest.FromString,
+            response_serializer=LeaseKeepAliveResponse.SerializeToString,
+        ),
+        'LeaseTimeToLive': grpc.unary_unary_rpc_method_handler(
+            servicer.LeaseTimeToLive,
+            request_deserializer=LeaseTimeToLiveRequest.FromString,
+            response_serializer=LeaseTimeToLiveResponse.SerializeToString,
+        ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+        'etcdserverpb.Lease', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+  class ClusterStub(object):
+
+    def __init__(self, channel):
+      """Constructor.
+
+      Args:
+        channel: A grpc.Channel.
+      """
+      self.MemberAdd = channel.unary_unary(
+          '/etcdserverpb.Cluster/MemberAdd',
+          request_serializer=MemberAddRequest.SerializeToString,
+          response_deserializer=MemberAddResponse.FromString,
+          )
+      self.MemberRemove = channel.unary_unary(
+          '/etcdserverpb.Cluster/MemberRemove',
+          request_serializer=MemberRemoveRequest.SerializeToString,
+          response_deserializer=MemberRemoveResponse.FromString,
+          )
+      self.MemberUpdate = channel.unary_unary(
+          '/etcdserverpb.Cluster/MemberUpdate',
+          request_serializer=MemberUpdateRequest.SerializeToString,
+          response_deserializer=MemberUpdateResponse.FromString,
+          )
+      self.MemberList = channel.unary_unary(
+          '/etcdserverpb.Cluster/MemberList',
+          request_serializer=MemberListRequest.SerializeToString,
+          response_deserializer=MemberListResponse.FromString,
+          )
+
+
+  class ClusterServicer(object):
+
+    def MemberAdd(self, request, context):
+      """MemberAdd adds a member into the cluster.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def MemberRemove(self, request, context):
+      """MemberRemove removes an existing member from the cluster.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def MemberUpdate(self, request, context):
+      """MemberUpdate updates the member configuration.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def MemberList(self, request, context):
+      """MemberList lists all the members in the cluster.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+
+  def add_ClusterServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+        'MemberAdd': grpc.unary_unary_rpc_method_handler(
+            servicer.MemberAdd,
+            request_deserializer=MemberAddRequest.FromString,
+            response_serializer=MemberAddResponse.SerializeToString,
+        ),
+        'MemberRemove': grpc.unary_unary_rpc_method_handler(
+            servicer.MemberRemove,
+            request_deserializer=MemberRemoveRequest.FromString,
+            response_serializer=MemberRemoveResponse.SerializeToString,
+        ),
+        'MemberUpdate': grpc.unary_unary_rpc_method_handler(
+            servicer.MemberUpdate,
+            request_deserializer=MemberUpdateRequest.FromString,
+            response_serializer=MemberUpdateResponse.SerializeToString,
+        ),
+        'MemberList': grpc.unary_unary_rpc_method_handler(
+            servicer.MemberList,
+            request_deserializer=MemberListRequest.FromString,
+            response_serializer=MemberListResponse.SerializeToString,
+        ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+        'etcdserverpb.Cluster', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+  class MaintenanceStub(object):
+
+    def __init__(self, channel):
+      """Constructor.
+
+      Args:
+        channel: A grpc.Channel.
+      """
+      self.Alarm = channel.unary_unary(
+          '/etcdserverpb.Maintenance/Alarm',
+          request_serializer=AlarmRequest.SerializeToString,
+          response_deserializer=AlarmResponse.FromString,
+          )
+      self.Status = channel.unary_unary(
+          '/etcdserverpb.Maintenance/Status',
+          request_serializer=StatusRequest.SerializeToString,
+          response_deserializer=StatusResponse.FromString,
+          )
+      self.Defragment = channel.unary_unary(
+          '/etcdserverpb.Maintenance/Defragment',
+          request_serializer=DefragmentRequest.SerializeToString,
+          response_deserializer=DefragmentResponse.FromString,
+          )
+      self.Hash = channel.unary_unary(
+          '/etcdserverpb.Maintenance/Hash',
+          request_serializer=HashRequest.SerializeToString,
+          response_deserializer=HashResponse.FromString,
+          )
+      self.Snapshot = channel.unary_stream(
+          '/etcdserverpb.Maintenance/Snapshot',
+          request_serializer=SnapshotRequest.SerializeToString,
+          response_deserializer=SnapshotResponse.FromString,
+          )
+
+
+  class MaintenanceServicer(object):
+
+    def Alarm(self, request, context):
+      """Alarm activates, deactivates, and queries alarms regarding cluster health.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def Status(self, request, context):
+      """Status gets the status of the member.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def Defragment(self, request, context):
+      """Defragment defragments a member's backend database to recover storage space.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def Hash(self, request, context):
+      """Hash returns the hash of the local KV state for consistency checking purpose.
+      This is designed for testing; do not use this in production when there
+      are ongoing transactions.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def Snapshot(self, request, context):
+      """Snapshot sends a snapshot of the entire backend from a member over a stream to a client.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+
+  def add_MaintenanceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+        'Alarm': grpc.unary_unary_rpc_method_handler(
+            servicer.Alarm,
+            request_deserializer=AlarmRequest.FromString,
+            response_serializer=AlarmResponse.SerializeToString,
+        ),
+        'Status': grpc.unary_unary_rpc_method_handler(
+            servicer.Status,
+            request_deserializer=StatusRequest.FromString,
+            response_serializer=StatusResponse.SerializeToString,
+        ),
+        'Defragment': grpc.unary_unary_rpc_method_handler(
+            servicer.Defragment,
+            request_deserializer=DefragmentRequest.FromString,
+            response_serializer=DefragmentResponse.SerializeToString,
+        ),
+        'Hash': grpc.unary_unary_rpc_method_handler(
+            servicer.Hash,
+            request_deserializer=HashRequest.FromString,
+            response_serializer=HashResponse.SerializeToString,
+        ),
+        'Snapshot': grpc.unary_stream_rpc_method_handler(
+            servicer.Snapshot,
+            request_deserializer=SnapshotRequest.FromString,
+            response_serializer=SnapshotResponse.SerializeToString,
+        ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+        'etcdserverpb.Maintenance', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+  class AuthStub(object):
+
+    def __init__(self, channel):
+      """Constructor.
+
+      Args:
+        channel: A grpc.Channel.
+      """
+      self.AuthEnable = channel.unary_unary(
+          '/etcdserverpb.Auth/AuthEnable',
+          request_serializer=AuthEnableRequest.SerializeToString,
+          response_deserializer=AuthEnableResponse.FromString,
+          )
+      self.AuthDisable = channel.unary_unary(
+          '/etcdserverpb.Auth/AuthDisable',
+          request_serializer=AuthDisableRequest.SerializeToString,
+          response_deserializer=AuthDisableResponse.FromString,
+          )
+      self.Authenticate = channel.unary_unary(
+          '/etcdserverpb.Auth/Authenticate',
+          request_serializer=AuthenticateRequest.SerializeToString,
+          response_deserializer=AuthenticateResponse.FromString,
+          )
+      self.UserAdd = channel.unary_unary(
+          '/etcdserverpb.Auth/UserAdd',
+          request_serializer=AuthUserAddRequest.SerializeToString,
+          response_deserializer=AuthUserAddResponse.FromString,
+          )
+      self.UserGet = channel.unary_unary(
+          '/etcdserverpb.Auth/UserGet',
+          request_serializer=AuthUserGetRequest.SerializeToString,
+          response_deserializer=AuthUserGetResponse.FromString,
+          )
+      self.UserList = channel.unary_unary(
+          '/etcdserverpb.Auth/UserList',
+          request_serializer=AuthUserListRequest.SerializeToString,
+          response_deserializer=AuthUserListResponse.FromString,
+          )
+      self.UserDelete = channel.unary_unary(
+          '/etcdserverpb.Auth/UserDelete',
+          request_serializer=AuthUserDeleteRequest.SerializeToString,
+          response_deserializer=AuthUserDeleteResponse.FromString,
+          )
+      self.UserChangePassword = channel.unary_unary(
+          '/etcdserverpb.Auth/UserChangePassword',
+          request_serializer=AuthUserChangePasswordRequest.SerializeToString,
+          response_deserializer=AuthUserChangePasswordResponse.FromString,
+          )
+      self.UserGrantRole = channel.unary_unary(
+          '/etcdserverpb.Auth/UserGrantRole',
+          request_serializer=AuthUserGrantRoleRequest.SerializeToString,
+          response_deserializer=AuthUserGrantRoleResponse.FromString,
+          )
+      self.UserRevokeRole = channel.unary_unary(
+          '/etcdserverpb.Auth/UserRevokeRole',
+          request_serializer=AuthUserRevokeRoleRequest.SerializeToString,
+          response_deserializer=AuthUserRevokeRoleResponse.FromString,
+          )
+      self.RoleAdd = channel.unary_unary(
+          '/etcdserverpb.Auth/RoleAdd',
+          request_serializer=AuthRoleAddRequest.SerializeToString,
+          response_deserializer=AuthRoleAddResponse.FromString,
+          )
+      self.RoleGet = channel.unary_unary(
+          '/etcdserverpb.Auth/RoleGet',
+          request_serializer=AuthRoleGetRequest.SerializeToString,
+          response_deserializer=AuthRoleGetResponse.FromString,
+          )
+      self.RoleList = channel.unary_unary(
+          '/etcdserverpb.Auth/RoleList',
+          request_serializer=AuthRoleListRequest.SerializeToString,
+          response_deserializer=AuthRoleListResponse.FromString,
+          )
+      self.RoleDelete = channel.unary_unary(
+          '/etcdserverpb.Auth/RoleDelete',
+          request_serializer=AuthRoleDeleteRequest.SerializeToString,
+          response_deserializer=AuthRoleDeleteResponse.FromString,
+          )
+      self.RoleGrantPermission = channel.unary_unary(
+          '/etcdserverpb.Auth/RoleGrantPermission',
+          request_serializer=AuthRoleGrantPermissionRequest.SerializeToString,
+          response_deserializer=AuthRoleGrantPermissionResponse.FromString,
+          )
+      self.RoleRevokePermission = channel.unary_unary(
+          '/etcdserverpb.Auth/RoleRevokePermission',
+          request_serializer=AuthRoleRevokePermissionRequest.SerializeToString,
+          response_deserializer=AuthRoleRevokePermissionResponse.FromString,
+          )
+
+
+  class AuthServicer(object):
+
+    def AuthEnable(self, request, context):
+      """AuthEnable enables authentication.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def AuthDisable(self, request, context):
+      """AuthDisable disables authentication.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def Authenticate(self, request, context):
+      """Authenticate processes an authenticate request.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def UserAdd(self, request, context):
+      """UserAdd adds a new user.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def UserGet(self, request, context):
+      """UserGet gets detailed user information.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def UserList(self, request, context):
+      """UserList gets a list of all users.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def UserDelete(self, request, context):
+      """UserDelete deletes a specified user.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def UserChangePassword(self, request, context):
+      """UserChangePassword changes the password of a specified user.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def UserGrantRole(self, request, context):
+      """UserGrant grants a role to a specified user.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def UserRevokeRole(self, request, context):
+      """UserRevokeRole revokes a role of specified user.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def RoleAdd(self, request, context):
+      """RoleAdd adds a new role.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def RoleGet(self, request, context):
+      """RoleGet gets detailed role information.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def RoleList(self, request, context):
+      """RoleList gets lists of all roles.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def RoleDelete(self, request, context):
+      """RoleDelete deletes a specified role.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def RoleGrantPermission(self, request, context):
+      """RoleGrantPermission grants a permission of a specified key or range to a specified role.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+    def RoleRevokePermission(self, request, context):
+      """RoleRevokePermission revokes a key or range permission of a specified role.
+      """
+      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+      context.set_details('Method not implemented!')
+      raise NotImplementedError('Method not implemented!')
+
+
+  def add_AuthServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+        'AuthEnable': grpc.unary_unary_rpc_method_handler(
+            servicer.AuthEnable,
+            request_deserializer=AuthEnableRequest.FromString,
+            response_serializer=AuthEnableResponse.SerializeToString,
+        ),
+        'AuthDisable': grpc.unary_unary_rpc_method_handler(
+            servicer.AuthDisable,
+            request_deserializer=AuthDisableRequest.FromString,
+            response_serializer=AuthDisableResponse.SerializeToString,
+        ),
+        'Authenticate': grpc.unary_unary_rpc_method_handler(
+            servicer.Authenticate,
+            request_deserializer=AuthenticateRequest.FromString,
+            response_serializer=AuthenticateResponse.SerializeToString,
+        ),
+        'UserAdd': grpc.unary_unary_rpc_method_handler(
+            servicer.UserAdd,
+            request_deserializer=AuthUserAddRequest.FromString,
+            response_serializer=AuthUserAddResponse.SerializeToString,
+        ),
+        'UserGet': grpc.unary_unary_rpc_method_handler(
+            servicer.UserGet,
+            request_deserializer=AuthUserGetRequest.FromString,
+            response_serializer=AuthUserGetResponse.SerializeToString,
+        ),
+        'UserList': grpc.unary_unary_rpc_method_handler(
+            servicer.UserList,
+            request_deserializer=AuthUserListRequest.FromString,
+            response_serializer=AuthUserListResponse.SerializeToString,
+        ),
+        'UserDelete': grpc.unary_unary_rpc_method_handler(
+            servicer.UserDelete,
+            request_deserializer=AuthUserDeleteRequest.FromString,
+            response_serializer=AuthUserDeleteResponse.SerializeToString,
+        ),
+        'UserChangePassword': grpc.unary_unary_rpc_method_handler(
+            servicer.UserChangePassword,
+            request_deserializer=AuthUserChangePasswordRequest.FromString,
+            response_serializer=AuthUserChangePasswordResponse.SerializeToString,
+        ),
+        'UserGrantRole': grpc.unary_unary_rpc_method_handler(
+            servicer.UserGrantRole,
+            request_deserializer=AuthUserGrantRoleRequest.FromString,
+            response_serializer=AuthUserGrantRoleResponse.SerializeToString,
+        ),
+        'UserRevokeRole': grpc.unary_unary_rpc_method_handler(
+            servicer.UserRevokeRole,
+            request_deserializer=AuthUserRevokeRoleRequest.FromString,
+            response_serializer=AuthUserRevokeRoleResponse.SerializeToString,
+        ),
+        'RoleAdd': grpc.unary_unary_rpc_method_handler(
+            servicer.RoleAdd,
+            request_deserializer=AuthRoleAddRequest.FromString,
+            response_serializer=AuthRoleAddResponse.SerializeToString,
+        ),
+        'RoleGet': grpc.unary_unary_rpc_method_handler(
+            servicer.RoleGet,
+            request_deserializer=AuthRoleGetRequest.FromString,
+            response_serializer=AuthRoleGetResponse.SerializeToString,
+        ),
+        'RoleList': grpc.unary_unary_rpc_method_handler(
+            servicer.RoleList,
+            request_deserializer=AuthRoleListRequest.FromString,
+            response_serializer=AuthRoleListResponse.SerializeToString,
+        ),
+        'RoleDelete': grpc.unary_unary_rpc_method_handler(
+            servicer.RoleDelete,
+            request_deserializer=AuthRoleDeleteRequest.FromString,
+            response_serializer=AuthRoleDeleteResponse.SerializeToString,
+        ),
+        'RoleGrantPermission': grpc.unary_unary_rpc_method_handler(
+            servicer.RoleGrantPermission,
+            request_deserializer=AuthRoleGrantPermissionRequest.FromString,
+            response_serializer=AuthRoleGrantPermissionResponse.SerializeToString,
+        ),
+        'RoleRevokePermission': grpc.unary_unary_rpc_method_handler(
+            servicer.RoleRevokePermission,
+            request_deserializer=AuthRoleRevokePermissionRequest.FromString,
+            response_serializer=AuthRoleRevokePermissionResponse.SerializeToString,
+        ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+        'etcdserverpb.Auth', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+  class BetaKVServicer(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    """for grpc-gateway
+
+    """
+    def Range(self, request, context):
+      """Range gets the keys in the range from the key-value store.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def Put(self, request, context):
+      """Put puts the given key into the key-value store.
+      A put request increments the revision of the key-value store
+      and generates one event in the event history.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def DeleteRange(self, request, context):
+      """DeleteRange deletes the given range from the key-value store.
+      A delete request increments the revision of the key-value store
+      and generates a delete event in the event history for every deleted key.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def Txn(self, request, context):
+      """Txn processes multiple requests in a single transaction.
+      A txn request increments the revision of the key-value store
+      and generates events with the same revision for every completed request.
+      It is not allowed to modify the same key several times within one txn.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def Compact(self, request, context):
+      """Compact compacts the event history in the etcd key-value store. The key-value
+      store should be periodically compacted or the event history will continue to grow
+      indefinitely.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+
+
+  class BetaKVStub(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    """for grpc-gateway
+
+    """
+    def Range(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """Range gets the keys in the range from the key-value store.
+      """
+      raise NotImplementedError()
+    Range.future = None
+    def Put(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """Put puts the given key into the key-value store.
+      A put request increments the revision of the key-value store
+      and generates one event in the event history.
+      """
+      raise NotImplementedError()
+    Put.future = None
+    def DeleteRange(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """DeleteRange deletes the given range from the key-value store.
+      A delete request increments the revision of the key-value store
+      and generates a delete event in the event history for every deleted key.
+      """
+      raise NotImplementedError()
+    DeleteRange.future = None
+    def Txn(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """Txn processes multiple requests in a single transaction.
+      A txn request increments the revision of the key-value store
+      and generates events with the same revision for every completed request.
+      It is not allowed to modify the same key several times within one txn.
+      """
+      raise NotImplementedError()
+    Txn.future = None
+    def Compact(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """Compact compacts the event history in the etcd key-value store. The key-value
+      store should be periodically compacted or the event history will continue to grow
+      indefinitely.
+      """
+      raise NotImplementedError()
+    Compact.future = None
+
+
+  def beta_create_KV_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_deserializers = {
+      ('etcdserverpb.KV', 'Compact'): CompactionRequest.FromString,
+      ('etcdserverpb.KV', 'DeleteRange'): DeleteRangeRequest.FromString,
+      ('etcdserverpb.KV', 'Put'): PutRequest.FromString,
+      ('etcdserverpb.KV', 'Range'): RangeRequest.FromString,
+      ('etcdserverpb.KV', 'Txn'): TxnRequest.FromString,
+    }
+    response_serializers = {
+      ('etcdserverpb.KV', 'Compact'): CompactionResponse.SerializeToString,
+      ('etcdserverpb.KV', 'DeleteRange'): DeleteRangeResponse.SerializeToString,
+      ('etcdserverpb.KV', 'Put'): PutResponse.SerializeToString,
+      ('etcdserverpb.KV', 'Range'): RangeResponse.SerializeToString,
+      ('etcdserverpb.KV', 'Txn'): TxnResponse.SerializeToString,
+    }
+    method_implementations = {
+      ('etcdserverpb.KV', 'Compact'): face_utilities.unary_unary_inline(servicer.Compact),
+      ('etcdserverpb.KV', 'DeleteRange'): face_utilities.unary_unary_inline(servicer.DeleteRange),
+      ('etcdserverpb.KV', 'Put'): face_utilities.unary_unary_inline(servicer.Put),
+      ('etcdserverpb.KV', 'Range'): face_utilities.unary_unary_inline(servicer.Range),
+      ('etcdserverpb.KV', 'Txn'): face_utilities.unary_unary_inline(servicer.Txn),
+    }
+    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
+    return beta_implementations.server(method_implementations, options=server_options)
+
+
+  def beta_create_KV_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_serializers = {
+      ('etcdserverpb.KV', 'Compact'): CompactionRequest.SerializeToString,
+      ('etcdserverpb.KV', 'DeleteRange'): DeleteRangeRequest.SerializeToString,
+      ('etcdserverpb.KV', 'Put'): PutRequest.SerializeToString,
+      ('etcdserverpb.KV', 'Range'): RangeRequest.SerializeToString,
+      ('etcdserverpb.KV', 'Txn'): TxnRequest.SerializeToString,
+    }
+    response_deserializers = {
+      ('etcdserverpb.KV', 'Compact'): CompactionResponse.FromString,
+      ('etcdserverpb.KV', 'DeleteRange'): DeleteRangeResponse.FromString,
+      ('etcdserverpb.KV', 'Put'): PutResponse.FromString,
+      ('etcdserverpb.KV', 'Range'): RangeResponse.FromString,
+      ('etcdserverpb.KV', 'Txn'): TxnResponse.FromString,
+    }
+    cardinalities = {
+      'Compact': cardinality.Cardinality.UNARY_UNARY,
+      'DeleteRange': cardinality.Cardinality.UNARY_UNARY,
+      'Put': cardinality.Cardinality.UNARY_UNARY,
+      'Range': cardinality.Cardinality.UNARY_UNARY,
+      'Txn': cardinality.Cardinality.UNARY_UNARY,
+    }
+    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
+    return beta_implementations.dynamic_stub(channel, 'etcdserverpb.KV', cardinalities, options=stub_options)
+
+
+  class BetaWatchServicer(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    def Watch(self, request_iterator, context):
+      """Watch watches for events happening or that have happened. Both input and output
+      are streams; the input stream is for creating and canceling watchers and the output
+      stream sends events. One watch RPC can watch on multiple key ranges, streaming events
+      for several watches at once. The entire event history can be watched starting from the
+      last compaction revision.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+
+
+  class BetaWatchStub(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    def Watch(self, request_iterator, timeout, metadata=None, with_call=False, protocol_options=None):
+      """Watch watches for events happening or that have happened. Both input and output
+      are streams; the input stream is for creating and canceling watchers and the output
+      stream sends events. One watch RPC can watch on multiple key ranges, streaming events
+      for several watches at once. The entire event history can be watched starting from the
+      last compaction revision.
+      """
+      raise NotImplementedError()
+
+
+  def beta_create_Watch_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_deserializers = {
+      ('etcdserverpb.Watch', 'Watch'): WatchRequest.FromString,
+    }
+    response_serializers = {
+      ('etcdserverpb.Watch', 'Watch'): WatchResponse.SerializeToString,
+    }
+    method_implementations = {
+      ('etcdserverpb.Watch', 'Watch'): face_utilities.stream_stream_inline(servicer.Watch),
+    }
+    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
+    return beta_implementations.server(method_implementations, options=server_options)
+
+
+  def beta_create_Watch_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_serializers = {
+      ('etcdserverpb.Watch', 'Watch'): WatchRequest.SerializeToString,
+    }
+    response_deserializers = {
+      ('etcdserverpb.Watch', 'Watch'): WatchResponse.FromString,
+    }
+    cardinalities = {
+      'Watch': cardinality.Cardinality.STREAM_STREAM,
+    }
+    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
+    return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Watch', cardinalities, options=stub_options)
+
+
+  class BetaLeaseServicer(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    def LeaseGrant(self, request, context):
+      """LeaseGrant creates a lease which expires if the server does not receive a keepAlive
+      within a given time to live period. All keys attached to the lease will be expired and
+      deleted if the lease expires. Each expired key generates a delete event in the event history.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def LeaseRevoke(self, request, context):
+      """LeaseRevoke revokes a lease. All keys attached to the lease will expire and be deleted.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def LeaseKeepAlive(self, request_iterator, context):
+      """LeaseKeepAlive keeps the lease alive by streaming keep alive requests from the client
+      to the server and streaming keep alive responses from the server to the client.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def LeaseTimeToLive(self, request, context):
+      """LeaseTimeToLive retrieves lease information.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+
+
+  class BetaLeaseStub(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    def LeaseGrant(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """LeaseGrant creates a lease which expires if the server does not receive a keepAlive
+      within a given time to live period. All keys attached to the lease will be expired and
+      deleted if the lease expires. Each expired key generates a delete event in the event history.
+      """
+      raise NotImplementedError()
+    LeaseGrant.future = None
+    def LeaseRevoke(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """LeaseRevoke revokes a lease. All keys attached to the lease will expire and be deleted.
+      """
+      raise NotImplementedError()
+    LeaseRevoke.future = None
+    def LeaseKeepAlive(self, request_iterator, timeout, metadata=None, with_call=False, protocol_options=None):
+      """LeaseKeepAlive keeps the lease alive by streaming keep alive requests from the client
+      to the server and streaming keep alive responses from the server to the client.
+      """
+      raise NotImplementedError()
+    def LeaseTimeToLive(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """LeaseTimeToLive retrieves lease information.
+      """
+      raise NotImplementedError()
+    LeaseTimeToLive.future = None
+
+
+  def beta_create_Lease_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_deserializers = {
+      ('etcdserverpb.Lease', 'LeaseGrant'): LeaseGrantRequest.FromString,
+      ('etcdserverpb.Lease', 'LeaseKeepAlive'): LeaseKeepAliveRequest.FromString,
+      ('etcdserverpb.Lease', 'LeaseRevoke'): LeaseRevokeRequest.FromString,
+      ('etcdserverpb.Lease', 'LeaseTimeToLive'): LeaseTimeToLiveRequest.FromString,
+    }
+    response_serializers = {
+      ('etcdserverpb.Lease', 'LeaseGrant'): LeaseGrantResponse.SerializeToString,
+      ('etcdserverpb.Lease', 'LeaseKeepAlive'): LeaseKeepAliveResponse.SerializeToString,
+      ('etcdserverpb.Lease', 'LeaseRevoke'): LeaseRevokeResponse.SerializeToString,
+      ('etcdserverpb.Lease', 'LeaseTimeToLive'): LeaseTimeToLiveResponse.SerializeToString,
+    }
+    method_implementations = {
+      ('etcdserverpb.Lease', 'LeaseGrant'): face_utilities.unary_unary_inline(servicer.LeaseGrant),
+      ('etcdserverpb.Lease', 'LeaseKeepAlive'): face_utilities.stream_stream_inline(servicer.LeaseKeepAlive),
+      ('etcdserverpb.Lease', 'LeaseRevoke'): face_utilities.unary_unary_inline(servicer.LeaseRevoke),
+      ('etcdserverpb.Lease', 'LeaseTimeToLive'): face_utilities.unary_unary_inline(servicer.LeaseTimeToLive),
+    }
+    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
+    return beta_implementations.server(method_implementations, options=server_options)
+
+
+  def beta_create_Lease_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_serializers = {
+      ('etcdserverpb.Lease', 'LeaseGrant'): LeaseGrantRequest.SerializeToString,
+      ('etcdserverpb.Lease', 'LeaseKeepAlive'): LeaseKeepAliveRequest.SerializeToString,
+      ('etcdserverpb.Lease', 'LeaseRevoke'): LeaseRevokeRequest.SerializeToString,
+      ('etcdserverpb.Lease', 'LeaseTimeToLive'): LeaseTimeToLiveRequest.SerializeToString,
+    }
+    response_deserializers = {
+      ('etcdserverpb.Lease', 'LeaseGrant'): LeaseGrantResponse.FromString,
+      ('etcdserverpb.Lease', 'LeaseKeepAlive'): LeaseKeepAliveResponse.FromString,
+      ('etcdserverpb.Lease', 'LeaseRevoke'): LeaseRevokeResponse.FromString,
+      ('etcdserverpb.Lease', 'LeaseTimeToLive'): LeaseTimeToLiveResponse.FromString,
+    }
+    cardinalities = {
+      'LeaseGrant': cardinality.Cardinality.UNARY_UNARY,
+      'LeaseKeepAlive': cardinality.Cardinality.STREAM_STREAM,
+      'LeaseRevoke': cardinality.Cardinality.UNARY_UNARY,
+      'LeaseTimeToLive': cardinality.Cardinality.UNARY_UNARY,
+    }
+    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
+    return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Lease', cardinalities, options=stub_options)
+
+
+  class BetaClusterServicer(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    def MemberAdd(self, request, context):
+      """MemberAdd adds a member into the cluster.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def MemberRemove(self, request, context):
+      """MemberRemove removes an existing member from the cluster.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def MemberUpdate(self, request, context):
+      """MemberUpdate updates the member configuration.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def MemberList(self, request, context):
+      """MemberList lists all the members in the cluster.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+
+
+  class BetaClusterStub(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    def MemberAdd(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """MemberAdd adds a member into the cluster.
+      """
+      raise NotImplementedError()
+    MemberAdd.future = None
+    def MemberRemove(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """MemberRemove removes an existing member from the cluster.
+      """
+      raise NotImplementedError()
+    MemberRemove.future = None
+    def MemberUpdate(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """MemberUpdate updates the member configuration.
+      """
+      raise NotImplementedError()
+    MemberUpdate.future = None
+    def MemberList(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """MemberList lists all the members in the cluster.
+      """
+      raise NotImplementedError()
+    MemberList.future = None
+
+
+  def beta_create_Cluster_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_deserializers = {
+      ('etcdserverpb.Cluster', 'MemberAdd'): MemberAddRequest.FromString,
+      ('etcdserverpb.Cluster', 'MemberList'): MemberListRequest.FromString,
+      ('etcdserverpb.Cluster', 'MemberRemove'): MemberRemoveRequest.FromString,
+      ('etcdserverpb.Cluster', 'MemberUpdate'): MemberUpdateRequest.FromString,
+    }
+    response_serializers = {
+      ('etcdserverpb.Cluster', 'MemberAdd'): MemberAddResponse.SerializeToString,
+      ('etcdserverpb.Cluster', 'MemberList'): MemberListResponse.SerializeToString,
+      ('etcdserverpb.Cluster', 'MemberRemove'): MemberRemoveResponse.SerializeToString,
+      ('etcdserverpb.Cluster', 'MemberUpdate'): MemberUpdateResponse.SerializeToString,
+    }
+    method_implementations = {
+      ('etcdserverpb.Cluster', 'MemberAdd'): face_utilities.unary_unary_inline(servicer.MemberAdd),
+      ('etcdserverpb.Cluster', 'MemberList'): face_utilities.unary_unary_inline(servicer.MemberList),
+      ('etcdserverpb.Cluster', 'MemberRemove'): face_utilities.unary_unary_inline(servicer.MemberRemove),
+      ('etcdserverpb.Cluster', 'MemberUpdate'): face_utilities.unary_unary_inline(servicer.MemberUpdate),
+    }
+    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
+    return beta_implementations.server(method_implementations, options=server_options)
+
+
+  def beta_create_Cluster_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_serializers = {
+      ('etcdserverpb.Cluster', 'MemberAdd'): MemberAddRequest.SerializeToString,
+      ('etcdserverpb.Cluster', 'MemberList'): MemberListRequest.SerializeToString,
+      ('etcdserverpb.Cluster', 'MemberRemove'): MemberRemoveRequest.SerializeToString,
+      ('etcdserverpb.Cluster', 'MemberUpdate'): MemberUpdateRequest.SerializeToString,
+    }
+    response_deserializers = {
+      ('etcdserverpb.Cluster', 'MemberAdd'): MemberAddResponse.FromString,
+      ('etcdserverpb.Cluster', 'MemberList'): MemberListResponse.FromString,
+      ('etcdserverpb.Cluster', 'MemberRemove'): MemberRemoveResponse.FromString,
+      ('etcdserverpb.Cluster', 'MemberUpdate'): MemberUpdateResponse.FromString,
+    }
+    cardinalities = {
+      'MemberAdd': cardinality.Cardinality.UNARY_UNARY,
+      'MemberList': cardinality.Cardinality.UNARY_UNARY,
+      'MemberRemove': cardinality.Cardinality.UNARY_UNARY,
+      'MemberUpdate': cardinality.Cardinality.UNARY_UNARY,
+    }
+    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
+    return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Cluster', cardinalities, options=stub_options)
+
+
+  class BetaMaintenanceServicer(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    def Alarm(self, request, context):
+      """Alarm activates, deactivates, and queries alarms regarding cluster health.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def Status(self, request, context):
+      """Status gets the status of the member.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def Defragment(self, request, context):
+      """Defragment defragments a member's backend database to recover storage space.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def Hash(self, request, context):
+      """Hash returns the hash of the local KV state for consistency checking purpose.
+      This is designed for testing; do not use this in production when there
+      are ongoing transactions.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def Snapshot(self, request, context):
+      """Snapshot sends a snapshot of the entire backend from a member over a stream to a client.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+
+
+  class BetaMaintenanceStub(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    def Alarm(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """Alarm activates, deactivates, and queries alarms regarding cluster health.
+      """
+      raise NotImplementedError()
+    Alarm.future = None
+    def Status(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """Status gets the status of the member.
+      """
+      raise NotImplementedError()
+    Status.future = None
+    def Defragment(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """Defragment defragments a member's backend database to recover storage space.
+      """
+      raise NotImplementedError()
+    Defragment.future = None
+    def Hash(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """Hash returns the hash of the local KV state for consistency checking purpose.
+      This is designed for testing; do not use this in production when there
+      are ongoing transactions.
+      """
+      raise NotImplementedError()
+    Hash.future = None
+    def Snapshot(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """Snapshot sends a snapshot of the entire backend from a member over a stream to a client.
+      """
+      raise NotImplementedError()
+
+
+  def beta_create_Maintenance_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_deserializers = {
+      ('etcdserverpb.Maintenance', 'Alarm'): AlarmRequest.FromString,
+      ('etcdserverpb.Maintenance', 'Defragment'): DefragmentRequest.FromString,
+      ('etcdserverpb.Maintenance', 'Hash'): HashRequest.FromString,
+      ('etcdserverpb.Maintenance', 'Snapshot'): SnapshotRequest.FromString,
+      ('etcdserverpb.Maintenance', 'Status'): StatusRequest.FromString,
+    }
+    response_serializers = {
+      ('etcdserverpb.Maintenance', 'Alarm'): AlarmResponse.SerializeToString,
+      ('etcdserverpb.Maintenance', 'Defragment'): DefragmentResponse.SerializeToString,
+      ('etcdserverpb.Maintenance', 'Hash'): HashResponse.SerializeToString,
+      ('etcdserverpb.Maintenance', 'Snapshot'): SnapshotResponse.SerializeToString,
+      ('etcdserverpb.Maintenance', 'Status'): StatusResponse.SerializeToString,
+    }
+    method_implementations = {
+      ('etcdserverpb.Maintenance', 'Alarm'): face_utilities.unary_unary_inline(servicer.Alarm),
+      ('etcdserverpb.Maintenance', 'Defragment'): face_utilities.unary_unary_inline(servicer.Defragment),
+      ('etcdserverpb.Maintenance', 'Hash'): face_utilities.unary_unary_inline(servicer.Hash),
+      ('etcdserverpb.Maintenance', 'Snapshot'): face_utilities.unary_stream_inline(servicer.Snapshot),
+      ('etcdserverpb.Maintenance', 'Status'): face_utilities.unary_unary_inline(servicer.Status),
+    }
+    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
+    return beta_implementations.server(method_implementations, options=server_options)
+
+
+  def beta_create_Maintenance_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_serializers = {
+      ('etcdserverpb.Maintenance', 'Alarm'): AlarmRequest.SerializeToString,
+      ('etcdserverpb.Maintenance', 'Defragment'): DefragmentRequest.SerializeToString,
+      ('etcdserverpb.Maintenance', 'Hash'): HashRequest.SerializeToString,
+      ('etcdserverpb.Maintenance', 'Snapshot'): SnapshotRequest.SerializeToString,
+      ('etcdserverpb.Maintenance', 'Status'): StatusRequest.SerializeToString,
+    }
+    response_deserializers = {
+      ('etcdserverpb.Maintenance', 'Alarm'): AlarmResponse.FromString,
+      ('etcdserverpb.Maintenance', 'Defragment'): DefragmentResponse.FromString,
+      ('etcdserverpb.Maintenance', 'Hash'): HashResponse.FromString,
+      ('etcdserverpb.Maintenance', 'Snapshot'): SnapshotResponse.FromString,
+      ('etcdserverpb.Maintenance', 'Status'): StatusResponse.FromString,
+    }
+    cardinalities = {
+      'Alarm': cardinality.Cardinality.UNARY_UNARY,
+      'Defragment': cardinality.Cardinality.UNARY_UNARY,
+      'Hash': cardinality.Cardinality.UNARY_UNARY,
+      'Snapshot': cardinality.Cardinality.UNARY_STREAM,
+      'Status': cardinality.Cardinality.UNARY_UNARY,
+    }
+    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
+    return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Maintenance', cardinalities, options=stub_options)
+
+
+  class BetaAuthServicer(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    def AuthEnable(self, request, context):
+      """AuthEnable enables authentication.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def AuthDisable(self, request, context):
+      """AuthDisable disables authentication.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def Authenticate(self, request, context):
+      """Authenticate processes an authenticate request.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def UserAdd(self, request, context):
+      """UserAdd adds a new user.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def UserGet(self, request, context):
+      """UserGet gets detailed user information.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def UserList(self, request, context):
+      """UserList gets a list of all users.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def UserDelete(self, request, context):
+      """UserDelete deletes a specified user.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def UserChangePassword(self, request, context):
+      """UserChangePassword changes the password of a specified user.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def UserGrantRole(self, request, context):
+      """UserGrant grants a role to a specified user.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def UserRevokeRole(self, request, context):
+      """UserRevokeRole revokes a role of specified user.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def RoleAdd(self, request, context):
+      """RoleAdd adds a new role.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def RoleGet(self, request, context):
+      """RoleGet gets detailed role information.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def RoleList(self, request, context):
+      """RoleList gets lists of all roles.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def RoleDelete(self, request, context):
+      """RoleDelete deletes a specified role.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def RoleGrantPermission(self, request, context):
+      """RoleGrantPermission grants a permission of a specified key or range to a specified role.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+    def RoleRevokePermission(self, request, context):
+      """RoleRevokePermission revokes a key or range permission of a specified role.
+      """
+      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
+
+
+  class BetaAuthStub(object):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This class was generated
+    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
+    def AuthEnable(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """AuthEnable enables authentication.
+      """
+      raise NotImplementedError()
+    AuthEnable.future = None
+    def AuthDisable(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """AuthDisable disables authentication.
+      """
+      raise NotImplementedError()
+    AuthDisable.future = None
+    def Authenticate(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """Authenticate processes an authenticate request.
+      """
+      raise NotImplementedError()
+    Authenticate.future = None
+    def UserAdd(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """UserAdd adds a new user.
+      """
+      raise NotImplementedError()
+    UserAdd.future = None
+    def UserGet(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """UserGet gets detailed user information.
+      """
+      raise NotImplementedError()
+    UserGet.future = None
+    def UserList(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """UserList gets a list of all users.
+      """
+      raise NotImplementedError()
+    UserList.future = None
+    def UserDelete(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """UserDelete deletes a specified user.
+      """
+      raise NotImplementedError()
+    UserDelete.future = None
+    def UserChangePassword(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """UserChangePassword changes the password of a specified user.
+      """
+      raise NotImplementedError()
+    UserChangePassword.future = None
+    def UserGrantRole(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """UserGrant grants a role to a specified user.
+      """
+      raise NotImplementedError()
+    UserGrantRole.future = None
+    def UserRevokeRole(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """UserRevokeRole revokes a role of specified user.
+      """
+      raise NotImplementedError()
+    UserRevokeRole.future = None
+    def RoleAdd(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """RoleAdd adds a new role.
+      """
+      raise NotImplementedError()
+    RoleAdd.future = None
+    def RoleGet(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """RoleGet gets detailed role information.
+      """
+      raise NotImplementedError()
+    RoleGet.future = None
+    def RoleList(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """RoleList gets lists of all roles.
+      """
+      raise NotImplementedError()
+    RoleList.future = None
+    def RoleDelete(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """RoleDelete deletes a specified role.
+      """
+      raise NotImplementedError()
+    RoleDelete.future = None
+    def RoleGrantPermission(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """RoleGrantPermission grants a permission of a specified key or range to a specified role.
+      """
+      raise NotImplementedError()
+    RoleGrantPermission.future = None
+    def RoleRevokePermission(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
+      """RoleRevokePermission revokes a key or range permission of a specified role.
+      """
+      raise NotImplementedError()
+    RoleRevokePermission.future = None
+
+
+  def beta_create_Auth_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_deserializers = {
+      ('etcdserverpb.Auth', 'AuthDisable'): AuthDisableRequest.FromString,
+      ('etcdserverpb.Auth', 'AuthEnable'): AuthEnableRequest.FromString,
+      ('etcdserverpb.Auth', 'Authenticate'): AuthenticateRequest.FromString,
+      ('etcdserverpb.Auth', 'RoleAdd'): AuthRoleAddRequest.FromString,
+      ('etcdserverpb.Auth', 'RoleDelete'): AuthRoleDeleteRequest.FromString,
+      ('etcdserverpb.Auth', 'RoleGet'): AuthRoleGetRequest.FromString,
+      ('etcdserverpb.Auth', 'RoleGrantPermission'): AuthRoleGrantPermissionRequest.FromString,
+      ('etcdserverpb.Auth', 'RoleList'): AuthRoleListRequest.FromString,
+      ('etcdserverpb.Auth', 'RoleRevokePermission'): AuthRoleRevokePermissionRequest.FromString,
+      ('etcdserverpb.Auth', 'UserAdd'): AuthUserAddRequest.FromString,
+      ('etcdserverpb.Auth', 'UserChangePassword'): AuthUserChangePasswordRequest.FromString,
+      ('etcdserverpb.Auth', 'UserDelete'): AuthUserDeleteRequest.FromString,
+      ('etcdserverpb.Auth', 'UserGet'): AuthUserGetRequest.FromString,
+      ('etcdserverpb.Auth', 'UserGrantRole'): AuthUserGrantRoleRequest.FromString,
+      ('etcdserverpb.Auth', 'UserList'): AuthUserListRequest.FromString,
+      ('etcdserverpb.Auth', 'UserRevokeRole'): AuthUserRevokeRoleRequest.FromString,
+    }
+    response_serializers = {
+      ('etcdserverpb.Auth', 'AuthDisable'): AuthDisableResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'AuthEnable'): AuthEnableResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'Authenticate'): AuthenticateResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'RoleAdd'): AuthRoleAddResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'RoleDelete'): AuthRoleDeleteResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'RoleGet'): AuthRoleGetResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'RoleGrantPermission'): AuthRoleGrantPermissionResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'RoleList'): AuthRoleListResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'RoleRevokePermission'): AuthRoleRevokePermissionResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'UserAdd'): AuthUserAddResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'UserChangePassword'): AuthUserChangePasswordResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'UserDelete'): AuthUserDeleteResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'UserGet'): AuthUserGetResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'UserGrantRole'): AuthUserGrantRoleResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'UserList'): AuthUserListResponse.SerializeToString,
+      ('etcdserverpb.Auth', 'UserRevokeRole'): AuthUserRevokeRoleResponse.SerializeToString,
+    }
+    method_implementations = {
+      ('etcdserverpb.Auth', 'AuthDisable'): face_utilities.unary_unary_inline(servicer.AuthDisable),
+      ('etcdserverpb.Auth', 'AuthEnable'): face_utilities.unary_unary_inline(servicer.AuthEnable),
+      ('etcdserverpb.Auth', 'Authenticate'): face_utilities.unary_unary_inline(servicer.Authenticate),
+      ('etcdserverpb.Auth', 'RoleAdd'): face_utilities.unary_unary_inline(servicer.RoleAdd),
+      ('etcdserverpb.Auth', 'RoleDelete'): face_utilities.unary_unary_inline(servicer.RoleDelete),
+      ('etcdserverpb.Auth', 'RoleGet'): face_utilities.unary_unary_inline(servicer.RoleGet),
+      ('etcdserverpb.Auth', 'RoleGrantPermission'): face_utilities.unary_unary_inline(servicer.RoleGrantPermission),
+      ('etcdserverpb.Auth', 'RoleList'): face_utilities.unary_unary_inline(servicer.RoleList),
+      ('etcdserverpb.Auth', 'RoleRevokePermission'): face_utilities.unary_unary_inline(servicer.RoleRevokePermission),
+      ('etcdserverpb.Auth', 'UserAdd'): face_utilities.unary_unary_inline(servicer.UserAdd),
+      ('etcdserverpb.Auth', 'UserChangePassword'): face_utilities.unary_unary_inline(servicer.UserChangePassword),
+      ('etcdserverpb.Auth', 'UserDelete'): face_utilities.unary_unary_inline(servicer.UserDelete),
+      ('etcdserverpb.Auth', 'UserGet'): face_utilities.unary_unary_inline(servicer.UserGet),
+      ('etcdserverpb.Auth', 'UserGrantRole'): face_utilities.unary_unary_inline(servicer.UserGrantRole),
+      ('etcdserverpb.Auth', 'UserList'): face_utilities.unary_unary_inline(servicer.UserList),
+      ('etcdserverpb.Auth', 'UserRevokeRole'): face_utilities.unary_unary_inline(servicer.UserRevokeRole),
+    }
+    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
+    return beta_implementations.server(method_implementations, options=server_options)
+
+
+  def beta_create_Auth_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
+    """The Beta API is deprecated for 0.15.0 and later.
+
+    It is recommended to use the GA API (classes and functions in this
+    file not marked beta) for all further purposes. This function was
+    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
+    request_serializers = {
+      ('etcdserverpb.Auth', 'AuthDisable'): AuthDisableRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'AuthEnable'): AuthEnableRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'Authenticate'): AuthenticateRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'RoleAdd'): AuthRoleAddRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'RoleDelete'): AuthRoleDeleteRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'RoleGet'): AuthRoleGetRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'RoleGrantPermission'): AuthRoleGrantPermissionRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'RoleList'): AuthRoleListRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'RoleRevokePermission'): AuthRoleRevokePermissionRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'UserAdd'): AuthUserAddRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'UserChangePassword'): AuthUserChangePasswordRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'UserDelete'): AuthUserDeleteRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'UserGet'): AuthUserGetRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'UserGrantRole'): AuthUserGrantRoleRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'UserList'): AuthUserListRequest.SerializeToString,
+      ('etcdserverpb.Auth', 'UserRevokeRole'): AuthUserRevokeRoleRequest.SerializeToString,
+    }
+    response_deserializers = {
+      ('etcdserverpb.Auth', 'AuthDisable'): AuthDisableResponse.FromString,
+      ('etcdserverpb.Auth', 'AuthEnable'): AuthEnableResponse.FromString,
+      ('etcdserverpb.Auth', 'Authenticate'): AuthenticateResponse.FromString,
+      ('etcdserverpb.Auth', 'RoleAdd'): AuthRoleAddResponse.FromString,
+      ('etcdserverpb.Auth', 'RoleDelete'): AuthRoleDeleteResponse.FromString,
+      ('etcdserverpb.Auth', 'RoleGet'): AuthRoleGetResponse.FromString,
+      ('etcdserverpb.Auth', 'RoleGrantPermission'): AuthRoleGrantPermissionResponse.FromString,
+      ('etcdserverpb.Auth', 'RoleList'): AuthRoleListResponse.FromString,
+      ('etcdserverpb.Auth', 'RoleRevokePermission'): AuthRoleRevokePermissionResponse.FromString,
+      ('etcdserverpb.Auth', 'UserAdd'): AuthUserAddResponse.FromString,
+      ('etcdserverpb.Auth', 'UserChangePassword'): AuthUserChangePasswordResponse.FromString,
+      ('etcdserverpb.Auth', 'UserDelete'): AuthUserDeleteResponse.FromString,
+      ('etcdserverpb.Auth', 'UserGet'): AuthUserGetResponse.FromString,
+      ('etcdserverpb.Auth', 'UserGrantRole'): AuthUserGrantRoleResponse.FromString,
+      ('etcdserverpb.Auth', 'UserList'): AuthUserListResponse.FromString,
+      ('etcdserverpb.Auth', 'UserRevokeRole'): AuthUserRevokeRoleResponse.FromString,
+    }
+    cardinalities = {
+      'AuthDisable': cardinality.Cardinality.UNARY_UNARY,
+      'AuthEnable': cardinality.Cardinality.UNARY_UNARY,
+      'Authenticate': cardinality.Cardinality.UNARY_UNARY,
+      'RoleAdd': cardinality.Cardinality.UNARY_UNARY,
+      'RoleDelete': cardinality.Cardinality.UNARY_UNARY,
+      'RoleGet': cardinality.Cardinality.UNARY_UNARY,
+      'RoleGrantPermission': cardinality.Cardinality.UNARY_UNARY,
+      'RoleList': cardinality.Cardinality.UNARY_UNARY,
+      'RoleRevokePermission': cardinality.Cardinality.UNARY_UNARY,
+      'UserAdd': cardinality.Cardinality.UNARY_UNARY,
+      'UserChangePassword': cardinality.Cardinality.UNARY_UNARY,
+      'UserDelete': cardinality.Cardinality.UNARY_UNARY,
+      'UserGet': cardinality.Cardinality.UNARY_UNARY,
+      'UserGrantRole': cardinality.Cardinality.UNARY_UNARY,
+      'UserList': cardinality.Cardinality.UNARY_UNARY,
+      'UserRevokeRole': cardinality.Cardinality.UNARY_UNARY,
+    }
+    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
+    return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Auth', cardinalities, options=stub_options)
+except ImportError:
+  pass
 # @@protoc_insertion_point(module_scope)
