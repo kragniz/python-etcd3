@@ -507,6 +507,12 @@ class TestClient(object):
                               cert_cert=None)
         assert client.uses_secure_channel is True
 
+    def test_secure_channel_ca_cert_and_key_raise_exception(self):
+        with pytest.raises(ValueError):
+            etcd3.client(ca_cert="tests/ca.crt",
+                         cert_key="tests/client.key",
+                         cert_cert=None)
+
     def test_user_pwd_auth(self):
         auth_mock = mock.MagicMock()
         auth_resp_mock = mock.MagicMock()

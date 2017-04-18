@@ -101,24 +101,24 @@ class Etcd3Client(object):
                  user=None, password=None):
         self._url = '{host}:{port}'.format(host=host, port=port)
 
-        cert_params = [c is not None for c in (cert_cert, cert_key, ca_cert)]
-        if all(cert_params):
-            # all the cert parameters are set
-            credentials = self._get_secure_creds(ca_cert,
-                                                 cert_key,
-                                                 cert_cert)
-            self.uses_secure_channel = True
-            self.channel = grpc.secure_channel(self._url, credentials)
-        elif any(cert_params):
-            if ca_cert is not None:
+        cert_params = [c is not None for c in (cert_cert, cert_key)]
+        if ca_cert is not None:
+            if all(cert_params):
+                # all the cert parameters are set
+                credentials = self._get_secure_creds(ca_cert,
+                                                     cert_key,
+                                                     cert_cert)
+                self.uses_secure_channel = True
+                self.channel = grpc.secure_channel(self._url, credentials)
+            elif any(cert_params):
+                # some of the cert parameters are set
+                raise ValueError('to use a secure channel ca_cert is required '
+                                 'by itself, or cert_cert and cert_key must '
+                                 'both be specified.')
+            else:
                 credentials = self._get_secure_creds(ca_cert, None, None)
                 self.uses_secure_channel = True
                 self.channel = grpc.secure_channel(self._url, credentials)
-            else:
-                # some of the cert parameters are set
-                raise ValueError('to use a secure channel ca_cert is required '
-                                 'but itself, or cert_cert and cert_key must '
-                                 'both be specified.')
 
         else:
             self.uses_secure_channel = False
@@ -126,16 +126,11 @@ class Etcd3Client(object):
 
         self.timeout = timeout
         self.call_credentials = None
+        self.authstub = etcdrpc.AuthStub(self.channel)
 
         cred_params = [c is not None for c in (user, password)]
         if all(cred_params):
-            self.authstub = etcdrpc.AuthStub(self.channel)
-            auth_request = etcdrpc.AuthenticateRequest(
-                name=utils.to_bytes(user), password=utils.to_bytes(password))
-
-            resp = self.authstub.Authenticate(auth_request, self.timeout)
-            self.call_credentials = grpc.metadata_call_credentials(
-                EtcdTokenCallCredentials(resp.token))
+            self._auth(user, password)
         elif any(cred_params):
             # some of the cert parameters are set
             raise ValueError('if using authentication credentials both '
@@ -154,9 +149,7 @@ class Etcd3Client(object):
         with open(ca_cert, 'rb') as ca_cert_file:
             if cert_key is None:
                 return grpc.ssl_channel_credentials(
-                    ca_cert_file.read(),
-                    None,
-                    None
+                    ca_cert_file.read(), None, None
                 )
             else:
                 with open(cert_key, 'rb') as cert_key_file:
@@ -166,6 +159,14 @@ class Etcd3Client(object):
                             cert_key_file.read(),
                             cert_cert_file.read()
                         )
+
+    def _auth(self, user, password):
+        auth_request = etcdrpc.AuthenticateRequest(
+            name=utils.to_bytes(user), password=utils.to_bytes(password))
+
+        resp = self.authstub.Authenticate(auth_request, self.timeout)
+        self.call_credentials = grpc.metadata_call_credentials(
+            EtcdTokenCallCredentials(resp.token))
 
     def _build_get_range_request(self, key,
                                  range_end=None,
