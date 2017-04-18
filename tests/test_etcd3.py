@@ -501,6 +501,36 @@ class TestClient(object):
                               cert_cert="tests/client.crt")
         assert client.uses_secure_channel is True
 
+    def test_secure_channel_ca_cert_only(self):
+        client = etcd3.client(ca_cert="tests/ca.crt",
+                              cert_key=None,
+                              cert_cert=None)
+        assert client.uses_secure_channel is True
+
+    def test_user_pwd_auth(self):
+        auth_mock = mock.MagicMock()
+        auth_resp_mock = mock.MagicMock()
+        auth_resp_mock.token = "the_token"
+        auth_mock.Authenticate = auth_resp_mock
+        etcdrpc.AuthStub = auth_mock
+
+        client = etcd3.client(user='some_user',
+                              password="some_pwd")
+
+        assert client.call_credentials is not None
+
+    def test_token_callback(self):
+        from etcd3.client import EtcdTokenCallCredentials
+        call_creds = EtcdTokenCallCredentials("the_token")
+
+        context_mock = mock.MagicMock()
+        callback_mock = mock.MagicMock()
+        call_creds.__call__(context_mock, callback_mock)
+
+        assert callback_mock.call_count is 1
+
+        callback_mock.assert_called_with((('token', "the_token"),), None)
+
 
 class TestCompares(object):
 

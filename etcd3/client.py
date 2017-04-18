@@ -84,9 +84,21 @@ class Status(object):
         self.raft_term = raft_term
 
 
+class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
+    """Metadata wrapper for raw access token credentials."""
+
+    def __init__(self, access_token):
+        self._access_token = access_token
+
+    def __call__(self, context, callback):
+        metadata = (('token', self._access_token),)
+        callback(metadata, None)
+
+
 class Etcd3Client(object):
     def __init__(self, host='localhost', port=2379,
-                 ca_cert=None, cert_key=None, cert_cert=None, timeout=None):
+                 ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
+                 user=None, password=None):
         self._url = '{host}:{port}'.format(host=host, port=port)
 
         cert_params = [c is not None for c in (cert_cert, cert_key, ca_cert)]
@@ -98,17 +110,41 @@ class Etcd3Client(object):
             self.uses_secure_channel = True
             self.channel = grpc.secure_channel(self._url, credentials)
         elif any(cert_params):
-            # some of the cert parameters are set
-            raise ValueError('the parameters cert_cert, cert_key and ca_cert '
-                             'must all be set to use a secure channel')
+            if ca_cert is not None:
+                credentials = self._get_secure_creds(ca_cert, None, None)
+                self.uses_secure_channel = True
+                self.channel = grpc.secure_channel(self._url, credentials)
+            else:
+                # some of the cert parameters are set
+                raise ValueError('to use a secure channel ca_cert is required '
+                                 'but itself, or cert_cert and cert_key must '
+                                 'both be specified.')
+
         else:
             self.uses_secure_channel = False
             self.channel = grpc.insecure_channel(self._url)
 
         self.timeout = timeout
+        self.call_credentials = None
+
+        cred_params = [c is not None for c in (user, password)]
+        if all(cred_params):
+            self.authstub = etcdrpc.AuthStub(self.channel)
+            auth_request = etcdrpc.AuthenticateRequest(
+                name=utils.to_bytes(user), password=utils.to_bytes(password))
+
+            resp = self.authstub.Authenticate(auth_request, self.timeout)
+            self.call_credentials = grpc.metadata_call_credentials(
+                EtcdTokenCallCredentials(resp.token))
+        elif any(cred_params):
+            # some of the cert parameters are set
+            raise ValueError('if using authentication credentials both '
+                             'user and password must be specified.')
+
         self.kvstub = etcdrpc.KVStub(self.channel)
         self.watcher = watch.Watcher(etcdrpc.WatchStub(self.channel),
-                                     timeout=self.timeout)
+                                     timeout=self.timeout,
+                                     call_credentials=self.call_credentials)
         self.clusterstub = etcdrpc.ClusterStub(self.channel)
         self.leasestub = etcdrpc.LeaseStub(self.channel)
         self.maintenancestub = etcdrpc.MaintenanceStub(self.channel)
@@ -116,13 +152,20 @@ class Etcd3Client(object):
 
     def _get_secure_creds(self, ca_cert, cert_key, cert_cert):
         with open(ca_cert, 'rb') as ca_cert_file:
-            with open(cert_key, 'rb') as cert_key_file:
-                with open(cert_cert, 'rb') as cert_cert_file:
-                    return grpc.ssl_channel_credentials(
-                        ca_cert_file.read(),
-                        cert_key_file.read(),
-                        cert_cert_file.read()
-                    )
+            if cert_key is None:
+                return grpc.ssl_channel_credentials(
+                    ca_cert_file.read(),
+                    None,
+                    None
+                )
+            else:
+                with open(cert_key, 'rb') as cert_key_file:
+                    with open(cert_cert, 'rb') as cert_cert_file:
+                        return grpc.ssl_channel_credentials(
+                            ca_cert_file.read(),
+                            cert_key_file.read(),
+                            cert_cert_file.read()
+                        )
 
     def _build_get_range_request(self, key,
                                  range_end=None,
@@ -186,7 +229,9 @@ class Etcd3Client(object):
         :rtype: bytes, ``KVMetadata``
         """
         range_request = self._build_get_range_request(key)
-        range_response = self.kvstub.Range(range_request, self.timeout)
+        range_response = self.kvstub.Range(range_request,
+                                           timeout=self.timeout,
+                                           credentials=self.call_credentials)
 
         if range_response.count < 1:
             return None, None
@@ -209,7 +254,9 @@ class Etcd3Client(object):
             sort_order=sort_order,
         )
 
-        range_response = self.kvstub.Range(range_request, self.timeout)
+        range_response = self.kvstub.Range(range_request,
+                                           timeout=self.timeout,
+                                           credentials=self.call_credentials)
 
         if range_response.count < 1:
             return
@@ -231,7 +278,9 @@ class Etcd3Client(object):
             sort_target=sort_target,
         )
 
-        range_response = self.kvstub.Range(range_request, self.timeout)
+        range_response = self.kvstub.Range(range_request,
+                                           timeout=self.timeout,
+                                           credentials=self.call_credentials)
 
         if range_response.count < 1:
             return
@@ -266,7 +315,9 @@ class Etcd3Client(object):
         :type lease: either :class:`.Lease`, or int (ID of lease)
         """
         put_request = self._build_put_request(key, value, lease=lease)
-        self.kvstub.Put(put_request, self.timeout)
+        self.kvstub.Put(put_request,
+                        timeout=self.timeout,
+                        credentials=self.call_credentials)
 
     @_handle_errors
     def replace(self, key, initial_value, new_value):
@@ -316,7 +367,9 @@ class Etcd3Client(object):
         :param key: key in etcd to delete
         """
         delete_request = self._build_delete_request(key)
-        self.kvstub.DeleteRange(delete_request, self.timeout)
+        self.kvstub.DeleteRange(delete_request,
+                                timeout=self.timeout,
+                                credentials=self.call_credentials)
 
     @_handle_errors
     def delete_prefix(self, prefix):
@@ -325,7 +378,9 @@ class Etcd3Client(object):
             prefix,
             range_end=utils.increment_last_byte(utils.to_bytes(prefix))
         )
-        return self.kvstub.DeleteRange(delete_request, self.timeout)
+        return self.kvstub.DeleteRange(delete_request,
+                                       timeout=self.timeout,
+                                       credentials=self.call_credentials)
 
     @_handle_errors
     def status(self):
@@ -518,7 +573,9 @@ class Etcd3Client(object):
         transaction_request = etcdrpc.TxnRequest(compare=compare,
                                                  success=success_ops,
                                                  failure=failure_ops)
-        txn_response = self.kvstub.Txn(transaction_request, self.timeout)
+        txn_response = self.kvstub.Txn(transaction_request,
+                                       timeout=self.timeout,
+                                       credentials=self.call_credentials)
 
         responses = []
         for response in txn_response.responses:
@@ -565,14 +622,18 @@ class Etcd3Client(object):
         :param lease_id: ID of the lease to revoke.
         """
         lease_revoke_request = etcdrpc.LeaseRevokeRequest(ID=lease_id)
-        self.leasestub.LeaseRevoke(lease_revoke_request, self.timeout)
+        self.leasestub.LeaseRevoke(lease_revoke_request,
+                                   timeout=self.timeout,
+                                   credentials=self.call_credentials)
 
     @_handle_errors
     def refresh_lease(self, lease_id):
         keep_alive_request = etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
         request_stream = [keep_alive_request]
-        for response in self.leasestub.LeaseKeepAlive(iter(request_stream),
-                                                      self.timeout):
+        for response in self.leasestub.LeaseKeepAlive(
+                iter(request_stream),
+                timeout=self.timeout,
+                credentials=self.call_credentials):
             yield response
 
     @_handle_errors
@@ -580,7 +641,10 @@ class Etcd3Client(object):
         # only available in etcd v3.1.0 and later
         ttl_request = etcdrpc.LeaseTimeToLiveRequest(ID=lease_id,
                                                      keys=True)
-        return self.leasestub.LeaseTimeToLive(ttl_request, self.timeout)
+        return self.leasestub.LeaseTimeToLive(
+            ttl_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials)
 
     @_handle_errors
     def lock(self, name, ttl=60):
@@ -625,7 +689,9 @@ class Etcd3Client(object):
         :param member_id: ID of the member to remove
         """
         member_rm_request = etcdrpc.MemberRemoveRequest(ID=member_id)
-        self.clusterstub.MemberRemove(member_rm_request, self.timeout)
+        self.clusterstub.MemberRemove(member_rm_request,
+                                      timeout=self.timeout,
+                                      credentials=self.call_credentials)
 
     @_handle_errors
     def update_member(self, member_id, peer_urls):
@@ -638,7 +704,9 @@ class Etcd3Client(object):
         """
         member_update_request = etcdrpc.MemberUpdateRequest(ID=member_id,
                                                             peerURLs=peer_urls)
-        self.clusterstub.MemberUpdate(member_update_request, self.timeout)
+        self.clusterstub.MemberUpdate(member_update_request,
+                                      timeout=self.timeout,
+                                      credentials=self.call_credentials)
 
     @property
     def members(self):
@@ -649,8 +717,11 @@ class Etcd3Client(object):
 
         """
         member_list_request = etcdrpc.MemberListRequest()
-        member_list_response = self.clusterstub.MemberList(member_list_request,
-                                                           self.timeout)
+        member_list_response = \
+            self.clusterstub.MemberList(
+                member_list_request,
+                timeout=self.timeout,
+                credentials=self.call_credentials)
 
         for member in member_list_response.members:
             yield etcd3.members.Member(member.ID,
@@ -675,7 +746,9 @@ class Etcd3Client(object):
         """
         compact_request = etcdrpc.CompactionRequest(revision=revision,
                                                     physical=physical)
-        self.kvstub.Compact(compact_request, self.timeout)
+        self.kvstub.Compact(compact_request,
+                            timeout=self.timeout,
+                            credentials=self.call_credentials)
 
     @_handle_errors
     def defragment(self):
@@ -685,11 +758,14 @@ class Etcd3Client(object):
 
 
 def client(host='localhost', port=2379,
-           ca_cert=None, cert_key=None, cert_cert=None, timeout=None):
+           ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
+           user=None, password=None):
     """Return an instance of an Etcd3Client."""
     return Etcd3Client(host=host,
                        port=port,
                        ca_cert=ca_cert,
                        cert_key=cert_key,
                        cert_cert=cert_cert,
+                       user=user,
+                       password=password,
                        timeout=timeout)
