@@ -24,17 +24,22 @@ _EXCEPTIONS_BY_CODE = {
 }
 
 
+def handle_exception_by_code(exc):
+    code = exc.code()
+    exception = _EXCEPTIONS_BY_CODE.get(code)
+    if exception is not None:
+        raise exception
+
+
 def _handle_errors(f):
+
     @functools.wraps(f)
     def handler(*args, **kwargs):
         try:
             return f(*args, **kwargs)
         except grpc.RpcError as exc:
-            code = exc.code()
-            exception = _EXCEPTIONS_BY_CODE.get(code)
-            if exception is None:
-                raise
-            raise exception
+            handle_exception_by_code(exc)
+            raise
 
     @functools.wraps(f)
     def generator_handler(*args, **kwargs):
@@ -42,11 +47,8 @@ def _handle_errors(f):
             for data in f(*args, **kwargs):
                 yield data
         except grpc.RpcError as exc:
-            code = exc.code()
-            exception = _EXCEPTIONS_BY_CODE.get(code)
-            if exception is None:
-                raise
-            raise exception
+            handle_exception_by_code(exc)
+            raise
 
     if inspect.isgeneratorfunction(f):
         return generator_handler
