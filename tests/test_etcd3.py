@@ -40,7 +40,7 @@ else:
 
 
 def etcdctl(*args):
-    endpoint = os.environ.get('ETCD_ENDPOINT', None)
+    endpoint = os.environ.get('PYTHON_ETCD_HTTP_URL')
     if endpoint:
         args = ['--endpoints', endpoint] + list(args)
     args = ['etcdctl', '-w', 'json'] + list(args)
@@ -60,7 +60,7 @@ class TestEtcd3(object):
 
     @pytest.fixture
     def etcd(self):
-        endpoint = os.environ.get('ETCD_ENDPOINT', None)
+        endpoint = os.environ.get('PYTHON_ETCD_HTTP_URL')
         timeout = 5
         if endpoint:
             url = urlparse(endpoint)

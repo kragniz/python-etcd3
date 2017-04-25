@@ -11,7 +11,7 @@ services:
     links:
       - etcd
     environment:
-      - ETCD_ENDPOINT=http://etcd:2379
+      - PYTHON_ETCD_HTTP_URL=http://etcd:2379
   etcd:
     ports:
       - "2379:2379"

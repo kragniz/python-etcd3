@@ -12,3 +12,4 @@ tox==2.6.0
 wheel==0.29.0
 flake8-docstrings==1.0.3
 mock==2.0.0
+pifpaf>=0.27.1
