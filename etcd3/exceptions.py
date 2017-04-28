@@ -20,3 +20,8 @@ class ConnectionTimeoutError(Etcd3Exception):
 
 class PreconditionFailedError(Etcd3Exception):
     pass
+
+
+class ConnectionTimedOut(Etcd3Exception):
+    """connection timeout exception"""
+    pass
