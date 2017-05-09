@@ -314,9 +314,12 @@ class Etcd3Client(object):
         Delete a single key in etcd.
 
         :param key: key in etcd to delete
+        :returns: True if the key has been deleted
         """
         delete_request = self._build_delete_request(key)
-        self.kvstub.DeleteRange(delete_request, self.timeout)
+        delete_response = self.kvstub.DeleteRange(
+            delete_request, self.timeout)
+        return delete_response.deleted >= 1
 
     @_handle_errors
     def delete_prefix(self, prefix):

@@ -103,7 +103,14 @@ class TestEtcd3(object):
         v, _ = etcd.get('/doot/delete_this')
         assert v == b'delete pls'
 
-        etcd.delete('/doot/delete_this')
+        deleted = etcd.delete('/doot/delete_this')
+        assert deleted is True
+
+        deleted = etcd.delete('/doot/delete_this')
+        assert deleted is False
+
+        deleted = etcd.delete('/doot/not_here_dude')
+        assert deleted is False
 
         v, _ = etcd.get('/doot/delete_this')
         assert v is None
