@@ -1,5 +1,6 @@
-import time
 import uuid
+
+import tenacity
 
 
 lock_prefix = '/locks/'
@@ -41,23 +42,38 @@ class Lock(object):
         self.key = lock_prefix + self.name
         self.lease = None
         self.uuid = None
+        # Just store this here in __init__ so anybody can override it if needed
+        self.acquire_wait_function = tenacity.wait_exponential(
+            max=1, multiplier=0.01)
 
-    def acquire(self):
-        """Acquire the lock."""
-        success = False
-        attempts = 10
+    def acquire(self, timeout=10):
+        """Acquire the lock.
+
+        :params timeout: Maximum time to wait before returning. `None` means
+                         forever, any other value equal or greater than 0 is
+                         the number of seconds.
+        :returns: True if the lock has been acquired, False otherwise.
+
+        """
 
         # store uuid as bytes, since it avoids having to decode each time we
         # need to compare
         self.uuid = uuid.uuid1().bytes
 
-        while success is not True and attempts > 0:
-            attempts -= 1
+        stop = (
+            tenacity.stop_never
+            if timeout is None else tenacity.stop_after_delay(timeout)
+        )
+
+        @tenacity.retry(retry=tenacity.retry_never,
+                        stop=stop,
+                        wait=self.acquire_wait_function)
+        def _acquire():
+            # TODO: save the created revision so we can check it later to make
+            # sure we still have the lock
 
             self.lease = self.etcd_client.lease(self.ttl)
 
-            # TODO: save the created revision so we can check it later to make
-            # sure we still have the lock
             success, _ = self.etcd_client.transaction(
                 compare=[
                     self.etcd_client.transactions.create(self.key) == 0
@@ -70,10 +86,15 @@ class Lock(object):
                     self.etcd_client.transactions.get(self.key)
                 ]
             )
-            if success is not True:
-                time.sleep(1)
+            if success is True:
+                return True
+            self.lease = None
+            raise tenacity.TryAgain
 
-        return success
+        try:
+            return _acquire()
+        except tenacity.RetryError:
+            return False
 
     def release(self):
         """Release the lock."""
