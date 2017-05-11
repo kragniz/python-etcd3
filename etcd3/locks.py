@@ -2,6 +2,7 @@ import uuid
 
 import tenacity
 
+from etcd3 import exceptions
 
 lock_prefix = '/locks/'
 
@@ -42,9 +43,6 @@ class Lock(object):
         self.key = lock_prefix + self.name
         self.lease = None
         self.uuid = None
-        # Just store this here in __init__ so anybody can override it if needed
-        self.acquire_wait_function = tenacity.wait_exponential(
-            max=1, multiplier=0.01)
 
     def acquire(self, timeout=10):
         """Acquire the lock.
@@ -65,9 +63,19 @@ class Lock(object):
             if timeout is None else tenacity.stop_after_delay(timeout)
         )
 
+        def wait(previous_attempt_number, delay_since_first_attempt):
+            remaining_timeout = max(timeout - delay_since_first_attempt, 0)
+            # TODO(jd): Wait for a DELETE event to happen: that'd mean the lock
+            # has been released, rather than retrying on PUT events too
+            try:
+                self.etcd_client.watch_once(self.key, remaining_timeout)
+            except exceptions.WatchTimedOut:
+                pass
+            return 0
+
         @tenacity.retry(retry=tenacity.retry_never,
                         stop=stop,
-                        wait=self.acquire_wait_function)
+                        wait=wait)
         def _acquire():
             # TODO: save the created revision so we can check it later to make
             # sure we still have the lock
