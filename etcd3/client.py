@@ -339,9 +339,10 @@ class Etcd3Client(object):
         for m in self.members:
             if m.id == status_response.leader:
                 leader = m
-            else:
-                # raise exception?
-                leader = None
+                break
+        else:
+            # raise exception?
+            leader = None
 
         return Status(status_response.version,
                       status_response.dbSize,
