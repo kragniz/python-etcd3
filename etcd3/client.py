@@ -401,7 +401,7 @@ class Etcd3Client(object):
 
     @_handle_errors
     def watch_prefix(self, key_prefix, **kwargs):
-        """The same as ``watch``, but watches a range of keys with a prefix."""
+        """Watches a range of keys with a prefix."""
         kwargs['range_end'] = \
             utils.increment_last_byte(utils.to_bytes(key_prefix))
         return self.watch(key_prefix, **kwargs)
@@ -435,7 +435,7 @@ class Etcd3Client(object):
     @_handle_errors
     def watch_prefix_once(self, key_prefix, timeout=None, **kwargs):
         """
-        The same as ``watch_once``, but watches a range of keys with a prefix.
+        Watches a range of keys with a prefix and stops after the first event.
 
         If the timeout was specified and event didn't arrived method
         will raise ``WatchTimedOut`` exception.
