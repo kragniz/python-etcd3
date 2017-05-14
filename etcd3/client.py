@@ -24,34 +24,30 @@ _EXCEPTIONS_BY_CODE = {
 }
 
 
+def _translate_exeption(exc):
+    code = exc.code()
+    exception = _EXCEPTIONS_BY_CODE.get(code)
+    if exception is None:
+        raise
+    raise exception
+
+
 def _handle_errors(f):
-    @functools.wraps(f)
-    def handler(*args, **kwargs):
-        try:
-            return f(*args, **kwargs)
-        except grpc.RpcError as exc:
-            code = exc.code()
-            exception = _EXCEPTIONS_BY_CODE.get(code)
-            if exception is None:
-                raise
-            raise exception
-
-    @functools.wraps(f)
-    def generator_handler(*args, **kwargs):
-        try:
-            for data in f(*args, **kwargs):
-                yield data
-        except grpc.RpcError as exc:
-            code = exc.code()
-            exception = _EXCEPTIONS_BY_CODE.get(code)
-            if exception is None:
-                raise
-            raise exception
-
     if inspect.isgeneratorfunction(f):
-        return generator_handler
+        def handler(*args, **kwargs):
+            try:
+                for data in f(*args, **kwargs):
+                    yield data
+            except grpc.RpcError as exc:
+                _translate_exeption(exc)
     else:
-        return handler
+        def handler(*args, **kwargs):
+            try:
+                return f(*args, **kwargs)
+            except grpc.RpcError as exc:
+                _translate_exeption(exc)
+
+    return functools.wraps(f)(handler)
 
 
 class Transactions(object):
@@ -405,7 +401,7 @@ class Etcd3Client(object):
 
     @_handle_errors
     def watch_prefix(self, key_prefix, **kwargs):
-        """The same as ``watch``, but watches a range of keys with a prefix."""
+        """Watches a range of keys with a prefix."""
         kwargs['range_end'] = \
             utils.increment_last_byte(utils.to_bytes(key_prefix))
         return self.watch(key_prefix, **kwargs)
@@ -439,7 +435,7 @@ class Etcd3Client(object):
     @_handle_errors
     def watch_prefix_once(self, key_prefix, timeout=None, **kwargs):
         """
-        The same as ``watch_once``, but watches a range of keys with a prefix.
+        Watches a range of keys with a prefix and stops after the first event.
 
         If the timeout was specified and event didn't arrived method
         will raise ``WatchTimedOut`` exception.
