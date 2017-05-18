@@ -154,6 +154,35 @@ class TestEtcd3(object):
 
         t.join()
 
+    def test_watch_exception_during_watch(self, etcd):
+        def pass_exception_to_callback(callback):
+            time.sleep(1)
+            callback(self.MockedException(grpc.StatusCode.UNAVAILABLE))
+
+        def add_callback_mock(*args, **kwargs):
+            callback = args[1]
+            t = threading.Thread(name="pass_exception_to_callback",
+                                 target=pass_exception_to_callback,
+                                 args=[callback])
+            t.start()
+            return 1
+
+        watcher_mock = mock.MagicMock()
+        watcher_mock.add_callback = add_callback_mock
+        etcd.watcher = watcher_mock
+
+        events_iterator, cancel = etcd.watch('foo')
+
+        with pytest.raises(etcd3.exceptions.ConnectionFailedError):
+            for _ in events_iterator:
+                pass
+
+    def test_watch_timeout_on_establishment(self, etcd):
+        foo_etcd = etcd3.client('foo.bar', timeout=3)
+
+        with pytest.raises(etcd3.exceptions.WatchTimedOut):
+            foo_etcd.watch('foo')
+
     def test_watch_prefix(self, etcd):
         def update_etcd(v):
             etcdctl('put', '/doot/watch/prefix/' + v, v)
