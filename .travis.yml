@@ -3,15 +3,15 @@ python: 3.5
 
 env:
   global:
-    - ETCD_VERSION=v3.0.13
+    - ETCD_VERSION=v3.1.8
   matrix:
     - TOXENV=py35
     - TOXENV=py34
     - TOXENV=py27
     - TOXENV=flake8
 
-    - TOXENV=py35 ETCD_VERSION=v3.1.0-rc.1
-    - TOXENV=py27 ETCD_VERSION=v3.1.0-rc.1
+    - TOXENV=py35 ETCD_VERSION=v3.2.0-rc.1
+    - TOXENV=py27 ETCD_VERSION=v3.2.0-rc.1
 
 install:
     - pip install -U tox codecov
