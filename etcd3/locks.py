@@ -53,7 +53,6 @@ class Lock(object):
         :returns: True if the lock has been acquired, False otherwise.
 
         """
-
         # store uuid as bytes, since it avoids having to decode each time we
         # need to compare
         self.uuid = uuid.uuid1().bytes
