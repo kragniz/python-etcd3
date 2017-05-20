@@ -353,6 +353,8 @@ class TestEtcd3(object):
         lock = etcd.lock('lock-1', ttl=10)
         assert lock.acquire() is True
         assert etcd.get(lock.key)[0] is not None
+        assert lock.acquire(timeout=0) is False
+        assert lock.acquire(timeout=1) is False
 
     def test_lock_release(self, etcd):
         lock = etcd.lock('lock-2', ttl=10)
@@ -361,6 +363,9 @@ class TestEtcd3(object):
         assert lock.release() is True
         v, _ = etcd.get(lock.key)
         assert v is None
+        assert lock.acquire() is True
+        assert lock.release() is True
+        assert lock.acquire(timeout=None) is True
 
     def test_lock_expire(self, etcd):
         lock = etcd.lock('lock-3', ttl=2)
