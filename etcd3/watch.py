@@ -53,8 +53,11 @@ class Watcher(threading.Thread):
                 if callback:
                     for event in response.events:
                         callback(events.new_event(event))
-        except grpc.RpcError:
+        except grpc.RpcError as e:
             self.stop()
+            if self._watch_id_callbacks:
+                for callback in self._watch_id_callbacks.values():
+                    callback(e)
 
     @property
     def _requests_iterator(self):
@@ -85,7 +88,7 @@ class Watcher(threading.Thread):
                 create_watch.prev_kv = prev_kv
             request = etcdrpc.WatchRequest(create_request=create_watch)
             self._watch_requests_queue.put((request, callback))
-            return self._watch_id_queue.get()
+            return self._watch_id_queue.get(timeout=self.timeout)
 
     def cancel(self, watch_id):
         if watch_id is not None:
