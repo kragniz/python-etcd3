@@ -486,6 +486,9 @@ class TestEtcd3(object):
         assert isinstance(status.leader, etcd3.members.Member) is True
         assert status.leader.id in [m.id for m in etcd.members]
 
+    def test_hash(self, etcd):
+        assert isinstance(etcd.hash(), int)
+
 
 class TestUtils(object):
     def test_increment_last_byte(self):

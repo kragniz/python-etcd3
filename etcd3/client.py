@@ -694,6 +694,17 @@ class Etcd3Client(object):
         defrag_request = etcdrpc.DefragmentRequest()
         self.maintenancestub.Defragment(defrag_request)
 
+    @_handle_errors
+    def hash(self):
+        """
+        Return the hash of the local KV state.
+
+        :returns: kv state hash
+        :rtype: int
+        """
+        hash_request = etcdrpc.HashRequest()
+        return self.maintenancestub.Hash(hash_request).hash
+
 
 def client(host='localhost', port=2379,
            ca_cert=None, cert_key=None, cert_cert=None, timeout=None):
