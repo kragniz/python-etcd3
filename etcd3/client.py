@@ -80,6 +80,12 @@ class Status(object):
         self.raft_term = raft_term
 
 
+class Alarm(object):
+    def __init__(self, alarm_type, member_id):
+        self.alarm_type = alarm_type
+        self.member_id = member_id
+
+
 class Etcd3Client(object):
     def __init__(self, host='localhost', port=2379,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None):
@@ -704,6 +710,87 @@ class Etcd3Client(object):
         """
         hash_request = etcdrpc.HashRequest()
         return self.maintenancestub.Hash(hash_request).hash
+
+    def _build_alarm_request(self, alarm_action, member_id, alarm_type):
+        alarm_request = etcdrpc.AlarmRequest()
+
+        if alarm_action == 'get':
+            alarm_request.action = etcdrpc.AlarmRequest.GET
+        elif alarm_action == 'activate':
+            alarm_request.action = etcdrpc.AlarmRequest.ACTIVATE
+        elif alarm_action == 'deactivate':
+            alarm_request.action = etcdrpc.AlarmRequest.DEACTIVATE
+        else:
+            raise ValueError('Unknown alarm action: {}'.format(alarm_action))
+
+        alarm_request.memberID = member_id
+
+        if alarm_type == 'none':
+            alarm_request.alarm = etcdrpc.NONE
+        elif alarm_type == 'no space':
+            alarm_request.alarm = etcdrpc.NOSPACE
+        else:
+            raise ValueError('Unknown alarm type: {}'.format(alarm_type))
+
+        return alarm_request
+
+    @_handle_errors
+    def create_alarm(self, member_id=0):
+        """Create an alarm.
+
+        If no member id is given, the alarm is activated for all the
+        memebers of the cluster. Only the `no space` alarm can be raised.
+
+        :param member_id: The cluster member id to create an alarm to.
+                          If 0, the alarm is created for all the members
+                          of the cluster.
+        :returns: list of :class:`.Alarm`
+        """
+        alarm_request = self._build_alarm_request('activate',
+                                                  member_id,
+                                                  'no space')
+        alarm_response = self.maintenancestub.Alarm(alarm_request,
+                                                    self.timeout)
+
+        return [Alarm(alarm.alarm, alarm.memberID)
+                for alarm in alarm_response.alarms]
+
+    @_handle_errors
+    def list_alarms(self, member_id=0, alarm_type='none'):
+        """List the activated alarms.
+
+        :param: member_id:
+        :param alarm_type: The cluster member id to create an alarm to.
+                           If 0, the alarm is created for all the members
+                           of the cluster.
+        :returns: sequence of :class:`.Alarm`
+        """
+        alarm_request = self._build_alarm_request('get',
+                                                  member_id,
+                                                  alarm_type)
+        alarm_response = self.maintenancestub.Alarm(alarm_request,
+                                                    self.timeout)
+
+        for alarm in alarm_response.alarms:
+            yield Alarm(alarm.alarm, alarm.memberID)
+
+    @_handle_errors
+    def disarm_alarm(self, member_id=0):
+        """Cancel an alarm.
+
+        :param member_id: The cluster member id to cancel an alarm.
+                          If 0, the alarm is canceled for all the members
+                          of the cluster.
+        :returns: List of :class:`.Alarm`
+        """
+        alarm_request = self._build_alarm_request('deactivate',
+                                                  member_id,
+                                                  'no space')
+        alarm_response = self.maintenancestub.Alarm(alarm_request,
+                                                    self.timeout)
+
+        return [Alarm(alarm.alarm, alarm.memberID)
+                for alarm in alarm_response.alarms]
 
 
 def client(host='localhost', port=2379,
