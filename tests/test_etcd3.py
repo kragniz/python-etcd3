@@ -8,6 +8,7 @@ import base64
 import json
 import os
 import subprocess
+import tempfile
 import threading
 import time
 
@@ -487,6 +488,13 @@ class TestEtcd3(object):
 
     def test_hash(self, etcd):
         assert isinstance(etcd.hash(), int)
+
+    def test_snapshot(self, etcd):
+        with tempfile.NamedTemporaryFile() as f:
+            etcd.snapshot(f)
+            f.flush()
+
+            etcdctl('snapshot', 'status', f.name)
 
 
 class TestAlarms(object):

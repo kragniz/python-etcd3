@@ -792,6 +792,18 @@ class Etcd3Client(object):
         return [Alarm(alarm.alarm, alarm.memberID)
                 for alarm in alarm_response.alarms]
 
+    @_handle_errors
+    def snapshot(self, file_obj):
+        """Take a snapshot of the database.
+
+        :param file_obj: A file-like object to write the database contents in.
+        """
+        snapshot_request = etcdrpc.SnapshotRequest()
+        snapshot_response = self.maintenancestub.Snapshot(snapshot_request)
+
+        for response in snapshot_response:
+            file_obj.write(response.blob)
+
 
 def client(host='localhost', port=2379,
            ca_cert=None, cert_key=None, cert_cert=None, timeout=None):
