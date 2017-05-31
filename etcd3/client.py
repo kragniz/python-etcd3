@@ -81,25 +81,30 @@ class Status(object):
 
 
 class Etcd3Client(object):
-    def __init__(self, host='localhost', port=2379,
+    def __init__(self, host='localhost', port=2379, tls=False,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None):
         self._url = '{host}:{port}'.format(host=host, port=port)
 
-        cert_params = [c is not None for c in (cert_cert, cert_key, ca_cert)]
-        if all(cert_params):
-            # all the cert parameters are set
-            credentials = self._get_secure_creds(ca_cert,
-                                                 cert_key,
-                                                 cert_cert)
+        if tls:
+            credentials = grpc.ssl_channel_credentials()
             self.uses_secure_channel = True
             self.channel = grpc.secure_channel(self._url, credentials)
-        elif any(cert_params):
-            # some of the cert parameters are set
-            raise ValueError('the parameters cert_cert, cert_key and ca_cert '
-                             'must all be set to use a secure channel')
         else:
-            self.uses_secure_channel = False
-            self.channel = grpc.insecure_channel(self._url)
+            cert_params = [c is not None for c in (cert_cert, cert_key, ca_cert)]
+            if all(cert_params):
+                # all the cert parameters are set
+                credentials = self._get_secure_creds(ca_cert,
+                                                     cert_key,
+                                                     cert_cert)
+                self.uses_secure_channel = True
+                self.channel = grpc.secure_channel(self._url, credentials)
+            elif any(cert_params):
+                # some of the cert parameters are set
+                raise ValueError('the parameters cert_cert, cert_key and ca_cert '
+                                 'must all be set to use a secure channel')
+            else:
+                self.uses_secure_channel = False
+                self.channel = grpc.insecure_channel(self._url)
 
         self.timeout = timeout
         self.kvstub = etcdrpc.KVStub(self.channel)
