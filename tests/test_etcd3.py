@@ -8,6 +8,7 @@ import base64
 import json
 import os
 import subprocess
+import tempfile
 import threading
 import time
 
@@ -27,7 +28,6 @@ import etcd3
 import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions
 import etcd3.utils as utils
-
 
 etcd_version = os.environ.get('ETCD_VERSION', 'v3.0.10')
 
@@ -485,6 +485,65 @@ class TestEtcd3(object):
 
         assert isinstance(status.leader, etcd3.members.Member) is True
         assert status.leader.id in [m.id for m in etcd.members]
+
+    def test_hash(self, etcd):
+        assert isinstance(etcd.hash(), int)
+
+    def test_snapshot(self, etcd):
+        with tempfile.NamedTemporaryFile() as f:
+            etcd.snapshot(f)
+            f.flush()
+
+            etcdctl('snapshot', 'status', f.name)
+
+
+class TestAlarms(object):
+    @pytest.fixture
+    def etcd(self):
+        etcd = etcd3.client()
+        yield etcd
+        etcd.disarm_alarm()
+        for m in etcd.members:
+            if m.active_alarms:
+                etcd.disarm_alarm(m.id)
+
+    def test_create_alarm_all_members(self, etcd):
+        alarms = etcd.create_alarm()
+
+        assert len(alarms) == 1
+        assert alarms[0].member_id == 0
+        assert alarms[0].alarm_type == etcdrpc.NOSPACE
+
+    def test_create_alarm_specific_member(self, etcd):
+        a_member = next(etcd.members)
+
+        alarms = etcd.create_alarm(member_id=a_member.id)
+
+        assert len(alarms) == 1
+        assert alarms[0].member_id == a_member.id
+        assert alarms[0].alarm_type == etcdrpc.NOSPACE
+
+    def test_list_alarms(self, etcd):
+        a_member = next(etcd.members)
+        etcd.create_alarm()
+        etcd.create_alarm(member_id=a_member.id)
+        possible_member_ids = [0, a_member.id]
+
+        alarms = list(etcd.list_alarms())
+
+        assert len(alarms) == 2
+        for alarm in alarms:
+            possible_member_ids.remove(alarm.member_id)
+            assert alarm.alarm_type == etcdrpc.NOSPACE
+
+        assert possible_member_ids == []
+
+    def test_disarm_alarm(self, etcd):
+        etcd.create_alarm()
+        assert len(list(etcd.list_alarms())) == 1
+
+        etcd.disarm_alarm()
+        assert len(list(etcd.list_alarms())) == 0
 
 
 class TestUtils(object):

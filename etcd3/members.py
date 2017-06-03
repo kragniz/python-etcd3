@@ -35,3 +35,11 @@ class Member(object):
                           communicate with the cluster
         """
         self._etcd_client.update_member(self.id, peer_urls)
+
+    @property
+    def active_alarms(self):
+        """Get active alarms of the member.
+
+        :returns: Alarms
+        """
+        return self._etcd_client.list_alarms(member_id=self.id)
