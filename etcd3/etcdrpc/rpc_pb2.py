@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='rpc.proto',
   package='etcdserverpb',
   syntax='proto3',
-  serialized_pb=_b('\n\trpc.proto\x12\x0c\x65tcdserverpb\x1a\x08kv.proto\x1a\nauth.proto\"\\\n\x0eResponseHeader\x12\x12\n\ncluster_id\x18\x01 \x01(\x04\x12\x11\n\tmember_id\x18\x02 \x01(\x04\x12\x10\n\x08revision\x18\x03 \x01(\x03\x12\x11\n\traft_term\x18\x04 \x01(\x04\"\xe4\x03\n\x0cRangeRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x11\n\trange_end\x18\x02 \x01(\x0c\x12\r\n\x05limit\x18\x03 \x01(\x03\x12\x10\n\x08revision\x18\x04 \x01(\x03\x12\x38\n\nsort_order\x18\x05 \x01(\x0e\x32$.etcdserverpb.RangeRequest.SortOrder\x12:\n\x0bsort_target\x18\x06 \x01(\x0e\x32%.etcdserverpb.RangeRequest.SortTarget\x12\x14\n\x0cserializable\x18\x07 \x01(\x08\x12\x11\n\tkeys_only\x18\x08 \x01(\x08\x12\x12\n\ncount_only\x18\t \x01(\x08\x12\x18\n\x10min_mod_revision\x18\n \x01(\x03\x12\x18\n\x10max_mod_revision\x18\x0b \x01(\x03\x12\x1b\n\x13min_create_revision\x18\x0c \x01(\x03\x12\x1b\n\x13max_create_revision\x18\r \x01(\x03\".\n\tSortOrder\x12\x08\n\x04NONE\x10\x00\x12\n\n\x06\x41SCEND\x10\x01\x12\x0b\n\x07\x44\x45SCEND\x10\x02\"B\n\nSortTarget\x12\x07\n\x03KEY\x10\x00\x12\x0b\n\x07VERSION\x10\x01\x12\n\n\x06\x43REATE\x10\x02\x12\x07\n\x03MOD\x10\x03\x12\t\n\x05VALUE\x10\x04\"y\n\rRangeResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x1d\n\x03kvs\x18\x02 \x03(\x0b\x32\x10.mvccpb.KeyValue\x12\x0c\n\x04more\x18\x03 \x01(\x08\x12\r\n\x05\x63ount\x18\x04 \x01(\x03\"H\n\nPutRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\r\n\x05value\x18\x02 \x01(\x0c\x12\r\n\x05lease\x18\x03 \x01(\x03\x12\x0f\n\x07prev_kv\x18\x04 \x01(\x08\"^\n\x0bPutResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12!\n\x07prev_kv\x18\x02 \x01(\x0b\x32\x10.mvccpb.KeyValue\"E\n\x12\x44\x65leteRangeRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x11\n\trange_end\x18\x02 \x01(\x0c\x12\x0f\n\x07prev_kv\x18\x03 \x01(\x08\"x\n\x13\x44\x65leteRangeResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x0f\n\x07\x64\x65leted\x18\x02 \x01(\x03\x12\"\n\x08prev_kvs\x18\x03 \x03(\x0b\x32\x10.mvccpb.KeyValue\"\xbe\x01\n\tRequestOp\x12\x33\n\rrequest_range\x18\x01 \x01(\x0b\x32\x1a.etcdserverpb.RangeRequestH\x00\x12/\n\x0brequest_put\x18\x02 \x01(\x0b\x32\x18.etcdserverpb.PutRequestH\x00\x12@\n\x14request_delete_range\x18\x03 \x01(\x0b\x32 .etcdserverpb.DeleteRangeRequestH\x00\x42\t\n\x07request\"\xc6\x01\n\nResponseOp\x12\x35\n\x0eresponse_range\x18\x01 \x01(\x0b\x32\x1b.etcdserverpb.RangeResponseH\x00\x12\x31\n\x0cresponse_put\x18\x02 \x01(\x0b\x32\x19.etcdserverpb.PutResponseH\x00\x12\x42\n\x15response_delete_range\x18\x03 \x01(\x0b\x32!.etcdserverpb.DeleteRangeResponseH\x00\x42\n\n\x08response\"\xd8\x02\n\x07\x43ompare\x12\x33\n\x06result\x18\x01 \x01(\x0e\x32#.etcdserverpb.Compare.CompareResult\x12\x33\n\x06target\x18\x02 \x01(\x0e\x32#.etcdserverpb.Compare.CompareTarget\x12\x0b\n\x03key\x18\x03 \x01(\x0c\x12\x11\n\x07version\x18\x04 \x01(\x03H\x00\x12\x19\n\x0f\x63reate_revision\x18\x05 \x01(\x03H\x00\x12\x16\n\x0cmod_revision\x18\x06 \x01(\x03H\x00\x12\x0f\n\x05value\x18\x07 \x01(\x0cH\x00\"1\n\rCompareResult\x12\t\n\x05\x45QUAL\x10\x00\x12\x0b\n\x07GREATER\x10\x01\x12\x08\n\x04LESS\x10\x02\"<\n\rCompareTarget\x12\x0b\n\x07VERSION\x10\x00\x12\n\n\x06\x43REATE\x10\x01\x12\x07\n\x03MOD\x10\x02\x12\t\n\x05VALUE\x10\x03\x42\x0e\n\x0ctarget_union\"\x88\x01\n\nTxnRequest\x12&\n\x07\x63ompare\x18\x01 \x03(\x0b\x32\x15.etcdserverpb.Compare\x12(\n\x07success\x18\x02 \x03(\x0b\x32\x17.etcdserverpb.RequestOp\x12(\n\x07\x66\x61ilure\x18\x03 \x03(\x0b\x32\x17.etcdserverpb.RequestOp\"{\n\x0bTxnResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x11\n\tsucceeded\x18\x02 \x01(\x08\x12+\n\tresponses\x18\x03 \x03(\x0b\x32\x18.etcdserverpb.ResponseOp\"7\n\x11\x43ompactionRequest\x12\x10\n\x08revision\x18\x01 \x01(\x03\x12\x10\n\x08physical\x18\x02 \x01(\x08\"B\n\x12\x43ompactionResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"\r\n\x0bHashRequest\"J\n\x0cHashResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x0c\n\x04hash\x18\x02 \x01(\r\"\x11\n\x0fSnapshotRequest\"g\n\x10SnapshotResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x17\n\x0fremaining_bytes\x18\x02 \x01(\x04\x12\x0c\n\x04\x62lob\x18\x03 \x01(\x0c\"\x97\x01\n\x0cWatchRequest\x12:\n\x0e\x63reate_request\x18\x01 \x01(\x0b\x32 .etcdserverpb.WatchCreateRequestH\x00\x12:\n\x0e\x63\x61ncel_request\x18\x02 \x01(\x0b\x32 .etcdserverpb.WatchCancelRequestH\x00\x42\x0f\n\rrequest_union\"\xdb\x01\n\x12WatchCreateRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x11\n\trange_end\x18\x02 \x01(\x0c\x12\x16\n\x0estart_revision\x18\x03 \x01(\x03\x12\x17\n\x0fprogress_notify\x18\x04 \x01(\x08\x12<\n\x07\x66ilters\x18\x05 \x03(\x0e\x32+.etcdserverpb.WatchCreateRequest.FilterType\x12\x0f\n\x07prev_kv\x18\x06 \x01(\x08\"%\n\nFilterType\x12\t\n\x05NOPUT\x10\x00\x12\x0c\n\x08NODELETE\x10\x01\"&\n\x12WatchCancelRequest\x12\x10\n\x08watch_id\x18\x01 \x01(\x03\"\xab\x01\n\rWatchResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x10\n\x08watch_id\x18\x02 \x01(\x03\x12\x0f\n\x07\x63reated\x18\x03 \x01(\x08\x12\x10\n\x08\x63\x61nceled\x18\x04 \x01(\x08\x12\x18\n\x10\x63ompact_revision\x18\x05 \x01(\x03\x12\x1d\n\x06\x65vents\x18\x0b \x03(\x0b\x32\r.mvccpb.Event\",\n\x11LeaseGrantRequest\x12\x0b\n\x03TTL\x18\x01 \x01(\x03\x12\n\n\x02ID\x18\x02 \x01(\x03\"j\n\x12LeaseGrantResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\n\n\x02ID\x18\x02 \x01(\x03\x12\x0b\n\x03TTL\x18\x03 \x01(\x03\x12\r\n\x05\x65rror\x18\x04 \x01(\t\" \n\x12LeaseRevokeRequest\x12\n\n\x02ID\x18\x01 \x01(\x03\"C\n\x13LeaseRevokeResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"#\n\x15LeaseKeepAliveRequest\x12\n\n\x02ID\x18\x01 \x01(\x03\"_\n\x16LeaseKeepAliveResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\n\n\x02ID\x18\x02 \x01(\x03\x12\x0b\n\x03TTL\x18\x03 \x01(\x03\"2\n\x16LeaseTimeToLiveRequest\x12\n\n\x02ID\x18\x01 \x01(\x03\x12\x0c\n\x04keys\x18\x02 \x01(\x08\"\x82\x01\n\x17LeaseTimeToLiveResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\n\n\x02ID\x18\x02 \x01(\x03\x12\x0b\n\x03TTL\x18\x03 \x01(\x03\x12\x12\n\ngrantedTTL\x18\x04 \x01(\x03\x12\x0c\n\x04keys\x18\x05 \x03(\x0c\"H\n\x06Member\x12\n\n\x02ID\x18\x01 \x01(\x04\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08peerURLs\x18\x03 \x03(\t\x12\x12\n\nclientURLs\x18\x04 \x03(\t\"$\n\x10MemberAddRequest\x12\x10\n\x08peerURLs\x18\x01 \x03(\t\"g\n\x11MemberAddResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12$\n\x06member\x18\x02 \x01(\x0b\x32\x14.etcdserverpb.Member\"!\n\x13MemberRemoveRequest\x12\n\n\x02ID\x18\x01 \x01(\x04\"D\n\x14MemberRemoveResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"3\n\x13MemberUpdateRequest\x12\n\n\x02ID\x18\x01 \x01(\x04\x12\x10\n\x08peerURLs\x18\x02 \x03(\t\"D\n\x14MemberUpdateResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"\x13\n\x11MemberListRequest\"i\n\x12MemberListResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12%\n\x07members\x18\x02 \x03(\x0b\x32\x14.etcdserverpb.Member\"\x13\n\x11\x44\x65\x66ragmentRequest\"B\n\x12\x44\x65\x66ragmentResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"\xb6\x01\n\x0c\x41larmRequest\x12\x36\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32&.etcdserverpb.AlarmRequest.AlarmAction\x12\x10\n\x08memberID\x18\x02 \x01(\x04\x12&\n\x05\x61larm\x18\x03 \x01(\x0e\x32\x17.etcdserverpb.AlarmType\"4\n\x0b\x41larmAction\x12\x07\n\x03GET\x10\x00\x12\x0c\n\x08\x41\x43TIVATE\x10\x01\x12\x0e\n\nDEACTIVATE\x10\x02\"G\n\x0b\x41larmMember\x12\x10\n\x08memberID\x18\x01 \x01(\x04\x12&\n\x05\x61larm\x18\x02 \x01(\x0e\x32\x17.etcdserverpb.AlarmType\"h\n\rAlarmResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12)\n\x06\x61larms\x18\x02 \x03(\x0b\x32\x19.etcdserverpb.AlarmMember\"\x0f\n\rStatusRequest\"\x94\x01\n\x0eStatusResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x0f\n\x07version\x18\x02 \x01(\t\x12\x0e\n\x06\x64\x62Size\x18\x03 \x01(\x03\x12\x0e\n\x06leader\x18\x04 \x01(\x04\x12\x11\n\traftIndex\x18\x05 \x01(\x04\x12\x10\n\x08raftTerm\x18\x06 \x01(\x04\"\x13\n\x11\x41uthEnableRequest\"\x14\n\x12\x41uthDisableRequest\"5\n\x13\x41uthenticateRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"4\n\x12\x41uthUserAddRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"\"\n\x12\x41uthUserGetRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"%\n\x15\x41uthUserDeleteRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"?\n\x1d\x41uthUserChangePasswordRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"6\n\x18\x41uthUserGrantRoleRequest\x12\x0c\n\x04user\x18\x01 \x01(\t\x12\x0c\n\x04role\x18\x02 \x01(\t\"7\n\x19\x41uthUserRevokeRoleRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04role\x18\x02 \x01(\t\"\"\n\x12\x41uthRoleAddRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\"\n\x12\x41uthRoleGetRequest\x12\x0c\n\x04role\x18\x01 \x01(\t\"\x15\n\x13\x41uthUserListRequest\"\x15\n\x13\x41uthRoleListRequest\"%\n\x15\x41uthRoleDeleteRequest\x12\x0c\n\x04role\x18\x01 \x01(\t\"P\n\x1e\x41uthRoleGrantPermissionRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12 \n\x04perm\x18\x02 \x01(\x0b\x32\x12.authpb.Permission\"O\n\x1f\x41uthRoleRevokePermissionRequest\x12\x0c\n\x04role\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\t\x12\x11\n\trange_end\x18\x03 \x01(\t\"B\n\x12\x41uthEnableResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"C\n\x13\x41uthDisableResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"S\n\x14\x41uthenticateResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05token\x18\x02 \x01(\t\"C\n\x13\x41uthUserAddResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"R\n\x13\x41uthUserGetResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05roles\x18\x02 \x03(\t\"F\n\x16\x41uthUserDeleteResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"N\n\x1e\x41uthUserChangePasswordResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"I\n\x19\x41uthUserGrantRoleResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"J\n\x1a\x41uthUserRevokeRoleResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"C\n\x13\x41uthRoleAddResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"e\n\x13\x41uthRoleGetResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12 \n\x04perm\x18\x02 \x03(\x0b\x32\x12.authpb.Permission\"S\n\x14\x41uthRoleListResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05roles\x18\x02 \x03(\t\"S\n\x14\x41uthUserListResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05users\x18\x02 \x03(\t\"F\n\x16\x41uthRoleDeleteResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"O\n\x1f\x41uthRoleGrantPermissionResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"P\n AuthRoleRevokePermissionResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader*\"\n\tAlarmType\x12\x08\n\x04NONE\x10\x00\x12\x0b\n\x07NOSPACE\x10\x01\x32\xea\x02\n\x02KV\x12\x42\n\x05Range\x12\x1a.etcdserverpb.RangeRequest\x1a\x1b.etcdserverpb.RangeResponse\"\x00\x12<\n\x03Put\x12\x18.etcdserverpb.PutRequest\x1a\x19.etcdserverpb.PutResponse\"\x00\x12T\n\x0b\x44\x65leteRange\x12 .etcdserverpb.DeleteRangeRequest\x1a!.etcdserverpb.DeleteRangeResponse\"\x00\x12<\n\x03Txn\x12\x18.etcdserverpb.TxnRequest\x1a\x19.etcdserverpb.TxnResponse\"\x00\x12N\n\x07\x43ompact\x12\x1f.etcdserverpb.CompactionRequest\x1a .etcdserverpb.CompactionResponse\"\x00\x32O\n\x05Watch\x12\x46\n\x05Watch\x12\x1a.etcdserverpb.WatchRequest\x1a\x1b.etcdserverpb.WatchResponse\"\x00(\x01\x30\x01\x32\xf5\x02\n\x05Lease\x12Q\n\nLeaseGrant\x12\x1f.etcdserverpb.LeaseGrantRequest\x1a .etcdserverpb.LeaseGrantResponse\"\x00\x12T\n\x0bLeaseRevoke\x12 .etcdserverpb.LeaseRevokeRequest\x1a!.etcdserverpb.LeaseRevokeResponse\"\x00\x12\x61\n\x0eLeaseKeepAlive\x12#.etcdserverpb.LeaseKeepAliveRequest\x1a$.etcdserverpb.LeaseKeepAliveResponse\"\x00(\x01\x30\x01\x12`\n\x0fLeaseTimeToLive\x12$.etcdserverpb.LeaseTimeToLiveRequest\x1a%.etcdserverpb.LeaseTimeToLiveResponse\"\x00\x32\xde\x02\n\x07\x43luster\x12N\n\tMemberAdd\x12\x1e.etcdserverpb.MemberAddRequest\x1a\x1f.etcdserverpb.MemberAddResponse\"\x00\x12W\n\x0cMemberRemove\x12!.etcdserverpb.MemberRemoveRequest\x1a\".etcdserverpb.MemberRemoveResponse\"\x00\x12W\n\x0cMemberUpdate\x12!.etcdserverpb.MemberUpdateRequest\x1a\".etcdserverpb.MemberUpdateResponse\"\x00\x12Q\n\nMemberList\x12\x1f.etcdserverpb.MemberListRequest\x1a .etcdserverpb.MemberListResponse\"\x00\x32\xfb\x02\n\x0bMaintenance\x12\x42\n\x05\x41larm\x12\x1a.etcdserverpb.AlarmRequest\x1a\x1b.etcdserverpb.AlarmResponse\"\x00\x12\x45\n\x06Status\x12\x1b.etcdserverpb.StatusRequest\x1a\x1c.etcdserverpb.StatusResponse\"\x00\x12Q\n\nDefragment\x12\x1f.etcdserverpb.DefragmentRequest\x1a .etcdserverpb.DefragmentResponse\"\x00\x12?\n\x04Hash\x12\x19.etcdserverpb.HashRequest\x1a\x1a.etcdserverpb.HashResponse\"\x00\x12M\n\x08Snapshot\x12\x1d.etcdserverpb.SnapshotRequest\x1a\x1e.etcdserverpb.SnapshotResponse\"\x00\x30\x01\x32\xdd\x0b\n\x04\x41uth\x12Q\n\nAuthEnable\x12\x1f.etcdserverpb.AuthEnableRequest\x1a .etcdserverpb.AuthEnableResponse\"\x00\x12T\n\x0b\x41uthDisable\x12 .etcdserverpb.AuthDisableRequest\x1a!.etcdserverpb.AuthDisableResponse\"\x00\x12W\n\x0c\x41uthenticate\x12!.etcdserverpb.AuthenticateRequest\x1a\".etcdserverpb.AuthenticateResponse\"\x00\x12P\n\x07UserAdd\x12 .etcdserverpb.AuthUserAddRequest\x1a!.etcdserverpb.AuthUserAddResponse\"\x00\x12P\n\x07UserGet\x12 .etcdserverpb.AuthUserGetRequest\x1a!.etcdserverpb.AuthUserGetResponse\"\x00\x12S\n\x08UserList\x12!.etcdserverpb.AuthUserListRequest\x1a\".etcdserverpb.AuthUserListResponse\"\x00\x12Y\n\nUserDelete\x12#.etcdserverpb.AuthUserDeleteRequest\x1a$.etcdserverpb.AuthUserDeleteResponse\"\x00\x12q\n\x12UserChangePassword\x12+.etcdserverpb.AuthUserChangePasswordRequest\x1a,.etcdserverpb.AuthUserChangePasswordResponse\"\x00\x12\x62\n\rUserGrantRole\x12&.etcdserverpb.AuthUserGrantRoleRequest\x1a\'.etcdserverpb.AuthUserGrantRoleResponse\"\x00\x12\x65\n\x0eUserRevokeRole\x12\'.etcdserverpb.AuthUserRevokeRoleRequest\x1a(.etcdserverpb.AuthUserRevokeRoleResponse\"\x00\x12P\n\x07RoleAdd\x12 .etcdserverpb.AuthRoleAddRequest\x1a!.etcdserverpb.AuthRoleAddResponse\"\x00\x12P\n\x07RoleGet\x12 .etcdserverpb.AuthRoleGetRequest\x1a!.etcdserverpb.AuthRoleGetResponse\"\x00\x12S\n\x08RoleList\x12!.etcdserverpb.AuthRoleListRequest\x1a\".etcdserverpb.AuthRoleListResponse\"\x00\x12Y\n\nRoleDelete\x12#.etcdserverpb.AuthRoleDeleteRequest\x1a$.etcdserverpb.AuthRoleDeleteResponse\"\x00\x12t\n\x13RoleGrantPermission\x12,.etcdserverpb.AuthRoleGrantPermissionRequest\x1a-.etcdserverpb.AuthRoleGrantPermissionResponse\"\x00\x12w\n\x14RoleRevokePermission\x12-.etcdserverpb.AuthRoleRevokePermissionRequest\x1a..etcdserverpb.AuthRoleRevokePermissionResponse\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\trpc.proto\x12\x0c\x65tcdserverpb\x1a\x08kv.proto\x1a\nauth.proto\"\\\n\x0eResponseHeader\x12\x12\n\ncluster_id\x18\x01 \x01(\x04\x12\x11\n\tmember_id\x18\x02 \x01(\x04\x12\x10\n\x08revision\x18\x03 \x01(\x03\x12\x11\n\traft_term\x18\x04 \x01(\x04\"\xe4\x03\n\x0cRangeRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x11\n\trange_end\x18\x02 \x01(\x0c\x12\r\n\x05limit\x18\x03 \x01(\x03\x12\x10\n\x08revision\x18\x04 \x01(\x03\x12\x38\n\nsort_order\x18\x05 \x01(\x0e\x32$.etcdserverpb.RangeRequest.SortOrder\x12:\n\x0bsort_target\x18\x06 \x01(\x0e\x32%.etcdserverpb.RangeRequest.SortTarget\x12\x14\n\x0cserializable\x18\x07 \x01(\x08\x12\x11\n\tkeys_only\x18\x08 \x01(\x08\x12\x12\n\ncount_only\x18\t \x01(\x08\x12\x18\n\x10min_mod_revision\x18\n \x01(\x03\x12\x18\n\x10max_mod_revision\x18\x0b \x01(\x03\x12\x1b\n\x13min_create_revision\x18\x0c \x01(\x03\x12\x1b\n\x13max_create_revision\x18\r \x01(\x03\".\n\tSortOrder\x12\x08\n\x04NONE\x10\x00\x12\n\n\x06\x41SCEND\x10\x01\x12\x0b\n\x07\x44\x45SCEND\x10\x02\"B\n\nSortTarget\x12\x07\n\x03KEY\x10\x00\x12\x0b\n\x07VERSION\x10\x01\x12\n\n\x06\x43REATE\x10\x02\x12\x07\n\x03MOD\x10\x03\x12\t\n\x05VALUE\x10\x04\"y\n\rRangeResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x1d\n\x03kvs\x18\x02 \x03(\x0b\x32\x10.mvccpb.KeyValue\x12\x0c\n\x04more\x18\x03 \x01(\x08\x12\r\n\x05\x63ount\x18\x04 \x01(\x03\"t\n\nPutRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\r\n\x05value\x18\x02 \x01(\x0c\x12\r\n\x05lease\x18\x03 \x01(\x03\x12\x0f\n\x07prev_kv\x18\x04 \x01(\x08\x12\x14\n\x0cignore_value\x18\x05 \x01(\x08\x12\x14\n\x0cignore_lease\x18\x06 \x01(\x08\"^\n\x0bPutResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12!\n\x07prev_kv\x18\x02 \x01(\x0b\x32\x10.mvccpb.KeyValue\"E\n\x12\x44\x65leteRangeRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x11\n\trange_end\x18\x02 \x01(\x0c\x12\x0f\n\x07prev_kv\x18\x03 \x01(\x08\"x\n\x13\x44\x65leteRangeResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x0f\n\x07\x64\x65leted\x18\x02 \x01(\x03\x12\"\n\x08prev_kvs\x18\x03 \x03(\x0b\x32\x10.mvccpb.KeyValue\"\xbe\x01\n\tRequestOp\x12\x33\n\rrequest_range\x18\x01 \x01(\x0b\x32\x1a.etcdserverpb.RangeRequestH\x00\x12/\n\x0brequest_put\x18\x02 \x01(\x0b\x32\x18.etcdserverpb.PutRequestH\x00\x12@\n\x14request_delete_range\x18\x03 \x01(\x0b\x32 .etcdserverpb.DeleteRangeRequestH\x00\x42\t\n\x07request\"\xc6\x01\n\nResponseOp\x12\x35\n\x0eresponse_range\x18\x01 \x01(\x0b\x32\x1b.etcdserverpb.RangeResponseH\x00\x12\x31\n\x0cresponse_put\x18\x02 \x01(\x0b\x32\x19.etcdserverpb.PutResponseH\x00\x12\x42\n\x15response_delete_range\x18\x03 \x01(\x0b\x32!.etcdserverpb.DeleteRangeResponseH\x00\x42\n\n\x08response\"\xe7\x02\n\x07\x43ompare\x12\x33\n\x06result\x18\x01 \x01(\x0e\x32#.etcdserverpb.Compare.CompareResult\x12\x33\n\x06target\x18\x02 \x01(\x0e\x32#.etcdserverpb.Compare.CompareTarget\x12\x0b\n\x03key\x18\x03 \x01(\x0c\x12\x11\n\x07version\x18\x04 \x01(\x03H\x00\x12\x19\n\x0f\x63reate_revision\x18\x05 \x01(\x03H\x00\x12\x16\n\x0cmod_revision\x18\x06 \x01(\x03H\x00\x12\x0f\n\x05value\x18\x07 \x01(\x0cH\x00\"@\n\rCompareResult\x12\t\n\x05\x45QUAL\x10\x00\x12\x0b\n\x07GREATER\x10\x01\x12\x08\n\x04LESS\x10\x02\x12\r\n\tNOT_EQUAL\x10\x03\"<\n\rCompareTarget\x12\x0b\n\x07VERSION\x10\x00\x12\n\n\x06\x43REATE\x10\x01\x12\x07\n\x03MOD\x10\x02\x12\t\n\x05VALUE\x10\x03\x42\x0e\n\x0ctarget_union\"\x88\x01\n\nTxnRequest\x12&\n\x07\x63ompare\x18\x01 \x03(\x0b\x32\x15.etcdserverpb.Compare\x12(\n\x07success\x18\x02 \x03(\x0b\x32\x17.etcdserverpb.RequestOp\x12(\n\x07\x66\x61ilure\x18\x03 \x03(\x0b\x32\x17.etcdserverpb.RequestOp\"{\n\x0bTxnResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x11\n\tsucceeded\x18\x02 \x01(\x08\x12+\n\tresponses\x18\x03 \x03(\x0b\x32\x18.etcdserverpb.ResponseOp\"7\n\x11\x43ompactionRequest\x12\x10\n\x08revision\x18\x01 \x01(\x03\x12\x10\n\x08physical\x18\x02 \x01(\x08\"B\n\x12\x43ompactionResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"\r\n\x0bHashRequest\"J\n\x0cHashResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x0c\n\x04hash\x18\x02 \x01(\r\"\x11\n\x0fSnapshotRequest\"g\n\x10SnapshotResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x17\n\x0fremaining_bytes\x18\x02 \x01(\x04\x12\x0c\n\x04\x62lob\x18\x03 \x01(\x0c\"\x97\x01\n\x0cWatchRequest\x12:\n\x0e\x63reate_request\x18\x01 \x01(\x0b\x32 .etcdserverpb.WatchCreateRequestH\x00\x12:\n\x0e\x63\x61ncel_request\x18\x02 \x01(\x0b\x32 .etcdserverpb.WatchCancelRequestH\x00\x42\x0f\n\rrequest_union\"\xdb\x01\n\x12WatchCreateRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x11\n\trange_end\x18\x02 \x01(\x0c\x12\x16\n\x0estart_revision\x18\x03 \x01(\x03\x12\x17\n\x0fprogress_notify\x18\x04 \x01(\x08\x12<\n\x07\x66ilters\x18\x05 \x03(\x0e\x32+.etcdserverpb.WatchCreateRequest.FilterType\x12\x0f\n\x07prev_kv\x18\x06 \x01(\x08\"%\n\nFilterType\x12\t\n\x05NOPUT\x10\x00\x12\x0c\n\x08NODELETE\x10\x01\"&\n\x12WatchCancelRequest\x12\x10\n\x08watch_id\x18\x01 \x01(\x03\"\xc2\x01\n\rWatchResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x10\n\x08watch_id\x18\x02 \x01(\x03\x12\x0f\n\x07\x63reated\x18\x03 \x01(\x08\x12\x10\n\x08\x63\x61nceled\x18\x04 \x01(\x08\x12\x18\n\x10\x63ompact_revision\x18\x05 \x01(\x03\x12\x15\n\rcancel_reason\x18\x06 \x01(\t\x12\x1d\n\x06\x65vents\x18\x0b \x03(\x0b\x32\r.mvccpb.Event\",\n\x11LeaseGrantRequest\x12\x0b\n\x03TTL\x18\x01 \x01(\x03\x12\n\n\x02ID\x18\x02 \x01(\x03\"j\n\x12LeaseGrantResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\n\n\x02ID\x18\x02 \x01(\x03\x12\x0b\n\x03TTL\x18\x03 \x01(\x03\x12\r\n\x05\x65rror\x18\x04 \x01(\t\" \n\x12LeaseRevokeRequest\x12\n\n\x02ID\x18\x01 \x01(\x03\"C\n\x13LeaseRevokeResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"#\n\x15LeaseKeepAliveRequest\x12\n\n\x02ID\x18\x01 \x01(\x03\"_\n\x16LeaseKeepAliveResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\n\n\x02ID\x18\x02 \x01(\x03\x12\x0b\n\x03TTL\x18\x03 \x01(\x03\"2\n\x16LeaseTimeToLiveRequest\x12\n\n\x02ID\x18\x01 \x01(\x03\x12\x0c\n\x04keys\x18\x02 \x01(\x08\"\x82\x01\n\x17LeaseTimeToLiveResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\n\n\x02ID\x18\x02 \x01(\x03\x12\x0b\n\x03TTL\x18\x03 \x01(\x03\x12\x12\n\ngrantedTTL\x18\x04 \x01(\x03\x12\x0c\n\x04keys\x18\x05 \x03(\x0c\"H\n\x06Member\x12\n\n\x02ID\x18\x01 \x01(\x04\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08peerURLs\x18\x03 \x03(\t\x12\x12\n\nclientURLs\x18\x04 \x03(\t\"$\n\x10MemberAddRequest\x12\x10\n\x08peerURLs\x18\x01 \x03(\t\"\x8e\x01\n\x11MemberAddResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12$\n\x06member\x18\x02 \x01(\x0b\x32\x14.etcdserverpb.Member\x12%\n\x07members\x18\x03 \x03(\x0b\x32\x14.etcdserverpb.Member\"!\n\x13MemberRemoveRequest\x12\n\n\x02ID\x18\x01 \x01(\x04\"k\n\x14MemberRemoveResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12%\n\x07members\x18\x02 \x03(\x0b\x32\x14.etcdserverpb.Member\"3\n\x13MemberUpdateRequest\x12\n\n\x02ID\x18\x01 \x01(\x04\x12\x10\n\x08peerURLs\x18\x02 \x03(\t\"k\n\x14MemberUpdateResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12%\n\x07members\x18\x02 \x03(\x0b\x32\x14.etcdserverpb.Member\"\x13\n\x11MemberListRequest\"i\n\x12MemberListResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12%\n\x07members\x18\x02 \x03(\x0b\x32\x14.etcdserverpb.Member\"\x13\n\x11\x44\x65\x66ragmentRequest\"B\n\x12\x44\x65\x66ragmentResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"\xb6\x01\n\x0c\x41larmRequest\x12\x36\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32&.etcdserverpb.AlarmRequest.AlarmAction\x12\x10\n\x08memberID\x18\x02 \x01(\x04\x12&\n\x05\x61larm\x18\x03 \x01(\x0e\x32\x17.etcdserverpb.AlarmType\"4\n\x0b\x41larmAction\x12\x07\n\x03GET\x10\x00\x12\x0c\n\x08\x41\x43TIVATE\x10\x01\x12\x0e\n\nDEACTIVATE\x10\x02\"G\n\x0b\x41larmMember\x12\x10\n\x08memberID\x18\x01 \x01(\x04\x12&\n\x05\x61larm\x18\x02 \x01(\x0e\x32\x17.etcdserverpb.AlarmType\"h\n\rAlarmResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12)\n\x06\x61larms\x18\x02 \x03(\x0b\x32\x19.etcdserverpb.AlarmMember\"\x0f\n\rStatusRequest\"\x94\x01\n\x0eStatusResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x0f\n\x07version\x18\x02 \x01(\t\x12\x0e\n\x06\x64\x62Size\x18\x03 \x01(\x03\x12\x0e\n\x06leader\x18\x04 \x01(\x04\x12\x11\n\traftIndex\x18\x05 \x01(\x04\x12\x10\n\x08raftTerm\x18\x06 \x01(\x04\"\x13\n\x11\x41uthEnableRequest\"\x14\n\x12\x41uthDisableRequest\"5\n\x13\x41uthenticateRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"4\n\x12\x41uthUserAddRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"\"\n\x12\x41uthUserGetRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"%\n\x15\x41uthUserDeleteRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"?\n\x1d\x41uthUserChangePasswordRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"6\n\x18\x41uthUserGrantRoleRequest\x12\x0c\n\x04user\x18\x01 \x01(\t\x12\x0c\n\x04role\x18\x02 \x01(\t\"7\n\x19\x41uthUserRevokeRoleRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04role\x18\x02 \x01(\t\"\"\n\x12\x41uthRoleAddRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\"\n\x12\x41uthRoleGetRequest\x12\x0c\n\x04role\x18\x01 \x01(\t\"\x15\n\x13\x41uthUserListRequest\"\x15\n\x13\x41uthRoleListRequest\"%\n\x15\x41uthRoleDeleteRequest\x12\x0c\n\x04role\x18\x01 \x01(\t\"P\n\x1e\x41uthRoleGrantPermissionRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12 \n\x04perm\x18\x02 \x01(\x0b\x32\x12.authpb.Permission\"O\n\x1f\x41uthRoleRevokePermissionRequest\x12\x0c\n\x04role\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\t\x12\x11\n\trange_end\x18\x03 \x01(\t\"B\n\x12\x41uthEnableResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"C\n\x13\x41uthDisableResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"S\n\x14\x41uthenticateResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05token\x18\x02 \x01(\t\"C\n\x13\x41uthUserAddResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"R\n\x13\x41uthUserGetResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05roles\x18\x02 \x03(\t\"F\n\x16\x41uthUserDeleteResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"N\n\x1e\x41uthUserChangePasswordResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"I\n\x19\x41uthUserGrantRoleResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"J\n\x1a\x41uthUserRevokeRoleResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"C\n\x13\x41uthRoleAddResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"e\n\x13\x41uthRoleGetResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12 \n\x04perm\x18\x02 \x03(\x0b\x32\x12.authpb.Permission\"S\n\x14\x41uthRoleListResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05roles\x18\x02 \x03(\t\"S\n\x14\x41uthUserListResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05users\x18\x02 \x03(\t\"F\n\x16\x41uthRoleDeleteResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"O\n\x1f\x41uthRoleGrantPermissionResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"P\n AuthRoleRevokePermissionResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader*\"\n\tAlarmType\x12\x08\n\x04NONE\x10\x00\x12\x0b\n\x07NOSPACE\x10\x01\x32\xea\x02\n\x02KV\x12\x42\n\x05Range\x12\x1a.etcdserverpb.RangeRequest\x1a\x1b.etcdserverpb.RangeResponse\"\x00\x12<\n\x03Put\x12\x18.etcdserverpb.PutRequest\x1a\x19.etcdserverpb.PutResponse\"\x00\x12T\n\x0b\x44\x65leteRange\x12 .etcdserverpb.DeleteRangeRequest\x1a!.etcdserverpb.DeleteRangeResponse\"\x00\x12<\n\x03Txn\x12\x18.etcdserverpb.TxnRequest\x1a\x19.etcdserverpb.TxnResponse\"\x00\x12N\n\x07\x43ompact\x12\x1f.etcdserverpb.CompactionRequest\x1a .etcdserverpb.CompactionResponse\"\x00\x32O\n\x05Watch\x12\x46\n\x05Watch\x12\x1a.etcdserverpb.WatchRequest\x1a\x1b.etcdserverpb.WatchResponse\"\x00(\x01\x30\x01\x32\xf5\x02\n\x05Lease\x12Q\n\nLeaseGrant\x12\x1f.etcdserverpb.LeaseGrantRequest\x1a .etcdserverpb.LeaseGrantResponse\"\x00\x12T\n\x0bLeaseRevoke\x12 .etcdserverpb.LeaseRevokeRequest\x1a!.etcdserverpb.LeaseRevokeResponse\"\x00\x12\x61\n\x0eLeaseKeepAlive\x12#.etcdserverpb.LeaseKeepAliveRequest\x1a$.etcdserverpb.LeaseKeepAliveResponse\"\x00(\x01\x30\x01\x12`\n\x0fLeaseTimeToLive\x12$.etcdserverpb.LeaseTimeToLiveRequest\x1a%.etcdserverpb.LeaseTimeToLiveResponse\"\x00\x32\xde\x02\n\x07\x43luster\x12N\n\tMemberAdd\x12\x1e.etcdserverpb.MemberAddRequest\x1a\x1f.etcdserverpb.MemberAddResponse\"\x00\x12W\n\x0cMemberRemove\x12!.etcdserverpb.MemberRemoveRequest\x1a\".etcdserverpb.MemberRemoveResponse\"\x00\x12W\n\x0cMemberUpdate\x12!.etcdserverpb.MemberUpdateRequest\x1a\".etcdserverpb.MemberUpdateResponse\"\x00\x12Q\n\nMemberList\x12\x1f.etcdserverpb.MemberListRequest\x1a .etcdserverpb.MemberListResponse\"\x00\x32\xfb\x02\n\x0bMaintenance\x12\x42\n\x05\x41larm\x12\x1a.etcdserverpb.AlarmRequest\x1a\x1b.etcdserverpb.AlarmResponse\"\x00\x12\x45\n\x06Status\x12\x1b.etcdserverpb.StatusRequest\x1a\x1c.etcdserverpb.StatusResponse\"\x00\x12Q\n\nDefragment\x12\x1f.etcdserverpb.DefragmentRequest\x1a .etcdserverpb.DefragmentResponse\"\x00\x12?\n\x04Hash\x12\x19.etcdserverpb.HashRequest\x1a\x1a.etcdserverpb.HashResponse\"\x00\x12M\n\x08Snapshot\x12\x1d.etcdserverpb.SnapshotRequest\x1a\x1e.etcdserverpb.SnapshotResponse\"\x00\x30\x01\x32\xdd\x0b\n\x04\x41uth\x12Q\n\nAuthEnable\x12\x1f.etcdserverpb.AuthEnableRequest\x1a .etcdserverpb.AuthEnableResponse\"\x00\x12T\n\x0b\x41uthDisable\x12 .etcdserverpb.AuthDisableRequest\x1a!.etcdserverpb.AuthDisableResponse\"\x00\x12W\n\x0c\x41uthenticate\x12!.etcdserverpb.AuthenticateRequest\x1a\".etcdserverpb.AuthenticateResponse\"\x00\x12P\n\x07UserAdd\x12 .etcdserverpb.AuthUserAddRequest\x1a!.etcdserverpb.AuthUserAddResponse\"\x00\x12P\n\x07UserGet\x12 .etcdserverpb.AuthUserGetRequest\x1a!.etcdserverpb.AuthUserGetResponse\"\x00\x12S\n\x08UserList\x12!.etcdserverpb.AuthUserListRequest\x1a\".etcdserverpb.AuthUserListResponse\"\x00\x12Y\n\nUserDelete\x12#.etcdserverpb.AuthUserDeleteRequest\x1a$.etcdserverpb.AuthUserDeleteResponse\"\x00\x12q\n\x12UserChangePassword\x12+.etcdserverpb.AuthUserChangePasswordRequest\x1a,.etcdserverpb.AuthUserChangePasswordResponse\"\x00\x12\x62\n\rUserGrantRole\x12&.etcdserverpb.AuthUserGrantRoleRequest\x1a\'.etcdserverpb.AuthUserGrantRoleResponse\"\x00\x12\x65\n\x0eUserRevokeRole\x12\'.etcdserverpb.AuthUserRevokeRoleRequest\x1a(.etcdserverpb.AuthUserRevokeRoleResponse\"\x00\x12P\n\x07RoleAdd\x12 .etcdserverpb.AuthRoleAddRequest\x1a!.etcdserverpb.AuthRoleAddResponse\"\x00\x12P\n\x07RoleGet\x12 .etcdserverpb.AuthRoleGetRequest\x1a!.etcdserverpb.AuthRoleGetResponse\"\x00\x12S\n\x08RoleList\x12!.etcdserverpb.AuthRoleListRequest\x1a\".etcdserverpb.AuthRoleListResponse\"\x00\x12Y\n\nRoleDelete\x12#.etcdserverpb.AuthRoleDeleteRequest\x1a$.etcdserverpb.AuthRoleDeleteResponse\"\x00\x12t\n\x13RoleGrantPermission\x12,.etcdserverpb.AuthRoleGrantPermissionRequest\x1a-.etcdserverpb.AuthRoleGrantPermissionResponse\"\x00\x12w\n\x14RoleRevokePermission\x12-.etcdserverpb.AuthRoleRevokePermissionRequest\x1a..etcdserverpb.AuthRoleRevokePermissionResponse\"\x00\x62\x06proto3')
   ,
   dependencies=[kv__pb2.DESCRIPTOR,auth__pb2.DESCRIPTOR,])
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
@@ -44,8 +44,8 @@ _ALARMTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=6801,
-  serialized_end=6835,
+  serialized_start=7001,
+  serialized_end=7035,
 )
 _sym_db.RegisterEnumDescriptor(_ALARMTYPE)
 
@@ -132,11 +132,15 @@ _COMPARE_COMPARERESULT = _descriptor.EnumDescriptor(
       name='LESS', index=2, number=2,
       options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='NOT_EQUAL', index=3, number=3,
+      options=None,
+      type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=1728,
-  serialized_end=1777,
+  serialized_start=1772,
+  serialized_end=1836,
 )
 _sym_db.RegisterEnumDescriptor(_COMPARE_COMPARERESULT)
 
@@ -165,8 +169,8 @@ _COMPARE_COMPARETARGET = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1779,
-  serialized_end=1839,
+  serialized_start=1838,
+  serialized_end=1898,
 )
 _sym_db.RegisterEnumDescriptor(_COMPARE_COMPARETARGET)
 
@@ -187,8 +191,8 @@ _WATCHCREATEREQUEST_FILTERTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=2798,
-  serialized_end=2835,
+  serialized_start=2857,
+  serialized_end=2894,
 )
 _sym_db.RegisterEnumDescriptor(_WATCHCREATEREQUEST_FILTERTYPE)
 
@@ -213,8 +217,8 @@ _ALARMREQUEST_ALARMACTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=4420,
-  serialized_end=4472,
+  serialized_start=4620,
+  serialized_end=4672,
 )
 _sym_db.RegisterEnumDescriptor(_ALARMREQUEST_ALARMACTION)
 
@@ -475,6 +479,20 @@ _PUTREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='ignore_value', full_name='etcdserverpb.PutRequest.ignore_value', index=4,
+      number=5, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='ignore_lease', full_name='etcdserverpb.PutRequest.ignore_lease', index=5,
+      number=6, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -488,7 +506,7 @@ _PUTREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=753,
-  serialized_end=825,
+  serialized_end=869,
 )
 
 
@@ -525,8 +543,8 @@ _PUTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=827,
-  serialized_end=921,
+  serialized_start=871,
+  serialized_end=965,
 )
 
 
@@ -570,8 +588,8 @@ _DELETERANGEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=923,
-  serialized_end=992,
+  serialized_start=967,
+  serialized_end=1036,
 )
 
 
@@ -615,8 +633,8 @@ _DELETERANGERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=994,
-  serialized_end=1114,
+  serialized_start=1038,
+  serialized_end=1158,
 )
 
 
@@ -663,8 +681,8 @@ _REQUESTOP = _descriptor.Descriptor(
       name='request', full_name='etcdserverpb.RequestOp.request',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1117,
-  serialized_end=1307,
+  serialized_start=1161,
+  serialized_end=1351,
 )
 
 
@@ -711,8 +729,8 @@ _RESPONSEOP = _descriptor.Descriptor(
       name='response', full_name='etcdserverpb.ResponseOp.response',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1310,
-  serialized_end=1508,
+  serialized_start=1354,
+  serialized_end=1552,
 )
 
 
@@ -789,8 +807,8 @@ _COMPARE = _descriptor.Descriptor(
       name='target_union', full_name='etcdserverpb.Compare.target_union',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1511,
-  serialized_end=1855,
+  serialized_start=1555,
+  serialized_end=1914,
 )
 
 
@@ -834,8 +852,8 @@ _TXNREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1858,
-  serialized_end=1994,
+  serialized_start=1917,
+  serialized_end=2053,
 )
 
 
@@ -879,8 +897,8 @@ _TXNRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1996,
-  serialized_end=2119,
+  serialized_start=2055,
+  serialized_end=2178,
 )
 
 
@@ -917,8 +935,8 @@ _COMPACTIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2121,
-  serialized_end=2176,
+  serialized_start=2180,
+  serialized_end=2235,
 )
 
 
@@ -948,8 +966,8 @@ _COMPACTIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2178,
-  serialized_end=2244,
+  serialized_start=2237,
+  serialized_end=2303,
 )
 
 
@@ -972,8 +990,8 @@ _HASHREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2246,
-  serialized_end=2259,
+  serialized_start=2305,
+  serialized_end=2318,
 )
 
 
@@ -1010,8 +1028,8 @@ _HASHRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2261,
-  serialized_end=2335,
+  serialized_start=2320,
+  serialized_end=2394,
 )
 
 
@@ -1034,8 +1052,8 @@ _SNAPSHOTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2337,
-  serialized_end=2354,
+  serialized_start=2396,
+  serialized_end=2413,
 )
 
 
@@ -1079,8 +1097,8 @@ _SNAPSHOTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2356,
-  serialized_end=2459,
+  serialized_start=2415,
+  serialized_end=2518,
 )
 
 
@@ -1120,8 +1138,8 @@ _WATCHREQUEST = _descriptor.Descriptor(
       name='request_union', full_name='etcdserverpb.WatchRequest.request_union',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=2462,
-  serialized_end=2613,
+  serialized_start=2521,
+  serialized_end=2672,
 )
 
 
@@ -1187,8 +1205,8 @@ _WATCHCREATEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2616,
-  serialized_end=2835,
+  serialized_start=2675,
+  serialized_end=2894,
 )
 
 
@@ -1218,8 +1236,8 @@ _WATCHCANCELREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2837,
-  serialized_end=2875,
+  serialized_start=2896,
+  serialized_end=2934,
 )
 
 
@@ -1266,7 +1284,14 @@ _WATCHRESPONSE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='events', full_name='etcdserverpb.WatchResponse.events', index=5,
+      name='cancel_reason', full_name='etcdserverpb.WatchResponse.cancel_reason', index=5,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='events', full_name='etcdserverpb.WatchResponse.events', index=6,
       number=11, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -1284,8 +1309,8 @@ _WATCHRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2878,
-  serialized_end=3049,
+  serialized_start=2937,
+  serialized_end=3131,
 )
 
 
@@ -1322,8 +1347,8 @@ _LEASEGRANTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3051,
-  serialized_end=3095,
+  serialized_start=3133,
+  serialized_end=3177,
 )
 
 
@@ -1374,8 +1399,8 @@ _LEASEGRANTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3097,
-  serialized_end=3203,
+  serialized_start=3179,
+  serialized_end=3285,
 )
 
 
@@ -1405,8 +1430,8 @@ _LEASEREVOKEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3205,
-  serialized_end=3237,
+  serialized_start=3287,
+  serialized_end=3319,
 )
 
 
@@ -1436,8 +1461,8 @@ _LEASEREVOKERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3239,
-  serialized_end=3306,
+  serialized_start=3321,
+  serialized_end=3388,
 )
 
 
@@ -1467,8 +1492,8 @@ _LEASEKEEPALIVEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3308,
-  serialized_end=3343,
+  serialized_start=3390,
+  serialized_end=3425,
 )
 
 
@@ -1512,8 +1537,8 @@ _LEASEKEEPALIVERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3345,
-  serialized_end=3440,
+  serialized_start=3427,
+  serialized_end=3522,
 )
 
 
@@ -1550,8 +1575,8 @@ _LEASETIMETOLIVEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3442,
-  serialized_end=3492,
+  serialized_start=3524,
+  serialized_end=3574,
 )
 
 
@@ -1609,8 +1634,8 @@ _LEASETIMETOLIVERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3495,
-  serialized_end=3625,
+  serialized_start=3577,
+  serialized_end=3707,
 )
 
 
@@ -1661,8 +1686,8 @@ _MEMBER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3627,
-  serialized_end=3699,
+  serialized_start=3709,
+  serialized_end=3781,
 )
 
 
@@ -1692,8 +1717,8 @@ _MEMBERADDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3701,
-  serialized_end=3737,
+  serialized_start=3783,
+  serialized_end=3819,
 )
 
 
@@ -1718,6 +1743,13 @@ _MEMBERADDRESPONSE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='members', full_name='etcdserverpb.MemberAddResponse.members', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -1730,8 +1762,8 @@ _MEMBERADDRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3739,
-  serialized_end=3842,
+  serialized_start=3822,
+  serialized_end=3964,
 )
 
 
@@ -1761,8 +1793,8 @@ _MEMBERREMOVEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3844,
-  serialized_end=3877,
+  serialized_start=3966,
+  serialized_end=3999,
 )
 
 
@@ -1780,6 +1812,13 @@ _MEMBERREMOVERESPONSE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='members', full_name='etcdserverpb.MemberRemoveResponse.members', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -1792,8 +1831,8 @@ _MEMBERREMOVERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3879,
-  serialized_end=3947,
+  serialized_start=4001,
+  serialized_end=4108,
 )
 
 
@@ -1830,8 +1869,8 @@ _MEMBERUPDATEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3949,
-  serialized_end=4000,
+  serialized_start=4110,
+  serialized_end=4161,
 )
 
 
@@ -1849,6 +1888,13 @@ _MEMBERUPDATERESPONSE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='members', full_name='etcdserverpb.MemberUpdateResponse.members', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -1861,8 +1907,8 @@ _MEMBERUPDATERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4002,
-  serialized_end=4070,
+  serialized_start=4163,
+  serialized_end=4270,
 )
 
 
@@ -1885,8 +1931,8 @@ _MEMBERLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4072,
-  serialized_end=4091,
+  serialized_start=4272,
+  serialized_end=4291,
 )
 
 
@@ -1923,8 +1969,8 @@ _MEMBERLISTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4093,
-  serialized_end=4198,
+  serialized_start=4293,
+  serialized_end=4398,
 )
 
 
@@ -1947,8 +1993,8 @@ _DEFRAGMENTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4200,
-  serialized_end=4219,
+  serialized_start=4400,
+  serialized_end=4419,
 )
 
 
@@ -1978,8 +2024,8 @@ _DEFRAGMENTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4221,
-  serialized_end=4287,
+  serialized_start=4421,
+  serialized_end=4487,
 )
 
 
@@ -2024,8 +2070,8 @@ _ALARMREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4290,
-  serialized_end=4472,
+  serialized_start=4490,
+  serialized_end=4672,
 )
 
 
@@ -2062,8 +2108,8 @@ _ALARMMEMBER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4474,
-  serialized_end=4545,
+  serialized_start=4674,
+  serialized_end=4745,
 )
 
 
@@ -2100,8 +2146,8 @@ _ALARMRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4547,
-  serialized_end=4651,
+  serialized_start=4747,
+  serialized_end=4851,
 )
 
 
@@ -2124,8 +2170,8 @@ _STATUSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4653,
-  serialized_end=4668,
+  serialized_start=4853,
+  serialized_end=4868,
 )
 
 
@@ -2190,8 +2236,8 @@ _STATUSRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4671,
-  serialized_end=4819,
+  serialized_start=4871,
+  serialized_end=5019,
 )
 
 
@@ -2214,8 +2260,8 @@ _AUTHENABLEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4821,
-  serialized_end=4840,
+  serialized_start=5021,
+  serialized_end=5040,
 )
 
 
@@ -2238,8 +2284,8 @@ _AUTHDISABLEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4842,
-  serialized_end=4862,
+  serialized_start=5042,
+  serialized_end=5062,
 )
 
 
@@ -2276,8 +2322,8 @@ _AUTHENTICATEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4864,
-  serialized_end=4917,
+  serialized_start=5064,
+  serialized_end=5117,
 )
 
 
@@ -2314,8 +2360,8 @@ _AUTHUSERADDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4919,
-  serialized_end=4971,
+  serialized_start=5119,
+  serialized_end=5171,
 )
 
 
@@ -2345,8 +2391,8 @@ _AUTHUSERGETREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4973,
-  serialized_end=5007,
+  serialized_start=5173,
+  serialized_end=5207,
 )
 
 
@@ -2376,8 +2422,8 @@ _AUTHUSERDELETEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5009,
-  serialized_end=5046,
+  serialized_start=5209,
+  serialized_end=5246,
 )
 
 
@@ -2414,8 +2460,8 @@ _AUTHUSERCHANGEPASSWORDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5048,
-  serialized_end=5111,
+  serialized_start=5248,
+  serialized_end=5311,
 )
 
 
@@ -2452,8 +2498,8 @@ _AUTHUSERGRANTROLEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5113,
-  serialized_end=5167,
+  serialized_start=5313,
+  serialized_end=5367,
 )
 
 
@@ -2490,8 +2536,8 @@ _AUTHUSERREVOKEROLEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5169,
-  serialized_end=5224,
+  serialized_start=5369,
+  serialized_end=5424,
 )
 
 
@@ -2521,8 +2567,8 @@ _AUTHROLEADDREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5226,
-  serialized_end=5260,
+  serialized_start=5426,
+  serialized_end=5460,
 )
 
 
@@ -2552,8 +2598,8 @@ _AUTHROLEGETREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5262,
-  serialized_end=5296,
+  serialized_start=5462,
+  serialized_end=5496,
 )
 
 
@@ -2576,8 +2622,8 @@ _AUTHUSERLISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5298,
-  serialized_end=5319,
+  serialized_start=5498,
+  serialized_end=5519,
 )
 
 
@@ -2600,8 +2646,8 @@ _AUTHROLELISTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5321,
-  serialized_end=5342,
+  serialized_start=5521,
+  serialized_end=5542,
 )
 
 
@@ -2631,8 +2677,8 @@ _AUTHROLEDELETEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5344,
-  serialized_end=5381,
+  serialized_start=5544,
+  serialized_end=5581,
 )
 
 
@@ -2669,8 +2715,8 @@ _AUTHROLEGRANTPERMISSIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5383,
-  serialized_end=5463,
+  serialized_start=5583,
+  serialized_end=5663,
 )
 
 
@@ -2714,8 +2760,8 @@ _AUTHROLEREVOKEPERMISSIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5465,
-  serialized_end=5544,
+  serialized_start=5665,
+  serialized_end=5744,
 )
 
 
@@ -2745,8 +2791,8 @@ _AUTHENABLERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5546,
-  serialized_end=5612,
+  serialized_start=5746,
+  serialized_end=5812,
 )
 
 
@@ -2776,8 +2822,8 @@ _AUTHDISABLERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5614,
-  serialized_end=5681,
+  serialized_start=5814,
+  serialized_end=5881,
 )
 
 
@@ -2814,8 +2860,8 @@ _AUTHENTICATERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5683,
-  serialized_end=5766,
+  serialized_start=5883,
+  serialized_end=5966,
 )
 
 
@@ -2845,8 +2891,8 @@ _AUTHUSERADDRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5768,
-  serialized_end=5835,
+  serialized_start=5968,
+  serialized_end=6035,
 )
 
 
@@ -2883,8 +2929,8 @@ _AUTHUSERGETRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5837,
-  serialized_end=5919,
+  serialized_start=6037,
+  serialized_end=6119,
 )
 
 
@@ -2914,8 +2960,8 @@ _AUTHUSERDELETERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5921,
-  serialized_end=5991,
+  serialized_start=6121,
+  serialized_end=6191,
 )
 
 
@@ -2945,8 +2991,8 @@ _AUTHUSERCHANGEPASSWORDRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5993,
-  serialized_end=6071,
+  serialized_start=6193,
+  serialized_end=6271,
 )
 
 
@@ -2976,8 +3022,8 @@ _AUTHUSERGRANTROLERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6073,
-  serialized_end=6146,
+  serialized_start=6273,
+  serialized_end=6346,
 )
 
 
@@ -3007,8 +3053,8 @@ _AUTHUSERREVOKEROLERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6148,
-  serialized_end=6222,
+  serialized_start=6348,
+  serialized_end=6422,
 )
 
 
@@ -3038,8 +3084,8 @@ _AUTHROLEADDRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6224,
-  serialized_end=6291,
+  serialized_start=6424,
+  serialized_end=6491,
 )
 
 
@@ -3076,8 +3122,8 @@ _AUTHROLEGETRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6293,
-  serialized_end=6394,
+  serialized_start=6493,
+  serialized_end=6594,
 )
 
 
@@ -3114,8 +3160,8 @@ _AUTHROLELISTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6396,
-  serialized_end=6479,
+  serialized_start=6596,
+  serialized_end=6679,
 )
 
 
@@ -3152,8 +3198,8 @@ _AUTHUSERLISTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6481,
-  serialized_end=6564,
+  serialized_start=6681,
+  serialized_end=6764,
 )
 
 
@@ -3183,8 +3229,8 @@ _AUTHROLEDELETERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6566,
-  serialized_end=6636,
+  serialized_start=6766,
+  serialized_end=6836,
 )
 
 
@@ -3214,8 +3260,8 @@ _AUTHROLEGRANTPERMISSIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6638,
-  serialized_end=6717,
+  serialized_start=6838,
+  serialized_end=6917,
 )
 
 
@@ -3245,8 +3291,8 @@ _AUTHROLEREVOKEPERMISSIONRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6719,
-  serialized_end=6799,
+  serialized_start=6919,
+  serialized_end=6999,
 )
 
 _RANGEREQUEST.fields_by_name['sort_order'].enum_type = _RANGEREQUEST_SORTORDER
@@ -3325,8 +3371,11 @@ _LEASEKEEPALIVERESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _LEASETIMETOLIVERESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _MEMBERADDRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _MEMBERADDRESPONSE.fields_by_name['member'].message_type = _MEMBER
+_MEMBERADDRESPONSE.fields_by_name['members'].message_type = _MEMBER
 _MEMBERREMOVERESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
+_MEMBERREMOVERESPONSE.fields_by_name['members'].message_type = _MEMBER
 _MEMBERUPDATERESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
+_MEMBERUPDATERESPONSE.fields_by_name['members'].message_type = _MEMBER
 _MEMBERLISTRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _MEMBERLISTRESPONSE.fields_by_name['members'].message_type = _MEMBER
 _DEFRAGMENTRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
@@ -3986,10 +4035,10 @@ try:
   # THESE ELEMENTS WILL BE DEPRECATED.
   # Please use the generated *_pb2_grpc.py files instead.
   import grpc
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
   from grpc.beta import implementations as beta_implementations
   from grpc.beta import interfaces as beta_interfaces
+  from grpc.framework.common import cardinality
+  from grpc.framework.interfaces.face import utilities as face_utilities
 
 
   class KVStub(object):

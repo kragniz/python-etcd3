@@ -611,6 +611,9 @@ class TestCompares(object):
         version_compare = tx.version(key) == 1
         assert version_compare.op == etcdrpc.Compare.EQUAL
 
+        version_compare = tx.version(key) != 2
+        assert version_compare.op == etcdrpc.Compare.NOT_EQUAL
+
         version_compare = tx.version(key) < 91
         assert version_compare.op == etcdrpc.Compare.LESS
 
@@ -626,6 +629,9 @@ class TestCompares(object):
         value_compare = tx.value(key) == 'b'
         assert value_compare.op == etcdrpc.Compare.EQUAL
 
+        value_compare = tx.value(key) != 'b'
+        assert value_compare.op == etcdrpc.Compare.NOT_EQUAL
+
         value_compare = tx.value(key) < 'b'
         assert value_compare.op == etcdrpc.Compare.LESS
 
@@ -640,6 +646,9 @@ class TestCompares(object):
         mod_compare = tx.mod(key) == -100
         assert mod_compare.op == etcdrpc.Compare.EQUAL
 
+        mod_compare = tx.mod(key) != -100
+        assert mod_compare.op == etcdrpc.Compare.NOT_EQUAL
+
         mod_compare = tx.mod(key) < 19
         assert mod_compare.op == etcdrpc.Compare.LESS
 
@@ -653,6 +662,9 @@ class TestCompares(object):
 
         create_compare = tx.create(key) == 10
         assert create_compare.op == etcdrpc.Compare.EQUAL
+
+        create_compare = tx.create(key) != 10
+        assert create_compare.op == etcdrpc.Compare.NOT_EQUAL
 
         create_compare = tx.create(key) < 155
         assert create_compare.op == etcdrpc.Compare.LESS
