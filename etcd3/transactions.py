@@ -15,6 +15,11 @@ class BaseCompare(object):
         self.op = etcdrpc.Compare.EQUAL
         return self
 
+    def __ne__(self, other):
+        self.value = other
+        self.op = etcdrpc.Compare.NOT_EQUAL
+        return self
+
     def __lt__(self, other):
         self.value = other
         self.op = etcdrpc.Compare.LESS
