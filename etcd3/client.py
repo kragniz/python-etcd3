@@ -526,6 +526,7 @@ class Etcd3Client(object):
                         are true
         :param failure: A list of operations to perform if any of the
                         comparisons are false
+        :return: A tuple of (operation status, responses)
         """
         compare = [c.build_message() for c in compare]
 
