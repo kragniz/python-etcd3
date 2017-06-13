@@ -13,11 +13,11 @@ __email__ = 'louis@kragniz.eu'
 __version__ = '0.6.0'
 
 __all__ = (
+    'etcdrpc',
     'Etcd3Client',
+    'Transactions',
+    'client',
     'Lease',
     'Lock',
     'Member',
-    'Transactions',
-    'client',
-    'etcdrpc',
 )
