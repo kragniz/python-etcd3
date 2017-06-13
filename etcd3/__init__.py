@@ -20,5 +20,4 @@ __all__ = (
     'Transactions',
     'client',
     'etcdrpc',
-    'utils',
 )
