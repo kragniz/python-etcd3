@@ -116,3 +116,31 @@ Then::
 
     $ cd python-etcd3
     $ tox -e genproto
+
+
+Cutting new releases
+--------------------
+
+The release process to PyPi is automated using travis deploys and bumpversion.
+
+1. Check changes since the last release:
+
+   .. code-block:: bash
+
+       $ git log $(git describe --tags --abbrev=0)..HEAD --oneline
+
+2. Bump the version (respecting semver, one of ``major``, ``minor`` or
+   ``patch``):
+
+   .. code-block:: bash
+
+       $ bumpversion patch
+
+3. Push to github:
+
+   .. code-block:: bash
+
+       $ git push
+       $ git push --tags
+
+4. Wait for travis tests to run and deploy to PyPI
