@@ -42,7 +42,9 @@ class Lock(object):
 
         self.key = lock_prefix + self.name
         self.lease = None
-        self.uuid = None
+        # store uuid as bytes, since it avoids having to decode each time we
+        # need to compare
+        self.uuid = uuid.uuid1().bytes
 
     def acquire(self, timeout=10):
         """Acquire the lock.
@@ -53,10 +55,6 @@ class Lock(object):
         :returns: True if the lock has been acquired, False otherwise.
 
         """
-        # store uuid as bytes, since it avoids having to decode each time we
-        # need to compare
-        self.uuid = uuid.uuid1().bytes
-
         stop = (
             tenacity.stop_never
             if timeout is None else tenacity.stop_after_delay(timeout)
