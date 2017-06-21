@@ -444,6 +444,12 @@ class TestEtcd3(object):
         assert lock1.is_acquired() is False
         assert lock2.is_acquired() is True
 
+    def test_lock_double_acquire_release(self, etcd):
+        lock = etcd.lock('lock-8', ttl=10)
+        assert lock.acquire(0) is True
+        assert lock.acquire(0) is False
+        assert lock.release() is True
+
     def test_internal_exception_on_internal_error(self, etcd):
         exception = self.MockedException(grpc.StatusCode.INTERNAL)
         kv_mock = mock.MagicMock()
