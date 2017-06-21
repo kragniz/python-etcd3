@@ -450,6 +450,13 @@ class TestEtcd3(object):
         assert lock.acquire(0) is False
         assert lock.release() is True
 
+    def test_lock_acquire_none(self, etcd):
+        lock = etcd.lock('lock-9', ttl=10)
+        assert lock.acquire(None) is True
+        # This will succeed after 10 seconds since the TTL will expire and the
+        # lock is not refreshed
+        assert lock.acquire(None) is True
+
     def test_internal_exception_on_internal_error(self, etcd):
         exception = self.MockedException(grpc.StatusCode.INTERNAL)
         kv_mock = mock.MagicMock()
