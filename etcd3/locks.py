@@ -61,7 +61,10 @@ class Lock(object):
         )
 
         def wait(previous_attempt_number, delay_since_first_attempt):
-            remaining_timeout = max(timeout - delay_since_first_attempt, 0)
+            if timeout is None:
+                remaining_timeout = None
+            else:
+                remaining_timeout = max(timeout - delay_since_first_attempt, 0)
             # TODO(jd): Wait for a DELETE event to happen: that'd mean the lock
             # has been released, rather than retrying on PUT events too
             try:
