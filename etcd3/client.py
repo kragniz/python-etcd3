@@ -336,7 +336,8 @@ class Etcd3Client(object):
     def status(self):
         """Get the status of the responding member."""
         status_request = etcdrpc.StatusRequest()
-        status_response = self.maintenancestub.Status(status_request)
+        status_response = self.maintenancestub.Status(status_request,
+                                                      self.timeout)
 
         for m in self.members:
             if m.id == status_response.leader:
