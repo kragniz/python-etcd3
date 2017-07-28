@@ -3,7 +3,7 @@ Sphinx==1.6.1
 bumpversion==0.5.3
 coverage==4.4.1
 flake8-import-order==0.12
-flake8==3.3.0
+flake8==3.4.1
 grpcio-tools>=1.2.0
 hypothesis==3.11.6
 pip==9.0.1
