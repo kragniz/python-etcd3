@@ -32,7 +32,7 @@ class BaseCompare(object):
 
     def __repr__(self):
         return "{}: {} {} '{}'".format(self.__class__, self.key,
-                                             self.op, self.value)
+                                       self.op, self.value)
 
     def build_message(self):
         compare = etcdrpc.Compare()
