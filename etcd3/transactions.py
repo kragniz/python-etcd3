@@ -31,7 +31,7 @@ class BaseCompare(object):
         return self
 
     def __repr__(self):
-        return "{}: {}('{}') {} '{}'".format(self.__class__, self.key, 
+        return "{}: {} {} '{}'".format(self.__class__, self.key,
                                              self.op, self.value)
 
     def build_message(self):
