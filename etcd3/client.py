@@ -91,18 +91,25 @@ class Etcd3Client(object):
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None):
         self._url = '{host}:{port}'.format(host=host, port=port)
 
-        cert_params = [c is not None for c in (cert_cert, cert_key, ca_cert)]
-        if all(cert_params):
-            # all the cert parameters are set
-            credentials = self._get_secure_creds(ca_cert,
-                                                 cert_key,
-                                                 cert_cert)
-            self.uses_secure_channel = True
-            self.channel = grpc.secure_channel(self._url, credentials)
-        elif any(cert_params):
-            # some of the cert parameters are set
-            raise ValueError('the parameters cert_cert, cert_key and ca_cert '
-                             'must all be set to use a secure channel')
+        cert_params = [c is not None for c in (cert_cert, cert_key)]
+        if ca_cert is not None:
+            if all(cert_params):
+                credentials = self._get_secure_creds(
+                    ca_cert,
+                    cert_key,
+                    cert_cert
+                )
+                self.uses_secure_channel = True
+                self.channel = grpc.secure_channel(self._url, credentials)
+            elif any(cert_params):
+                # some of the cert parameters are set
+                raise ValueError(
+                    'to use a secure channel ca_cert is required by itself, '
+                    'or cert_cert and cert_key must both be specified.')
+            else:
+                credentials = self._get_secure_creds(ca_cert, None, None)
+                self.uses_secure_channel = True
+                self.channel = grpc.secure_channel(self._url, credentials)
         else:
             self.uses_secure_channel = False
             self.channel = grpc.insecure_channel(self._url)
@@ -116,15 +123,26 @@ class Etcd3Client(object):
         self.maintenancestub = etcdrpc.MaintenanceStub(self.channel)
         self.transactions = Transactions()
 
-    def _get_secure_creds(self, ca_cert, cert_key, cert_cert):
-        with open(ca_cert, 'rb') as ca_cert_file:
-            with open(cert_key, 'rb') as cert_key_file:
-                with open(cert_cert, 'rb') as cert_cert_file:
-                    return grpc.ssl_channel_credentials(
-                        ca_cert_file.read(),
-                        cert_key_file.read(),
-                        cert_cert_file.read()
-                    )
+    def _get_secure_creds(self, ca_cert, cert_key=None, cert_cert=None):
+        cert_key_file = None
+        cert_cert_file = None
+
+        with open(ca_cert, 'rb') as f:
+            ca_cert_file = f.read()
+
+        if cert_key is not None:
+            with open(cert_key, 'rb') as f:
+                cert_key_file = f.read()
+
+        if cert_cert is not None:
+            with open(cert_cert, 'rb') as f:
+                cert_cert_file = f.read()
+
+        return grpc.ssl_channel_credentials(
+            ca_cert_file,
+            cert_key_file,
+            cert_cert_file
+        )
 
     def _build_get_range_request(self, key,
                                  range_end=None,
