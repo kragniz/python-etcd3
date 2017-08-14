@@ -1,25 +1,22 @@
 language: python
-python: 3.5
+python:
+    - 2.7
+    - 3.4
+    - 3.5
+    - 3.6
 
 env:
-  global:
-    - ETCD_VERSION=v3.1.8
   matrix:
-    - TOXENV=py35
-    - TOXENV=py34
-    - TOXENV=py27
-    - TOXENV=flake8
-
-    - TOXENV=py35 ETCD_VERSION=v3.2.0
-    - TOXENV=py27 ETCD_VERSION=v3.2.0
+    - ETCD_VERSION=v3.1.8
+    - ETCD_VERSION=v3.2.0
 
 install:
-    - pip install -U tox codecov
+    - pip install -U tox tox-travis codecov
     - curl -L https://github.com/coreos/etcd/releases/download/$ETCD_VERSION/etcd-$ETCD_VERSION-linux-amd64.tar.gz -o etcd-$ETCD_VERSION-linux-amd64.tar.gz
     - tar xzvf etcd-$ETCD_VERSION-linux-amd64.tar.gz
     - export PATH=$PATH:etcd-$ETCD_VERSION-linux-amd64
 
-script: tox -e ${TOXENV}
+script: tox
 
 after_success:
       - codecov
