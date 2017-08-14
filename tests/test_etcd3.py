@@ -609,10 +609,38 @@ class TestClient(object):
             etcd._build_get_range_request(key, sort_order='feelsbadman')
 
     def test_secure_channel(self):
-        client = etcd3.client(ca_cert="tests/ca.crt",
-                              cert_key="tests/client.key",
-                              cert_cert="tests/client.crt")
+        client = etcd3.client(
+            ca_cert="tests/ca.crt",
+            cert_key="tests/client.key",
+            cert_cert="tests/client.crt"
+        )
         assert client.uses_secure_channel is True
+
+    def test_secure_channel_ca_cert_only(self):
+        client = etcd3.client(
+            ca_cert="tests/ca.crt",
+            cert_key=None,
+            cert_cert=None
+        )
+        assert client.uses_secure_channel is True
+
+    def test_secure_channel_ca_cert_and_key_raise_exception(self):
+        with pytest.raises(ValueError):
+            etcd3.client(
+                ca_cert='tests/ca.crt',
+                cert_key='tests/client.crt',
+                cert_cert=None)
+
+        with pytest.raises(ValueError):
+            etcd3.client(
+                ca_cert='tests/ca.crt',
+                cert_key=None,
+                cert_cert='tests/client.crt')
+
+    def test_compact(self, etcd):
+        etcd.compact(1)
+        with pytest.raises(grpc.RpcError):
+            etcd.compact(1)
 
 
 class TestCompares(object):
