@@ -24,7 +24,7 @@ _EXCEPTIONS_BY_CODE = {
 }
 
 
-def _translate_exeption(exc):
+def _translate_exception(exc):
     code = exc.code()
     exception = _EXCEPTIONS_BY_CODE.get(code)
     if exception is None:
@@ -39,13 +39,13 @@ def _handle_errors(f):
                 for data in f(*args, **kwargs):
                     yield data
             except grpc.RpcError as exc:
-                _translate_exeption(exc)
+                _translate_exception(exc)
     else:
         def handler(*args, **kwargs):
             try:
                 return f(*args, **kwargs)
             except grpc.RpcError as exc:
-                _translate_exeption(exc)
+                _translate_exception(exc)
 
     return functools.wraps(f)(handler)
 
@@ -741,7 +741,7 @@ class Etcd3Client(object):
         """Create an alarm.
 
         If no member id is given, the alarm is activated for all the
-        memebers of the cluster. Only the `no space` alarm can be raised.
+        members of the cluster. Only the `no space` alarm can be raised.
 
         :param member_id: The cluster member id to create an alarm to.
                           If 0, the alarm is created for all the members
@@ -761,7 +761,7 @@ class Etcd3Client(object):
     def list_alarms(self, member_id=0, alarm_type='none'):
         """List the activated alarms.
 
-        :param: member_id:
+        :param member_id:
         :param alarm_type: The cluster member id to create an alarm to.
                            If 0, the alarm is created for all the members
                            of the cluster.
