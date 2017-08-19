@@ -154,6 +154,68 @@ class TestEtcd3(object):
 
         t.join()
 
+    def test_watch_key_with_revision_compacted(self, etcd):
+        etcdctl('put', '/random', '1')  # Some data to compact
+
+        def update_etcd(v):
+            etcdctl('put', '/watchcompation', v)
+            out = etcdctl('get', '/watchcompation')
+            assert base64.b64decode(out['kvs'][0]['value']) == \
+                utils.to_bytes(v)
+
+        def update_key():
+            # sleep to make watch can get the event
+            time.sleep(3)
+            update_etcd('0')
+            time.sleep(1)
+            update_etcd('1')
+            time.sleep(1)
+            update_etcd('2')
+            time.sleep(1)
+            update_etcd('3')
+            time.sleep(1)
+
+        t = threading.Thread(name="update_key", target=update_key)
+        t.start()
+
+        def watch_compacted_revision_test():
+            events_iterator, cancel = etcd.watch(
+                b'/watchcompation', start_revision=1)
+
+            error_raised = False
+            compacted_revision = 0
+            try:
+                next(events_iterator)
+            except Exception as err:
+                error_raised = True
+                assert isinstance(err, etcd3.exceptions.RevisionCompactedError)
+                compacted_revision = err.compacted_revision
+
+            assert error_raised is True
+            assert compacted_revision == 2
+
+            change_count = 0
+            events_iterator, cancel = etcd.watch(
+                b'/watchcompation', start_revision=compacted_revision)
+            for event in events_iterator:
+                assert event.key == b'/watchcompation'
+                assert event.value == \
+                    utils.to_bytes(str(change_count))
+
+                # if cancel worked, we should not receive event 3
+                assert event.value != utils.to_bytes('3')
+
+                change_count += 1
+                if change_count > 2:
+                    cancel()
+
+        # Compact etcd and test watcher
+        etcd.compact(2)
+
+        watch_compacted_revision_test()
+
+        t.join()
+
     def test_watch_exception_during_watch(self, etcd):
         def pass_exception_to_callback(callback):
             time.sleep(1)
@@ -638,9 +700,9 @@ class TestClient(object):
                 cert_cert='tests/client.crt')
 
     def test_compact(self, etcd):
-        etcd.compact(1)
+        etcd.compact(3)
         with pytest.raises(grpc.RpcError):
-            etcd.compact(1)
+            etcd.compact(3)
 
 
 class TestCompares(object):

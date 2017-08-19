@@ -6,6 +6,7 @@ from six.moves import queue
 
 import etcd3.etcdrpc as etcdrpc
 import etcd3.events as events
+import etcd3.exceptions as etcd3_exceptions
 import etcd3.utils as utils
 
 
@@ -51,6 +52,17 @@ class Watcher(threading.Thread):
 
                 callback = self._watch_id_callbacks.get(response.watch_id)
                 if callback:
+                    # The watcher can be safely reused, but adding a new event
+                    # to indicate that the revision is already compacted
+                    # requires api change which would break all users of this
+                    # module. So, raising an exception if a watcher is still
+                    # alive. The caller has to create a new client instance to
+                    # recover would break all users of this module.
+                    if response.compact_revision != 0:
+                        callback(etcd3_exceptions.RevisionCompactedError(
+                            response.compact_revision))
+                        self.cancel(response.watch_id)
+                        continue
                     for event in response.events:
                         callback(events.new_event(event))
         except grpc.RpcError as e:
