@@ -28,6 +28,7 @@ import etcd3
 import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions
 import etcd3.utils as utils
+from etcd3.client import EtcdTokenCallCredentials
 
 etcd_version = os.environ.get('ETCD_VERSION', 'v3.0.10')
 
@@ -47,6 +48,16 @@ def etcdctl(*args):
     print(" ".join(args))
     output = subprocess.check_output(args)
     return json.loads(output.decode('utf-8'))
+
+
+# def etcdctl2(*args):
+#     # endpoint = os.environ.get('PYTHON_ETCD_HTTP_URL')
+#     # if endpoint:
+#     #     args = ['--endpoints', endpoint] + list(args)
+#     # args = ['echo', 'pwd', '|', 'etcdctl', '-w', 'json'] + list(args)
+#     # print(" ".join(args))
+#     output = subprocess.check_output("echo pwd | ./etcdctl user add root")
+#     return json.loads(output.decode('utf-8'))
 
 
 class TestEtcd3(object):
@@ -113,6 +124,25 @@ class TestEtcd3(object):
         assert deleted is False
 
         v, _ = etcd.get('/doot/delete_this')
+        assert v is None
+
+    def test_delete_keys_with_prefix(self, etcd):
+        etcdctl('put', '/foo/1', 'bar')
+        etcdctl('put', '/foo/2', 'baz')
+
+        v, _ = etcd.get('/foo/1')
+        assert v == b'bar'
+
+        v, _ = etcd.get('/foo/2')
+        assert v == b'baz'
+
+        response = etcd.delete_prefix('/foo')
+        assert response.deleted == 2
+
+        v, _ = etcd.get('/foo/1')
+        assert v is None
+
+        v, _ = etcd.get('/foo/2')
         assert v is None
 
     def test_watch_key(self, etcd):
@@ -318,6 +348,12 @@ class TestEtcd3(object):
         )
         out = etcdctl('get', '/doot/txn')
         assert base64.b64decode(out['kvs'][0]['value']) == b'failure'
+
+    def test_ops_to_requests(self, etcd):
+        with pytest.raises(Exception):
+            etcd._ops_to_requests(['not_transaction_type'])
+        with pytest.raises(TypeError):
+            etcd._ops_to_requests(0)
 
     def test_replace_success(self, etcd):
         etcd.put('/doot/thing', 'toot')
@@ -632,6 +668,16 @@ class TestUtils(object):
         assert etcd3.utils.to_bytes('doot') == b'doot'
 
 
+class TestEtcdTokenCallCredentials(object):
+
+    def test_token_callback(self):
+        e = EtcdTokenCallCredentials('foo')
+        callback = mock.MagicMock()
+        e(None, callback)
+        metadata = (('token', 'foo'),)
+        callback.assert_called_once_with(metadata, None)
+
+
 class TestClient(object):
     @pytest.fixture
     def etcd(self):
@@ -703,6 +749,55 @@ class TestClient(object):
         etcd.compact(3)
         with pytest.raises(grpc.RpcError):
             etcd.compact(3)
+
+    def test_channel_with_no_cert(self):
+        client = etcd3.client(
+            ca_cert=None,
+            cert_key=None,
+            cert_cert=None
+        )
+        assert client.uses_secure_channel is False
+
+    @mock.patch('etcdrpc.AuthStub')
+    def test_user_pwd_auth(self, auth_mock):
+        auth_resp_mock = mock.MagicMock()
+        auth_resp_mock.token = 'foo'
+        auth_mock.Authenticate = auth_resp_mock
+        self._enable_auth_in_etcd()
+
+        # Create a client using username and password auth
+        client = etcd3.client(
+            user='root',
+            password='pwd'
+        )
+
+        assert client.call_credentials is not None
+        self._disable_auth_in_etcd()
+
+    def test_user_or_pwd_auth_raises_exception(self):
+        with pytest.raises(Exception):
+            etcd3.client(user='usr')
+
+        with pytest.raises(Exception):
+            etcd3.client(password='pwd')
+
+    def _enable_auth_in_etcd(self):
+        p = subprocess.Popen(
+            ['etcdctl', '-w', 'json', 'user', 'add', 'root'],
+            stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE
+        )
+        password = 'pwd\n'
+        if six.PY3:
+            password = bytes(password, 'utf-8')
+        p.stdin.write(password)
+        p.stdin.write(password)
+        p.stdin.close()
+        subprocess.call(['etcdctl', 'auth', 'enable'])
+
+    def _disable_auth_in_etcd(self):
+        subprocess.call(['etcdctl', 'user', 'remove', 'root'])
+        subprocess.call(['etcdctl', '-u', 'root:pwd', 'auth', 'disable'])
 
 
 class TestCompares(object):
