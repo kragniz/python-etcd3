@@ -30,7 +30,7 @@ import etcd3.exceptions
 import etcd3.utils as utils
 from etcd3.client import EtcdTokenCallCredentials
 
-etcd_version = os.environ.get('ETCD_VERSION', 'v3.0.10')
+etcd_version = os.environ.get('ETCD_VERSION', 'v3.2.8')
 
 os.environ['ETCDCTL_API'] = '3'
 
@@ -435,21 +435,21 @@ class TestEtcd3(object):
         lease = etcd.lease(1)
         lease.revoke()
 
-    @pytest.mark.skipif(not etcd_version.startswith('v3.1'),
-                        reason="requires etcd v3.1")
+    @pytest.mark.skipif(etcd_version.startswith('v3.0'),
+                        reason="requires etcd v3.1 or higher")
     def test_lease_keys_empty(self, etcd):
         lease = etcd.lease(1)
         assert lease.keys == []
 
-    @pytest.mark.skipif(not etcd_version.startswith('v3.1'),
-                        reason="requires etcd v3.1")
+    @pytest.mark.skipif(etcd_version.startswith('v3.0'),
+                        reason="requires etcd v3.1 or higher")
     def test_lease_single_key(self, etcd):
         lease = etcd.lease(1)
         etcd.put('/doot/lease_test', 'this is a lease', lease=lease)
         assert lease.keys == [b'/doot/lease_test']
 
-    @pytest.mark.skipif(not etcd_version.startswith('v3.1'),
-                        reason="requires etcd v3.1")
+    @pytest.mark.skipif(etcd_version.startswith('v3.0'),
+                        reason="requires etcd v3.1 or higher")
     def test_lease_expire(self, etcd):
         key = '/doot/lease_test_expire'
         lease = etcd.lease(1)
