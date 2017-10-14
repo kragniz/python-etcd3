@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to python-etcd3's documentation!
-======================================
+========================================
 
 Contents:
 
@@ -15,7 +15,8 @@ Contents:
    installation
    usage
    contributing
-   authorshistory
+   authors
+   history
 
 Indices and tables
 ==================
