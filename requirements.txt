@@ -1,2 +1,2 @@
 grpcio>=1.2.0
-tenacity==4.4.0
+tenacity==4.7.1
