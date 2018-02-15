@@ -20,6 +20,15 @@ This defaults to localhost, but you can specify the host and port:
 
     etcd = etcd3.client(host='etcd-host-01', port=2379)
 
+If you would like to specify options for the underlying GRPC connection, you can also pass it as a parameter:
+
+.. code-block:: python
+
+    etcd = etcd3.client(grpc_options={
+                            'grpc.http2.true_binary': 1,
+                            'grpc.http2.max_pings_without_data': 0,
+                        }.items())
+
 Putting values into etcd
 ------------------------
 
