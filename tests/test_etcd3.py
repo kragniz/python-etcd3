@@ -102,6 +102,12 @@ class TestEtcd3(object):
         assert returned == b'dootdoot'
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
+    def test_get_have_cluster_revision(self, etcd, string):
+        etcdctl('put', '/doot/' + string, 'dootdoot')
+        _, md = etcd.get('/doot/' + string)
+        assert md.response_header.revision > 0
+
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
     def test_put_key(self, etcd, string):
         etcd.put('/doot/put_1', string)
         out = etcdctl('get', '/doot/put_1')
