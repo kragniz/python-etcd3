@@ -1,7 +1,6 @@
 import logging
 import threading
 
-import attr
 import grpc
 import six
 from six.moves import queue
@@ -179,11 +178,11 @@ class Watcher(object):
         self._request_queue.put(rq)
 
 
-@attr.s
 class _NewWatch(object):
-    callback = attr.ib()
-    id = attr.ib(default=None)
-    err = attr.ib(default=None)
+    def __init__(self, callback):
+        self.callback = callback
+        self.id = None
+        self.err = None
 
 
 def _new_request_iter(_request_queue):
