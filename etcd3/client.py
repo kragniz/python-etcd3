@@ -160,6 +160,7 @@ class Etcd3Client(object):
             etcdrpc.WatchStub(self.channel),
             timeout=self.timeout,
             call_credentials=self.call_credentials,
+            metadata=self.metadata
         )
         self.clusterstub = etcdrpc.ClusterStub(self.channel)
         self.leasestub = etcdrpc.LeaseStub(self.channel)
