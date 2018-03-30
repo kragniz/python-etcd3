@@ -63,12 +63,13 @@ class Transactions(object):
 
 
 class KVMetadata(object):
-    def __init__(self, keyvalue):
+    def __init__(self, keyvalue, header):
         self.key = keyvalue.key
         self.create_revision = keyvalue.create_revision
         self.mod_revision = keyvalue.mod_revision
         self.version = keyvalue.version
         self.lease_id = keyvalue.lease
+        self.response_header = header
 
 
 class Status(object):
@@ -259,7 +260,7 @@ class Etcd3Client(object):
             return None, None
         else:
             kv = range_response.kvs.pop()
-            return kv.value, KVMetadata(kv)
+            return kv.value, KVMetadata(kv, range_response.header)
 
     @_handle_errors
     def get_prefix(self, key_prefix, sort_order=None, sort_target='key'):
@@ -287,7 +288,7 @@ class Etcd3Client(object):
             return
         else:
             for kv in range_response.kvs:
-                yield (kv.value, KVMetadata(kv))
+                yield (kv.value, KVMetadata(kv, range_response.header))
 
     @_handle_errors
     def get_all(self, sort_order=None, sort_target='key'):
@@ -314,7 +315,7 @@ class Etcd3Client(object):
             return
         else:
             for kv in range_response.kvs:
-                yield (kv.value, KVMetadata(kv))
+                yield (kv.value, KVMetadata(kv, range_response.header))
 
     def _build_put_request(self, key, value, lease=None):
         put_request = etcdrpc.PutRequest()
@@ -646,7 +647,8 @@ class Etcd3Client(object):
             elif response_type == 'response_range':
                 range_kvs = []
                 for kv in response.response_range.kvs:
-                    range_kvs.append((kv.value, KVMetadata(kv)))
+                    range_kvs.append((kv.value,
+                                      KVMetadata(kv, txn_response.header)))
 
                 responses.append(range_kvs)
 
