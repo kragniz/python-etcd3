@@ -274,6 +274,7 @@ class Etcd3Client(object):
             key=key_prefix,
             range_end=utils.increment_last_byte(utils.to_bytes(key_prefix)),
             sort_order=sort_order,
+            sort_target=sort_target,
         )
 
         range_response = self.kvstub.Range(
