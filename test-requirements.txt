@@ -9,7 +9,7 @@ hypothesis==3.11.6
 pip==9.0.1
 pytest==3.2.1
 tox==2.7.0
-wheel==0.29.0
+wheel==0.31.0
 flake8-docstrings==1.1.0
 mock==2.0.0
 pifpaf>=0.27.1
