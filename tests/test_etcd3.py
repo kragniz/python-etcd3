@@ -30,7 +30,7 @@ import etcd3.exceptions
 import etcd3.utils as utils
 from etcd3.client import EtcdTokenCallCredentials
 
-etcd_version = os.environ.get('ETCD_VERSION', 'v3.2.8')
+etcd_version = os.environ.get('TEST_ETCD_VERSION', 'v3.2.8')
 
 os.environ['ETCDCTL_API'] = '3'
 
