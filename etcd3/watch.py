@@ -29,7 +29,8 @@ class Watch(object):
 
 class Watcher(threading.Thread):
 
-    def __init__(self, watchstub, timeout=None, call_credentials=None, metadata=None):
+    def __init__(self, watchstub, timeout=None, call_credentials=None,
+                 metadata=None):
         threading.Thread.__init__(self)
         self.timeout = timeout
         self._watch_id_callbacks = {}
