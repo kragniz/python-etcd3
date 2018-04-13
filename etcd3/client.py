@@ -63,12 +63,13 @@ class Transactions(object):
 
 
 class KVMetadata(object):
-    def __init__(self, keyvalue):
+    def __init__(self, keyvalue, header):
         self.key = keyvalue.key
         self.create_revision = keyvalue.create_revision
         self.mod_revision = keyvalue.mod_revision
         self.version = keyvalue.version
         self.lease_id = keyvalue.lease
+        self.response_header = header
 
 
 class Status(object):
@@ -103,6 +104,7 @@ class Etcd3Client(object):
                  user=None, password=None, grpc_options=None):
 
         self._url = '{host}:{port}'.format(host=host, port=port)
+        self.metadata = None
 
         cert_params = [c is not None for c in (cert_cert, cert_key)]
         if ca_cert is not None:
@@ -143,6 +145,7 @@ class Etcd3Client(object):
             )
 
             resp = self.auth_stub.Authenticate(auth_request, self.timeout)
+            self.metadata = (('token', resp.token),)
             self.call_credentials = grpc.metadata_call_credentials(
                 EtcdTokenCallCredentials(resp.token))
 
@@ -157,6 +160,7 @@ class Etcd3Client(object):
             etcdrpc.WatchStub(self.channel),
             timeout=self.timeout,
             call_credentials=self.call_credentials,
+            metadata=self.metadata
         )
         self.clusterstub = etcdrpc.ClusterStub(self.channel)
         self.leasestub = etcdrpc.LeaseStub(self.channel)
@@ -250,13 +254,14 @@ class Etcd3Client(object):
             range_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
         if range_response.count < 1:
             return None, None
         else:
             kv = range_response.kvs.pop()
-            return kv.value, KVMetadata(kv)
+            return kv.value, KVMetadata(kv, range_response.header)
 
     @_handle_errors
     def get_prefix(self, key_prefix, sort_order=None, sort_target='key'):
@@ -271,19 +276,21 @@ class Etcd3Client(object):
             key=key_prefix,
             range_end=utils.increment_last_byte(utils.to_bytes(key_prefix)),
             sort_order=sort_order,
+            sort_target=sort_target,
         )
 
         range_response = self.kvstub.Range(
             range_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
         if range_response.count < 1:
             return
         else:
             for kv in range_response.kvs:
-                yield (kv.value, KVMetadata(kv))
+                yield (kv.value, KVMetadata(kv, range_response.header))
 
     @_handle_errors
     def get_all(self, sort_order=None, sort_target='key'):
@@ -303,13 +310,14 @@ class Etcd3Client(object):
             range_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
         if range_response.count < 1:
             return
         else:
             for kv in range_response.kvs:
-                yield (kv.value, KVMetadata(kv))
+                yield (kv.value, KVMetadata(kv, range_response.header))
 
     def _build_put_request(self, key, value, lease=None):
         put_request = etcdrpc.PutRequest()
@@ -342,6 +350,7 @@ class Etcd3Client(object):
             put_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
     @_handle_errors
@@ -397,6 +406,7 @@ class Etcd3Client(object):
             delete_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
         return delete_response.deleted >= 1
 
@@ -411,6 +421,7 @@ class Etcd3Client(object):
             delete_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
     @_handle_errors
@@ -421,6 +432,7 @@ class Etcd3Client(object):
             status_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
         for m in self.members:
@@ -625,6 +637,7 @@ class Etcd3Client(object):
             transaction_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
         responses = []
@@ -636,7 +649,8 @@ class Etcd3Client(object):
             elif response_type == 'response_range':
                 range_kvs = []
                 for kv in response.response_range.kvs:
-                    range_kvs.append((kv.value, KVMetadata(kv)))
+                    range_kvs.append((kv.value,
+                                      KVMetadata(kv, txn_response.header)))
 
                 responses.append(range_kvs)
 
@@ -662,6 +676,7 @@ class Etcd3Client(object):
             lease_grant_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
         return leases.Lease(lease_id=lease_grant_response.ID,
                             ttl=lease_grant_response.TTL,
@@ -679,6 +694,7 @@ class Etcd3Client(object):
             lease_revoke_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
     @_handle_errors
@@ -688,7 +704,8 @@ class Etcd3Client(object):
         for response in self.leasestub.LeaseKeepAlive(
                 iter(request_stream),
                 self.timeout,
-                credentials=self.call_credentials):
+                credentials=self.call_credentials,
+                metadata=self.metadata):
             yield response
 
     @_handle_errors
@@ -700,6 +717,7 @@ class Etcd3Client(object):
             ttl_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
     @_handle_errors
@@ -732,6 +750,7 @@ class Etcd3Client(object):
             member_add_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
         member = member_add_response.member
@@ -753,6 +772,7 @@ class Etcd3Client(object):
             member_rm_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
     @_handle_errors
@@ -770,6 +790,7 @@ class Etcd3Client(object):
             member_update_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
     @property
@@ -785,6 +806,7 @@ class Etcd3Client(object):
             member_list_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
         for member in member_list_response.members:
@@ -814,6 +836,7 @@ class Etcd3Client(object):
             compact_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
     @_handle_errors
@@ -824,6 +847,7 @@ class Etcd3Client(object):
             defrag_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
     @_handle_errors
@@ -879,6 +903,7 @@ class Etcd3Client(object):
             alarm_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
         return [Alarm(alarm.alarm, alarm.memberID)
@@ -901,6 +926,7 @@ class Etcd3Client(object):
             alarm_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
         for alarm in alarm_response.alarms:
@@ -922,6 +948,7 @@ class Etcd3Client(object):
             alarm_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
         return [Alarm(alarm.alarm, alarm.memberID)
@@ -938,6 +965,7 @@ class Etcd3Client(object):
             snapshot_request,
             self.timeout,
             credentials=self.call_credentials,
+            metadata=self.metadata
         )
 
         for response in snapshot_response:
