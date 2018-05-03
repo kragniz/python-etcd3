@@ -793,17 +793,7 @@ class TestClient(object):
             etcd3.client(password='pwd')
 
     def _enable_auth_in_etcd(self):
-        p = subprocess.Popen(
-            ['etcdctl', '-w', 'json', 'user', 'add', 'root'],
-            stdout=subprocess.PIPE,
-            stdin=subprocess.PIPE
-        )
-        password = 'pwd\n'
-        if six.PY3:
-            password = bytes(password, 'utf-8')
-        p.stdin.write(password)
-        p.stdin.write(password)
-        p.stdin.close()
+        subprocess.call(['etcdctl', '-w', 'json', 'user', 'add', 'root:pwd'])
         subprocess.call(['etcdctl', 'auth', 'enable'])
 
     def _disable_auth_in_etcd(self):
