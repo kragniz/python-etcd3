@@ -276,7 +276,12 @@ class TestEtcd3(object):
                 pass
 
     def test_watch_timeout_on_establishment(self, etcd):
-        foo_etcd = etcd3.client('foo.bar', timeout=3)
+        foo_etcd = etcd3.client(timeout=3)
+
+        def slow_watch_mock(*args, **kwargs):
+            time.sleep(4)
+
+        foo_etcd.watcher._watch_stub.Watch = slow_watch_mock  # noqa
 
         with pytest.raises(etcd3.exceptions.WatchTimedOut):
             foo_etcd.watch('foo')
