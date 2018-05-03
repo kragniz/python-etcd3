@@ -276,7 +276,12 @@ class TestEtcd3(object):
                 pass
 
     def test_watch_timeout_on_establishment(self, etcd):
-        foo_etcd = etcd3.client('foo.bar', timeout=3)
+        foo_etcd = etcd3.client(timeout=3)
+
+        def slow_watch_mock(*args, **kwargs):
+            time.sleep(4)
+
+        foo_etcd.watcher._watch_stub.Watch = slow_watch_mock  # noqa
 
         with pytest.raises(etcd3.exceptions.WatchTimedOut):
             foo_etcd.watch('foo')
@@ -788,17 +793,7 @@ class TestClient(object):
             etcd3.client(password='pwd')
 
     def _enable_auth_in_etcd(self):
-        p = subprocess.Popen(
-            ['etcdctl', '-w', 'json', 'user', 'add', 'root'],
-            stdout=subprocess.PIPE,
-            stdin=subprocess.PIPE
-        )
-        password = 'pwd\n'
-        if six.PY3:
-            password = bytes(password, 'utf-8')
-        p.stdin.write(password)
-        p.stdin.write(password)
-        p.stdin.close()
+        subprocess.call(['etcdctl', '-w', 'json', 'user', 'add', 'root:pwd'])
         subprocess.call(['etcdctl', 'auth', 'enable'])
 
     def _disable_auth_in_etcd(self):

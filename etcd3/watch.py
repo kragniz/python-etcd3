@@ -2,6 +2,7 @@ import logging
 import threading
 
 import grpc
+
 import six
 from six.moves import queue
 
@@ -33,7 +34,8 @@ class Watch(object):
 
 class Watcher(object):
 
-    def __init__(self, watchstub, timeout=None, call_credentials=None, metadata=None):
+    def __init__(self, watchstub, timeout=None, call_credentials=None,
+                 metadata=None):
         self.timeout = timeout
         self._watch_stub = watchstub
         self._credentials = call_credentials
