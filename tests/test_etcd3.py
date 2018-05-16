@@ -24,6 +24,8 @@ import pytest
 import six
 from six.moves.urllib.parse import urlparse
 
+from tenacity import retry, stop_after_attempt, wait_fixed
+
 import etcd3
 import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions
@@ -81,8 +83,14 @@ class TestEtcd3(object):
         else:
             yield etcd3.client()
 
-        # clean up after fixture goes out of scope
-        etcdctl('del', '--prefix', '/')
+        @retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
+        def delete_keys_definitely():
+            # clean up after fixture goes out of scope
+            etcdctl('del', '--prefix', '/')
+            out = etcdctl('get', '--prefix', '/')
+            assert 'kvs' not in out
+
+        delete_keys_definitely()
 
     def test_get_unknown_key(self, etcd):
         value, meta = etcd.get('probably-invalid-key')
