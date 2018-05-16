@@ -514,21 +514,21 @@ class TestEtcd3(object):
         assert lock.acquire(timeout=None) is True
 
     def test_lock_expire(self, etcd):
-        lock = etcd.lock('lock-3', ttl=2)
+        lock = etcd.lock('lock-3', ttl=3)
         assert lock.acquire() is True
         assert etcd.get(lock.key)[0] is not None
         # wait for the lease to expire
-        time.sleep(6)
+        time.sleep(9)
         v, _ = etcd.get(lock.key)
         assert v is None
 
     def test_lock_refresh(self, etcd):
-        lock = etcd.lock('lock-4', ttl=2)
+        lock = etcd.lock('lock-4', ttl=3)
         assert lock.acquire() is True
         assert etcd.get(lock.key)[0] is not None
         # sleep for the same total time as test_lock_expire, but refresh each
         # second
-        for _ in range(6):
+        for _ in range(9):
             time.sleep(1)
             lock.refresh()
 
