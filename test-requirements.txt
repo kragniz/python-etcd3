@@ -1,4 +1,4 @@
-PyYAML==3.12
+PyYAML==4.1
 Sphinx==1.6.3
 bumpversion==0.5.3
 coverage==4.5.1
