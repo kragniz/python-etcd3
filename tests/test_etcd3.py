@@ -104,6 +104,14 @@ class TestEtcd3(object):
         assert returned == string.encode('utf-8')
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
+    def test_get_key_serializable(self, etcd, string):
+        etcdctl('put', '/doot/a_key', string)
+        # Just check the keyword doesn't break
+        # Checking the behaviour would need cluster testing
+        returned, _ = etcd.get('/doot/a_key', serializable=True)
+        assert returned == string.encode('utf-8')
+
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
     def test_get_random_key(self, etcd, string):
         etcdctl('put', '/doot/' + string, 'dootdoot')
         returned, _ = etcd.get('/doot/' + string)
@@ -114,6 +122,16 @@ class TestEtcd3(object):
         etcdctl('put', '/doot/' + string, 'dootdoot')
         _, md = etcd.get('/doot/' + string)
         assert md.response_header.revision > 0
+
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
+    def test_get_key_at_revision(self, etcd, string):
+        etcdctl('put', '/dootee/' + string, 'dootdoot')
+        returned, md = etcd.get('/dootee/' + string)
+        assert returned == b'dootdoot'
+        returned, md = etcd.get('/dootee/' + string,
+                                revision=1)
+        assert returned is None
+        assert md is None
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
     def test_put_key(self, etcd, string):
@@ -400,6 +418,76 @@ class TestEtcd3(object):
         for value, _ in values:
             assert value == b'i am a range'
 
+    def test_get_prefix_limit(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/range{}'.format(i), 'i am a range')
+        for i in range(5):
+            etcdctl('put', '/doot/notrange{}'.format(i), 'i am a not range')
+        values = list(etcd.get_prefix('/doot/range', limit=10))
+        assert len(values) == 10
+        for value, _ in values:
+            assert value == b'i am a range'
+
+    def test_get_prefix_keys(self, etcd):
+        for i in range(10):
+            etcdctl('put', '/doot/range{}'.format(i), 'i am a range')
+
+        for i in range(5):
+            etcdctl('put', '/doot/notrange{}'.format(i), 'i am a not range')
+        keys = list(etcd.get_prefix_keys('/doot/range'))
+        assert len(keys) == 10
+        for i, key in enumerate(keys):
+            assert key == b'/doot/range%d' % i
+
+    def test_count_prefix(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/range{}'.format(i), 'i am a range')
+
+        for i in range(5):
+            etcdctl('put', '/doot/notrange{}'.format(i), 'i am a not range')
+
+        count = etcd.count_prefix('/doot/range')
+        assert count == 20
+
+    def test_get_prefix_filtered_by_revision(self, etcd):
+        for i in range(20):
+            out = etcdctl('put', '/doot/range{}'.format(i), 'i am a range')
+            if i == 0:
+                first_create_revison = out['header']['revision']
+            if i == 19:
+                last_create_revison = out['header']['revision']
+        for i in range(20):
+            out = etcdctl('put', '/doot/range{}'.format(i), 'i am a range')
+            if i == 0:
+                first_mod_revison = out['header']['revision']
+            if i == 19:
+                last_mod_revison = out['header']['revision']
+
+        values = list(etcd.get_prefix(
+            '/doot/range', min_create_revision=first_create_revison))
+        assert len(values) == 20
+        values = list(etcd.get_prefix(
+            '/doot/range', min_create_revision=last_create_revison))
+        assert len(values) == 1
+        values = list(etcd.get_prefix(
+            '/doot/range', max_create_revision=first_create_revison))
+        assert len(values) == 1
+        values = list(etcd.get_prefix(
+            '/doot/range', max_create_revision=last_create_revison))
+        assert len(values) == 20
+        values = list(etcd.get_prefix(
+            '/doot/range', min_mod_revision=first_mod_revison))
+        assert len(values) == 20
+        values = list(etcd.get_prefix(
+            '/doot/range', min_mod_revision=last_mod_revison))
+        assert len(values) == 1
+        values = list(etcd.get_prefix(
+            '/doot/range', max_mod_revision=first_mod_revison))
+        assert len(values) == 1
+        values = list(etcd.get_prefix(
+            '/doot/range', max_mod_revision=last_mod_revison))
+        assert len(values) == 20
+
     def test_all_not_found_error(self, etcd):
         result = list(etcd.get_all())
         assert not result
@@ -421,6 +509,29 @@ class TestEtcd3(object):
         assert len(values) == 25
         for value, _ in values:
             assert value == b'i am in all'
+
+    def test_get_all_keys(self, etcd):
+        for i in range(5):
+            etcdctl('put', '/doot/range{}'.format(i), 'i am in all')
+
+        for i in range(5):
+            etcdctl('put', '/doot/notrange{}'.format(i), 'i am in all')
+        keys = list(etcd.get_all_keys())
+        assert len(keys) == 10
+        for i, key in enumerate(keys):
+            if i < 5:
+                assert key == b'/doot/notrange%d' % i
+            else:
+                assert key == b'/doot/range%d' % (i - 5)
+
+    def test_count_all(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/range{}'.format(i), 'i am in all')
+
+        for i in range(5):
+            etcdctl('put', '/doot/notrange{}'.format(i), 'i am in all')
+        count = etcd.count_all()
+        assert count == 25
 
     def test_sort_order(self, etcd):
         def remove_prefix(string, prefix):
