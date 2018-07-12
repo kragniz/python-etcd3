@@ -492,11 +492,22 @@ class TestEtcd3(object):
         result = list(etcd.get_all())
         assert not result
 
+    def test_all_keys_not_found_error(self, etcd):
+        result = list(etcd.get_all_keys())
+        assert not result
+
     def test_range_not_found_error(self, etcd):
         for i in range(5):
             etcdctl('put', '/doot/notrange{}'.format(i), 'i am a not range')
 
         result = list(etcd.get_prefix('/doot/range'))
+        assert not result
+
+    def test_range_keys_not_found_error(self, etcd):
+        for i in range(5):
+            etcdctl('put', '/doot/notrange{}'.format(i), 'i am a not range')
+
+        result = list(etcd.get_prefix_keys('/doot/range'))
         assert not result
 
     def test_get_all(self, etcd):
