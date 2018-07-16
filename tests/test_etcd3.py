@@ -82,11 +82,13 @@ class TestEtcd3(object):
         timeout = 5
         if endpoint:
             url = urlparse(endpoint)
-            yield etcd3.client(host=url.hostname,
-                               port=url.port,
-                               timeout=timeout)
+            client = etcd3.client(host=url.hostname,
+                                  port=url.port,
+                                  timeout=timeout)
         else:
-            yield etcd3.client()
+            client = etcd3.client()
+        yield client
+        client.close()
 
         @retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
         def delete_keys_definitely():
