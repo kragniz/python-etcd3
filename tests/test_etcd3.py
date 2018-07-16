@@ -14,7 +14,7 @@ import time
 
 import grpc
 
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis.strategies import characters
 
 import mock
@@ -40,6 +40,11 @@ if six.PY2:
     int_types = (int, long)
 else:
     int_types = (int,)
+
+
+# Don't set any deadline in Hypothesis
+settings.register_profile("default", deadline=None)
+settings.load_profile("default")
 
 
 def etcdctl(*args):
