@@ -14,7 +14,7 @@ import time
 
 import grpc
 
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis.strategies import characters
 
 import mock
@@ -23,6 +23,8 @@ import pytest
 
 import six
 from six.moves.urllib.parse import urlparse
+
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 import etcd3
 import etcd3.etcdrpc as etcdrpc
@@ -38,6 +40,11 @@ if six.PY2:
     int_types = (int, long)
 else:
     int_types = (int,)
+
+
+# Don't set any deadline in Hypothesis
+settings.register_profile("default", deadline=None)
+settings.load_profile("default")
 
 
 def etcdctl(*args):
@@ -81,8 +88,14 @@ class TestEtcd3(object):
         else:
             yield etcd3.client()
 
-        # clean up after fixture goes out of scope
-        etcdctl('del', '--prefix', '/')
+        @retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
+        def delete_keys_definitely():
+            # clean up after fixture goes out of scope
+            etcdctl('del', '--prefix', '/')
+            out = etcdctl('get', '--prefix', '/')
+            assert 'kvs' not in out
+
+        delete_keys_definitely()
 
     def test_get_unknown_key(self, etcd):
         value, meta = etcd.get('probably-invalid-key')
@@ -506,21 +519,21 @@ class TestEtcd3(object):
         assert lock.acquire(timeout=None) is True
 
     def test_lock_expire(self, etcd):
-        lock = etcd.lock('lock-3', ttl=2)
+        lock = etcd.lock('lock-3', ttl=3)
         assert lock.acquire() is True
         assert etcd.get(lock.key)[0] is not None
         # wait for the lease to expire
-        time.sleep(6)
+        time.sleep(9)
         v, _ = etcd.get(lock.key)
         assert v is None
 
     def test_lock_refresh(self, etcd):
-        lock = etcd.lock('lock-4', ttl=2)
+        lock = etcd.lock('lock-4', ttl=3)
         assert lock.acquire() is True
         assert etcd.get(lock.key)[0] is not None
         # sleep for the same total time as test_lock_expire, but refresh each
         # second
-        for _ in range(6):
+        for _ in range(9):
             time.sleep(1)
             lock.refresh()
 
