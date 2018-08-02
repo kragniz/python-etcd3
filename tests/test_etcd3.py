@@ -130,6 +130,17 @@ class TestEtcd3(object):
         assert base64.b64decode(out['kvs'][0]['value']) == \
             string.encode('utf-8')
 
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
+    def test_put_has_cluster_revision(self, etcd, string):
+        response = etcd.put('/doot/put_1', string)
+        assert response.header.revision > 0
+
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
+    def test_put_has_prev_kv(self, etcd, string):
+        etcdctl('put', '/doot/put_1', 'old_value')
+        response = etcd.put('/doot/put_1', string, prev_kv=True)
+        assert response.prev_kv.value == b'old_value'
+
     def test_delete_key(self, etcd):
         etcdctl('put', '/doot/delete_this', 'delete pls')
 
@@ -147,6 +158,16 @@ class TestEtcd3(object):
 
         v, _ = etcd.get('/doot/delete_this')
         assert v is None
+
+    def test_delete_has_cluster_revision(self, etcd):
+        response = etcd.delete('/doot/delete_this', return_response=True)
+        assert response.header.revision > 0
+
+    def test_delete_has_prev_kv(self, etcd):
+        etcdctl('put', '/doot/delete_this', 'old_value')
+        response = etcd.delete('/doot/delete_this', prev_kv=True,
+                               return_response=True)
+        assert response.prev_kvs[0].value == b'old_value'
 
     def test_delete_keys_with_prefix(self, etcd):
         etcdctl('put', '/foo/1', 'bar')
