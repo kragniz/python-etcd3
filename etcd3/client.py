@@ -303,6 +303,37 @@ class Etcd3Client(object):
                 yield (kv.value, KVMetadata(kv, range_response.header))
 
     @_handle_errors
+    def get_range(self, range_start, range_end, sort_order=None,
+                  sort_target='key', **kwargs):
+        """
+        Get a range of keys.
+
+        :param range_start: first key in range
+        :param range_end: last key in range
+        :returns: sequence of (value, metadata) tuples
+        """
+        range_request = self._build_get_range_request(
+            key=range_start,
+            range_end=range_end,
+            sort_order=sort_order,
+            sort_target=sort_target,
+            **kwargs
+        )
+
+        range_response = self.kvstub.Range(
+            range_request,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+        if range_response.count < 1:
+            return
+        else:
+            for kv in range_response.kvs:
+                yield (kv.value, KVMetadata(kv, range_response.header))
+
+    @_handle_errors
     def get_all(self, sort_order=None, sort_target='key'):
         """
         Get all keys currently stored in etcd.
