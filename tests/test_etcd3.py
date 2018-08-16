@@ -7,6 +7,7 @@ Tests for `etcd3` module.
 import base64
 import json
 import os
+import string
 import subprocess
 import tempfile
 import threading
@@ -406,6 +407,18 @@ class TestEtcd3(object):
         assert len(values) == 20
         for value, _ in values:
             assert value == b'i am a range'
+
+    def test_get_range(self, etcd):
+        for char in string.ascii_lowercase:
+            if char < 'p':
+                etcdctl('put', '/doot/' + char, 'i am in range')
+            else:
+                etcdctl('put', '/doot/' + char, 'i am not in range')
+
+        values = list(etcd.get_range('/doot/a', '/doot/p'))
+        assert len(values) == 15
+        for value, _ in values:
+            assert value == b'i am in range'
 
     def test_all_not_found_error(self, etcd):
         result = list(etcd.get_all())
