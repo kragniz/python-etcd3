@@ -360,15 +360,17 @@ class Etcd3Client(object):
             for kv in range_response.kvs:
                 yield (kv.value, KVMetadata(kv, range_response.header))
 
-    def _build_put_request(self, key, value, lease=None):
+    def _build_put_request(self, key, value, lease=None, prev_kv=False):
         put_request = etcdrpc.PutRequest()
         put_request.key = utils.to_bytes(key)
         put_request.value = utils.to_bytes(value)
         put_request.lease = utils.lease_to_id(lease)
+        put_request.prev_kv = prev_kv
+
         return put_request
 
     @_handle_errors
-    def put(self, key, value, lease=None):
+    def put(self, key, value, lease=None, prev_kv=False):
         """
         Save a value to etcd.
 
@@ -385,9 +387,14 @@ class Etcd3Client(object):
         :type value: bytes
         :param lease: Lease to associate with this key.
         :type lease: either :class:`.Lease`, or int (ID of lease)
+        :param prev_kv: return the previous key-value pair
+        :type prev_kv: bool
+        :returns: a response containing a header and the prev_kv
+        :rtype: :class:`.rpc_pb2.PutResponse`
         """
-        put_request = self._build_put_request(key, value, lease=lease)
-        self.kvstub.Put(
+        put_request = self._build_put_request(key, value, lease=lease,
+                                              prev_kv=prev_kv)
+        return self.kvstub.Put(
             put_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -422,33 +429,40 @@ class Etcd3Client(object):
 
     def _build_delete_request(self, key,
                               range_end=None,
-                              prev_kv=None):
+                              prev_kv=False):
         delete_request = etcdrpc.DeleteRangeRequest()
         delete_request.key = utils.to_bytes(key)
+        delete_request.prev_kv = prev_kv
 
         if range_end is not None:
             delete_request.range_end = utils.to_bytes(range_end)
 
-        if prev_kv is not None:
-            delete_request.prev_kv = prev_kv
-
         return delete_request
 
     @_handle_errors
-    def delete(self, key):
+    def delete(self, key, prev_kv=False, return_response=False):
         """
         Delete a single key in etcd.
 
         :param key: key in etcd to delete
-        :returns: True if the key has been deleted
+        :param prev_kv: return the deleted key-value pair
+        :type prev_kv: bool
+        :param return_response: return the full response
+        :type return_response: bool
+        :returns: True if the key has been deleted when
+                  ``return_response`` is False and a response containing
+                  a header, the number of deleted keys and prev_kvs when
+                  ``return_response`` is True
         """
-        delete_request = self._build_delete_request(key)
+        delete_request = self._build_delete_request(key, prev_kv=prev_kv)
         delete_response = self.kvstub.DeleteRange(
             delete_request,
             self.timeout,
             credentials=self.call_credentials,
             metadata=self.metadata
         )
+        if return_response:
+            return delete_response
         return delete_response.deleted >= 1
 
     @_handle_errors
@@ -684,8 +698,8 @@ class Etcd3Client(object):
         responses = []
         for response in txn_response.responses:
             response_type = response.WhichOneof('response')
-            if response_type == 'response_put':
-                responses.append(None)
+            if response_type in ['response_put', 'response_delete_range']:
+                responses.append(response)
 
             elif response_type == 'response_range':
                 range_kvs = []
