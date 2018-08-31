@@ -72,10 +72,11 @@ class Mod(BaseCompare):
 
 
 class Put(object):
-    def __init__(self, key, value, lease=None):
+    def __init__(self, key, value, lease=None, prev_kv=False):
         self.key = key
         self.value = value
         self.lease = lease
+        self.prev_kv = prev_kv
 
 
 class Get(object):
@@ -84,5 +85,6 @@ class Get(object):
 
 
 class Delete(object):
-    def __init__(self, key):
+    def __init__(self, key, prev_kv=False):
         self.key = key
+        self.prev_kv = prev_kv
