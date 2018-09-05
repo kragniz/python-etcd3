@@ -638,13 +638,13 @@ class Etcd3Client(object):
                 request_ops.append(request_op)
 
             elif isinstance(op, transactions.Get):
-                request = self._build_get_range_request(op.key)
+                request = self._build_get_range_request(op.key, op.range_end)
                 request_op = etcdrpc.RequestOp(request_range=request)
                 request_ops.append(request_op)
 
             elif isinstance(op, transactions.Delete):
-                request = self._build_delete_request(op.key,
-                                                     prev_kv=op.prev_kv)
+                request = self._build_delete_request(op.key, op.range_end,
+                                                     op.prev_kv)
                 request_op = etcdrpc.RequestOp(request_delete_range=request)
                 request_ops.append(request_op)
 

@@ -80,11 +80,13 @@ class Put(object):
 
 
 class Get(object):
-    def __init__(self, key):
+    def __init__(self, key, range_end=None):
         self.key = key
+        self.range_end = range_end
 
 
 class Delete(object):
-    def __init__(self, key, prev_kv=False):
+    def __init__(self, key, range_end=None, prev_kv=False):
         self.key = key
+        self.range_end = range_end
         self.prev_kv = prev_kv
