@@ -6,7 +6,7 @@ flake8-import-order==0.18
 flake8==3.5.0
 grpcio-tools>=1.2.0
 hypothesis==3.55.3
-pip==9.0.3
+pip==18.1
 pytest==3.5.0
 pycodestyle<2.4.0
 tox==3.0.0
