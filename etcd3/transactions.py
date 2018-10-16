@@ -1,6 +1,13 @@
 import etcd3.etcdrpc as etcdrpc
 import etcd3.utils as utils
 
+_OPERATORS = {
+    etcdrpc.Compare.EQUAL: "==",
+    etcdrpc.Compare.NOT_EQUAL: "!=",
+    etcdrpc.Compare.LESS: "<",
+    etcdrpc.Compare.GREATER: ">"
+}
+
 
 class BaseCompare(object):
     def __init__(self, key):
@@ -32,14 +39,15 @@ class BaseCompare(object):
 
     def __repr__(self):
         return "{}: {} {} '{}'".format(self.__class__, self.key,
-                                       self.op, self.value)
+                                       _OPERATORS.get(self.op),
+                                       self.value)
 
     def build_message(self):
         compare = etcdrpc.Compare()
         compare.key = utils.to_bytes(self.key)
 
         if self.op is None:
-            raise ValueError('op must be one of =, < or >')
+            raise ValueError('op must be one of =, !=, < or >')
 
         compare.result = self.op
 
