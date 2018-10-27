@@ -29,6 +29,12 @@ If you would like to specify options for the underlying GRPC connection, you can
                             'grpc.http2.max_pings_without_data': 0,
                         }.items())
 
+You can provide a configurable prefix for the ETCD client to use while creating the locks.
+
+.. code-block:: python
+
+    etcd = etcd3.client(lock_prefix='/locks')
+
 Putting values into etcd
 ------------------------
 

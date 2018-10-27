@@ -50,6 +50,10 @@ Basic usage:
     with etcd.lock('doot-machine') as lock:
         # do something
 
+    # locks with prefix
+    etcd.lock_prefix = "/locks"
+    lock = etcd.lock('thing')   # Lock will be generated under /locks/thing
+
     # transactions
     etcd.transaction(
         compare=[

@@ -1056,7 +1056,8 @@ class Etcd3Client(object):
 
 def client(host='localhost', port=2379,
            ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
-           user=None, password=None, grpc_options=None):
+           user=None, password=None, grpc_options=None,
+           lock_prefix=None):
     """Return an instance of an Etcd3Client."""
     return Etcd3Client(host=host,
                        port=port,
@@ -1066,4 +1067,5 @@ def client(host='localhost', port=2379,
                        timeout=timeout,
                        user=user,
                        password=password,
-                       grpc_options=grpc_options)
+                       grpc_options=grpc_options,
+                       lock_prefix=lock_prefix)
