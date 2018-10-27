@@ -141,6 +141,13 @@ class TestEtcd3(object):
         response = etcd.put('/doot/put_1', string, prev_kv=True)
         assert response.prev_kv.value == b'old_value'
 
+    def test_lock_prefix_default(self, etcd):
+        assert etcd.lock_prefix is None
+
+    def test_lock_prefix_change(self, etcd):
+        etcd.lock_prefix = "/prefix"
+        assert etcd.lock_prefix == "/prefix"
+
     def test_delete_key(self, etcd):
         etcdctl('put', '/doot/delete_this', 'delete pls')
 
@@ -552,6 +559,15 @@ class TestEtcd3(object):
             for client_url in member.client_urls:
                 assert client_url.startswith('http://')
             assert isinstance(member.id, int_types) is True
+
+    def test_lock_name_without_prefix(self, etcd):
+        lock = etcd.lock('without-prefix', ttl=10)
+        assert lock.key == 'without-prefix'
+
+    def test_lock_name_with_prefix(self, etcd):
+        etcd.lock_prefix = "/prefix"
+        lock = etcd.lock('with-prefix', ttl=10)
+        assert lock.key == '/prefix/with-prefix'
 
     def test_lock_acquire(self, etcd):
         lock = etcd.lock('lock-1', ttl=10)

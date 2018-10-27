@@ -102,8 +102,10 @@ class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
 class Etcd3Client(object):
     def __init__(self, host='localhost', port=2379,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
-                 user=None, password=None, grpc_options=None):
+                 user=None, password=None, grpc_options=None,
+                 lock_prefix=None):
 
+        self._lock_prefix = lock_prefix
         self._url = '{host}:{port}'.format(host=host, port=port)
         self.metadata = None
 
@@ -180,6 +182,14 @@ class Etcd3Client(object):
         
     def __del__(self):
         self.close()
+
+    @property
+    def lock_prefix(self):
+        return self._lock_prefix
+
+    @lock_prefix.setter
+    def lock_prefix(self, lock_prefix):
+        self._lock_prefix = lock_prefix
 
     def _get_secure_creds(self, ca_cert, cert_key=None, cert_cert=None):
         cert_key_file = None

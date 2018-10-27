@@ -4,8 +4,6 @@ import tenacity
 
 from etcd3 import exceptions
 
-lock_prefix = '/locks/'
-
 
 class Lock(object):
     """
@@ -40,7 +38,8 @@ class Lock(object):
         if etcd_client is not None:
             self.etcd_client = etcd_client
 
-        self.key = lock_prefix + self.name
+        _etcd_prefix = self.etcd_client.lock_prefix
+        self.key = "/".join([_etcd_prefix, name]) if _etcd_prefix else name
         self.lease = None
         # store uuid as bytes, since it avoids having to decode each time we
         # need to compare
