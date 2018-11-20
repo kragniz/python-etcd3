@@ -179,7 +179,6 @@ class Etcd3Client(object):
         
     def __del__(self):
         self.close()
-
     def _get_secure_creds(self, ca_cert, cert_key=None, cert_cert=None):
         cert_key_file = None
         cert_cert_file = None
