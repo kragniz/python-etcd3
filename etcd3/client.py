@@ -176,7 +176,7 @@ class Etcd3Client(object):
 
     def __exit__(self, *args):
         self.close()
-        
+
     def __del__(self):
         self.close()
 
