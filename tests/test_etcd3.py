@@ -7,6 +7,7 @@ Tests for `etcd3` module.
 import base64
 import json
 import os
+import string
 import subprocess
 import tempfile
 import threading
@@ -147,6 +148,17 @@ class TestEtcd3(object):
         assert base64.b64decode(out['kvs'][0]['value']) == \
             string.encode('utf-8')
 
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
+    def test_put_has_cluster_revision(self, etcd, string):
+        response = etcd.put('/doot/put_1', string)
+        assert response.header.revision > 0
+
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
+    def test_put_has_prev_kv(self, etcd, string):
+        etcdctl('put', '/doot/put_1', 'old_value')
+        response = etcd.put('/doot/put_1', string, prev_kv=True)
+        assert response.prev_kv.value == b'old_value'
+
     def test_delete_key(self, etcd):
         etcdctl('put', '/doot/delete_this', 'delete pls')
 
@@ -164,6 +176,16 @@ class TestEtcd3(object):
 
         v, _ = etcd.get('/doot/delete_this')
         assert v is None
+
+    def test_delete_has_cluster_revision(self, etcd):
+        response = etcd.delete('/doot/delete_this', return_response=True)
+        assert response.header.revision > 0
+
+    def test_delete_has_prev_kv(self, etcd):
+        etcdctl('put', '/doot/delete_this', 'old_value')
+        response = etcd.delete('/doot/delete_this', prev_kv=True,
+                               return_response=True)
+        assert response.prev_kvs[0].value == b'old_value'
 
     def test_delete_keys_with_prefix(self, etcd):
         etcdctl('put', '/foo/1', 'bar')
@@ -494,6 +516,18 @@ class TestEtcd3(object):
         values = list(etcd.get_prefix(
             '/doot/range', max_mod_revision=last_mod_revison))
         assert len(values) == 20
+
+    def test_get_range(self, etcd):
+        for char in string.ascii_lowercase:
+            if char < 'p':
+                etcdctl('put', '/doot/' + char, 'i am in range')
+            else:
+                etcdctl('put', '/doot/' + char, 'i am not in range')
+
+        values = list(etcd.get_range('/doot/a', '/doot/p'))
+        assert len(values) == 15
+        for value, _ in values:
+            assert value == b'i am in range'
 
     def test_all_not_found_error(self, etcd):
         result = list(etcd.get_all())

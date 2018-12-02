@@ -8,7 +8,6 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-from google.protobuf import descriptor_pb2
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -22,10 +21,10 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='rpc.proto',
   package='etcdserverpb',
   syntax='proto3',
-  serialized_pb=_b('\n\trpc.proto\x12\x0c\x65tcdserverpb\x1a\x08kv.proto\x1a\nauth.proto\"\\\n\x0eResponseHeader\x12\x12\n\ncluster_id\x18\x01 \x01(\x04\x12\x11\n\tmember_id\x18\x02 \x01(\x04\x12\x10\n\x08revision\x18\x03 \x01(\x03\x12\x11\n\traft_term\x18\x04 \x01(\x04\"\xe4\x03\n\x0cRangeRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x11\n\trange_end\x18\x02 \x01(\x0c\x12\r\n\x05limit\x18\x03 \x01(\x03\x12\x10\n\x08revision\x18\x04 \x01(\x03\x12\x38\n\nsort_order\x18\x05 \x01(\x0e\x32$.etcdserverpb.RangeRequest.SortOrder\x12:\n\x0bsort_target\x18\x06 \x01(\x0e\x32%.etcdserverpb.RangeRequest.SortTarget\x12\x14\n\x0cserializable\x18\x07 \x01(\x08\x12\x11\n\tkeys_only\x18\x08 \x01(\x08\x12\x12\n\ncount_only\x18\t \x01(\x08\x12\x18\n\x10min_mod_revision\x18\n \x01(\x03\x12\x18\n\x10max_mod_revision\x18\x0b \x01(\x03\x12\x1b\n\x13min_create_revision\x18\x0c \x01(\x03\x12\x1b\n\x13max_create_revision\x18\r \x01(\x03\".\n\tSortOrder\x12\x08\n\x04NONE\x10\x00\x12\n\n\x06\x41SCEND\x10\x01\x12\x0b\n\x07\x44\x45SCEND\x10\x02\"B\n\nSortTarget\x12\x07\n\x03KEY\x10\x00\x12\x0b\n\x07VERSION\x10\x01\x12\n\n\x06\x43REATE\x10\x02\x12\x07\n\x03MOD\x10\x03\x12\t\n\x05VALUE\x10\x04\"y\n\rRangeResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x1d\n\x03kvs\x18\x02 \x03(\x0b\x32\x10.mvccpb.KeyValue\x12\x0c\n\x04more\x18\x03 \x01(\x08\x12\r\n\x05\x63ount\x18\x04 \x01(\x03\"t\n\nPutRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\r\n\x05value\x18\x02 \x01(\x0c\x12\r\n\x05lease\x18\x03 \x01(\x03\x12\x0f\n\x07prev_kv\x18\x04 \x01(\x08\x12\x14\n\x0cignore_value\x18\x05 \x01(\x08\x12\x14\n\x0cignore_lease\x18\x06 \x01(\x08\"^\n\x0bPutResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12!\n\x07prev_kv\x18\x02 \x01(\x0b\x32\x10.mvccpb.KeyValue\"E\n\x12\x44\x65leteRangeRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x11\n\trange_end\x18\x02 \x01(\x0c\x12\x0f\n\x07prev_kv\x18\x03 \x01(\x08\"x\n\x13\x44\x65leteRangeResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x0f\n\x07\x64\x65leted\x18\x02 \x01(\x03\x12\"\n\x08prev_kvs\x18\x03 \x03(\x0b\x32\x10.mvccpb.KeyValue\"\xbe\x01\n\tRequestOp\x12\x33\n\rrequest_range\x18\x01 \x01(\x0b\x32\x1a.etcdserverpb.RangeRequestH\x00\x12/\n\x0brequest_put\x18\x02 \x01(\x0b\x32\x18.etcdserverpb.PutRequestH\x00\x12@\n\x14request_delete_range\x18\x03 \x01(\x0b\x32 .etcdserverpb.DeleteRangeRequestH\x00\x42\t\n\x07request\"\xc6\x01\n\nResponseOp\x12\x35\n\x0eresponse_range\x18\x01 \x01(\x0b\x32\x1b.etcdserverpb.RangeResponseH\x00\x12\x31\n\x0cresponse_put\x18\x02 \x01(\x0b\x32\x19.etcdserverpb.PutResponseH\x00\x12\x42\n\x15response_delete_range\x18\x03 \x01(\x0b\x32!.etcdserverpb.DeleteRangeResponseH\x00\x42\n\n\x08response\"\xe7\x02\n\x07\x43ompare\x12\x33\n\x06result\x18\x01 \x01(\x0e\x32#.etcdserverpb.Compare.CompareResult\x12\x33\n\x06target\x18\x02 \x01(\x0e\x32#.etcdserverpb.Compare.CompareTarget\x12\x0b\n\x03key\x18\x03 \x01(\x0c\x12\x11\n\x07version\x18\x04 \x01(\x03H\x00\x12\x19\n\x0f\x63reate_revision\x18\x05 \x01(\x03H\x00\x12\x16\n\x0cmod_revision\x18\x06 \x01(\x03H\x00\x12\x0f\n\x05value\x18\x07 \x01(\x0cH\x00\"@\n\rCompareResult\x12\t\n\x05\x45QUAL\x10\x00\x12\x0b\n\x07GREATER\x10\x01\x12\x08\n\x04LESS\x10\x02\x12\r\n\tNOT_EQUAL\x10\x03\"<\n\rCompareTarget\x12\x0b\n\x07VERSION\x10\x00\x12\n\n\x06\x43REATE\x10\x01\x12\x07\n\x03MOD\x10\x02\x12\t\n\x05VALUE\x10\x03\x42\x0e\n\x0ctarget_union\"\x88\x01\n\nTxnRequest\x12&\n\x07\x63ompare\x18\x01 \x03(\x0b\x32\x15.etcdserverpb.Compare\x12(\n\x07success\x18\x02 \x03(\x0b\x32\x17.etcdserverpb.RequestOp\x12(\n\x07\x66\x61ilure\x18\x03 \x03(\x0b\x32\x17.etcdserverpb.RequestOp\"{\n\x0bTxnResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x11\n\tsucceeded\x18\x02 \x01(\x08\x12+\n\tresponses\x18\x03 \x03(\x0b\x32\x18.etcdserverpb.ResponseOp\"7\n\x11\x43ompactionRequest\x12\x10\n\x08revision\x18\x01 \x01(\x03\x12\x10\n\x08physical\x18\x02 \x01(\x08\"B\n\x12\x43ompactionResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"\r\n\x0bHashRequest\"J\n\x0cHashResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x0c\n\x04hash\x18\x02 \x01(\r\"\x11\n\x0fSnapshotRequest\"g\n\x10SnapshotResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x17\n\x0fremaining_bytes\x18\x02 \x01(\x04\x12\x0c\n\x04\x62lob\x18\x03 \x01(\x0c\"\x97\x01\n\x0cWatchRequest\x12:\n\x0e\x63reate_request\x18\x01 \x01(\x0b\x32 .etcdserverpb.WatchCreateRequestH\x00\x12:\n\x0e\x63\x61ncel_request\x18\x02 \x01(\x0b\x32 .etcdserverpb.WatchCancelRequestH\x00\x42\x0f\n\rrequest_union\"\xdb\x01\n\x12WatchCreateRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x11\n\trange_end\x18\x02 \x01(\x0c\x12\x16\n\x0estart_revision\x18\x03 \x01(\x03\x12\x17\n\x0fprogress_notify\x18\x04 \x01(\x08\x12<\n\x07\x66ilters\x18\x05 \x03(\x0e\x32+.etcdserverpb.WatchCreateRequest.FilterType\x12\x0f\n\x07prev_kv\x18\x06 \x01(\x08\"%\n\nFilterType\x12\t\n\x05NOPUT\x10\x00\x12\x0c\n\x08NODELETE\x10\x01\"&\n\x12WatchCancelRequest\x12\x10\n\x08watch_id\x18\x01 \x01(\x03\"\xc2\x01\n\rWatchResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x10\n\x08watch_id\x18\x02 \x01(\x03\x12\x0f\n\x07\x63reated\x18\x03 \x01(\x08\x12\x10\n\x08\x63\x61nceled\x18\x04 \x01(\x08\x12\x18\n\x10\x63ompact_revision\x18\x05 \x01(\x03\x12\x15\n\rcancel_reason\x18\x06 \x01(\t\x12\x1d\n\x06\x65vents\x18\x0b \x03(\x0b\x32\r.mvccpb.Event\",\n\x11LeaseGrantRequest\x12\x0b\n\x03TTL\x18\x01 \x01(\x03\x12\n\n\x02ID\x18\x02 \x01(\x03\"j\n\x12LeaseGrantResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\n\n\x02ID\x18\x02 \x01(\x03\x12\x0b\n\x03TTL\x18\x03 \x01(\x03\x12\r\n\x05\x65rror\x18\x04 \x01(\t\" \n\x12LeaseRevokeRequest\x12\n\n\x02ID\x18\x01 \x01(\x03\"C\n\x13LeaseRevokeResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"#\n\x15LeaseKeepAliveRequest\x12\n\n\x02ID\x18\x01 \x01(\x03\"_\n\x16LeaseKeepAliveResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\n\n\x02ID\x18\x02 \x01(\x03\x12\x0b\n\x03TTL\x18\x03 \x01(\x03\"2\n\x16LeaseTimeToLiveRequest\x12\n\n\x02ID\x18\x01 \x01(\x03\x12\x0c\n\x04keys\x18\x02 \x01(\x08\"\x82\x01\n\x17LeaseTimeToLiveResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\n\n\x02ID\x18\x02 \x01(\x03\x12\x0b\n\x03TTL\x18\x03 \x01(\x03\x12\x12\n\ngrantedTTL\x18\x04 \x01(\x03\x12\x0c\n\x04keys\x18\x05 \x03(\x0c\"H\n\x06Member\x12\n\n\x02ID\x18\x01 \x01(\x04\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08peerURLs\x18\x03 \x03(\t\x12\x12\n\nclientURLs\x18\x04 \x03(\t\"$\n\x10MemberAddRequest\x12\x10\n\x08peerURLs\x18\x01 \x03(\t\"\x8e\x01\n\x11MemberAddResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12$\n\x06member\x18\x02 \x01(\x0b\x32\x14.etcdserverpb.Member\x12%\n\x07members\x18\x03 \x03(\x0b\x32\x14.etcdserverpb.Member\"!\n\x13MemberRemoveRequest\x12\n\n\x02ID\x18\x01 \x01(\x04\"k\n\x14MemberRemoveResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12%\n\x07members\x18\x02 \x03(\x0b\x32\x14.etcdserverpb.Member\"3\n\x13MemberUpdateRequest\x12\n\n\x02ID\x18\x01 \x01(\x04\x12\x10\n\x08peerURLs\x18\x02 \x03(\t\"k\n\x14MemberUpdateResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12%\n\x07members\x18\x02 \x03(\x0b\x32\x14.etcdserverpb.Member\"\x13\n\x11MemberListRequest\"i\n\x12MemberListResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12%\n\x07members\x18\x02 \x03(\x0b\x32\x14.etcdserverpb.Member\"\x13\n\x11\x44\x65\x66ragmentRequest\"B\n\x12\x44\x65\x66ragmentResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"\xb6\x01\n\x0c\x41larmRequest\x12\x36\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32&.etcdserverpb.AlarmRequest.AlarmAction\x12\x10\n\x08memberID\x18\x02 \x01(\x04\x12&\n\x05\x61larm\x18\x03 \x01(\x0e\x32\x17.etcdserverpb.AlarmType\"4\n\x0b\x41larmAction\x12\x07\n\x03GET\x10\x00\x12\x0c\n\x08\x41\x43TIVATE\x10\x01\x12\x0e\n\nDEACTIVATE\x10\x02\"G\n\x0b\x41larmMember\x12\x10\n\x08memberID\x18\x01 \x01(\x04\x12&\n\x05\x61larm\x18\x02 \x01(\x0e\x32\x17.etcdserverpb.AlarmType\"h\n\rAlarmResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12)\n\x06\x61larms\x18\x02 \x03(\x0b\x32\x19.etcdserverpb.AlarmMember\"\x0f\n\rStatusRequest\"\x94\x01\n\x0eStatusResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x0f\n\x07version\x18\x02 \x01(\t\x12\x0e\n\x06\x64\x62Size\x18\x03 \x01(\x03\x12\x0e\n\x06leader\x18\x04 \x01(\x04\x12\x11\n\traftIndex\x18\x05 \x01(\x04\x12\x10\n\x08raftTerm\x18\x06 \x01(\x04\"\x13\n\x11\x41uthEnableRequest\"\x14\n\x12\x41uthDisableRequest\"5\n\x13\x41uthenticateRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"4\n\x12\x41uthUserAddRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"\"\n\x12\x41uthUserGetRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"%\n\x15\x41uthUserDeleteRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"?\n\x1d\x41uthUserChangePasswordRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"6\n\x18\x41uthUserGrantRoleRequest\x12\x0c\n\x04user\x18\x01 \x01(\t\x12\x0c\n\x04role\x18\x02 \x01(\t\"7\n\x19\x41uthUserRevokeRoleRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04role\x18\x02 \x01(\t\"\"\n\x12\x41uthRoleAddRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\"\n\x12\x41uthRoleGetRequest\x12\x0c\n\x04role\x18\x01 \x01(\t\"\x15\n\x13\x41uthUserListRequest\"\x15\n\x13\x41uthRoleListRequest\"%\n\x15\x41uthRoleDeleteRequest\x12\x0c\n\x04role\x18\x01 \x01(\t\"P\n\x1e\x41uthRoleGrantPermissionRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12 \n\x04perm\x18\x02 \x01(\x0b\x32\x12.authpb.Permission\"O\n\x1f\x41uthRoleRevokePermissionRequest\x12\x0c\n\x04role\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\t\x12\x11\n\trange_end\x18\x03 \x01(\t\"B\n\x12\x41uthEnableResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"C\n\x13\x41uthDisableResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"S\n\x14\x41uthenticateResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05token\x18\x02 \x01(\t\"C\n\x13\x41uthUserAddResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"R\n\x13\x41uthUserGetResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05roles\x18\x02 \x03(\t\"F\n\x16\x41uthUserDeleteResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"N\n\x1e\x41uthUserChangePasswordResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"I\n\x19\x41uthUserGrantRoleResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"J\n\x1a\x41uthUserRevokeRoleResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"C\n\x13\x41uthRoleAddResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"e\n\x13\x41uthRoleGetResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12 \n\x04perm\x18\x02 \x03(\x0b\x32\x12.authpb.Permission\"S\n\x14\x41uthRoleListResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05roles\x18\x02 \x03(\t\"S\n\x14\x41uthUserListResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05users\x18\x02 \x03(\t\"F\n\x16\x41uthRoleDeleteResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"O\n\x1f\x41uthRoleGrantPermissionResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"P\n AuthRoleRevokePermissionResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader*\"\n\tAlarmType\x12\x08\n\x04NONE\x10\x00\x12\x0b\n\x07NOSPACE\x10\x01\x32\xea\x02\n\x02KV\x12\x42\n\x05Range\x12\x1a.etcdserverpb.RangeRequest\x1a\x1b.etcdserverpb.RangeResponse\"\x00\x12<\n\x03Put\x12\x18.etcdserverpb.PutRequest\x1a\x19.etcdserverpb.PutResponse\"\x00\x12T\n\x0b\x44\x65leteRange\x12 .etcdserverpb.DeleteRangeRequest\x1a!.etcdserverpb.DeleteRangeResponse\"\x00\x12<\n\x03Txn\x12\x18.etcdserverpb.TxnRequest\x1a\x19.etcdserverpb.TxnResponse\"\x00\x12N\n\x07\x43ompact\x12\x1f.etcdserverpb.CompactionRequest\x1a .etcdserverpb.CompactionResponse\"\x00\x32O\n\x05Watch\x12\x46\n\x05Watch\x12\x1a.etcdserverpb.WatchRequest\x1a\x1b.etcdserverpb.WatchResponse\"\x00(\x01\x30\x01\x32\xf5\x02\n\x05Lease\x12Q\n\nLeaseGrant\x12\x1f.etcdserverpb.LeaseGrantRequest\x1a .etcdserverpb.LeaseGrantResponse\"\x00\x12T\n\x0bLeaseRevoke\x12 .etcdserverpb.LeaseRevokeRequest\x1a!.etcdserverpb.LeaseRevokeResponse\"\x00\x12\x61\n\x0eLeaseKeepAlive\x12#.etcdserverpb.LeaseKeepAliveRequest\x1a$.etcdserverpb.LeaseKeepAliveResponse\"\x00(\x01\x30\x01\x12`\n\x0fLeaseTimeToLive\x12$.etcdserverpb.LeaseTimeToLiveRequest\x1a%.etcdserverpb.LeaseTimeToLiveResponse\"\x00\x32\xde\x02\n\x07\x43luster\x12N\n\tMemberAdd\x12\x1e.etcdserverpb.MemberAddRequest\x1a\x1f.etcdserverpb.MemberAddResponse\"\x00\x12W\n\x0cMemberRemove\x12!.etcdserverpb.MemberRemoveRequest\x1a\".etcdserverpb.MemberRemoveResponse\"\x00\x12W\n\x0cMemberUpdate\x12!.etcdserverpb.MemberUpdateRequest\x1a\".etcdserverpb.MemberUpdateResponse\"\x00\x12Q\n\nMemberList\x12\x1f.etcdserverpb.MemberListRequest\x1a .etcdserverpb.MemberListResponse\"\x00\x32\xfb\x02\n\x0bMaintenance\x12\x42\n\x05\x41larm\x12\x1a.etcdserverpb.AlarmRequest\x1a\x1b.etcdserverpb.AlarmResponse\"\x00\x12\x45\n\x06Status\x12\x1b.etcdserverpb.StatusRequest\x1a\x1c.etcdserverpb.StatusResponse\"\x00\x12Q\n\nDefragment\x12\x1f.etcdserverpb.DefragmentRequest\x1a .etcdserverpb.DefragmentResponse\"\x00\x12?\n\x04Hash\x12\x19.etcdserverpb.HashRequest\x1a\x1a.etcdserverpb.HashResponse\"\x00\x12M\n\x08Snapshot\x12\x1d.etcdserverpb.SnapshotRequest\x1a\x1e.etcdserverpb.SnapshotResponse\"\x00\x30\x01\x32\xdd\x0b\n\x04\x41uth\x12Q\n\nAuthEnable\x12\x1f.etcdserverpb.AuthEnableRequest\x1a .etcdserverpb.AuthEnableResponse\"\x00\x12T\n\x0b\x41uthDisable\x12 .etcdserverpb.AuthDisableRequest\x1a!.etcdserverpb.AuthDisableResponse\"\x00\x12W\n\x0c\x41uthenticate\x12!.etcdserverpb.AuthenticateRequest\x1a\".etcdserverpb.AuthenticateResponse\"\x00\x12P\n\x07UserAdd\x12 .etcdserverpb.AuthUserAddRequest\x1a!.etcdserverpb.AuthUserAddResponse\"\x00\x12P\n\x07UserGet\x12 .etcdserverpb.AuthUserGetRequest\x1a!.etcdserverpb.AuthUserGetResponse\"\x00\x12S\n\x08UserList\x12!.etcdserverpb.AuthUserListRequest\x1a\".etcdserverpb.AuthUserListResponse\"\x00\x12Y\n\nUserDelete\x12#.etcdserverpb.AuthUserDeleteRequest\x1a$.etcdserverpb.AuthUserDeleteResponse\"\x00\x12q\n\x12UserChangePassword\x12+.etcdserverpb.AuthUserChangePasswordRequest\x1a,.etcdserverpb.AuthUserChangePasswordResponse\"\x00\x12\x62\n\rUserGrantRole\x12&.etcdserverpb.AuthUserGrantRoleRequest\x1a\'.etcdserverpb.AuthUserGrantRoleResponse\"\x00\x12\x65\n\x0eUserRevokeRole\x12\'.etcdserverpb.AuthUserRevokeRoleRequest\x1a(.etcdserverpb.AuthUserRevokeRoleResponse\"\x00\x12P\n\x07RoleAdd\x12 .etcdserverpb.AuthRoleAddRequest\x1a!.etcdserverpb.AuthRoleAddResponse\"\x00\x12P\n\x07RoleGet\x12 .etcdserverpb.AuthRoleGetRequest\x1a!.etcdserverpb.AuthRoleGetResponse\"\x00\x12S\n\x08RoleList\x12!.etcdserverpb.AuthRoleListRequest\x1a\".etcdserverpb.AuthRoleListResponse\"\x00\x12Y\n\nRoleDelete\x12#.etcdserverpb.AuthRoleDeleteRequest\x1a$.etcdserverpb.AuthRoleDeleteResponse\"\x00\x12t\n\x13RoleGrantPermission\x12,.etcdserverpb.AuthRoleGrantPermissionRequest\x1a-.etcdserverpb.AuthRoleGrantPermissionResponse\"\x00\x12w\n\x14RoleRevokePermission\x12-.etcdserverpb.AuthRoleRevokePermissionRequest\x1a..etcdserverpb.AuthRoleRevokePermissionResponse\"\x00\x62\x06proto3')
+  serialized_options=None,
+  serialized_pb=_b('\n\trpc.proto\x12\x0c\x65tcdserverpb\x1a\x08kv.proto\x1a\nauth.proto\"\\\n\x0eResponseHeader\x12\x12\n\ncluster_id\x18\x01 \x01(\x04\x12\x11\n\tmember_id\x18\x02 \x01(\x04\x12\x10\n\x08revision\x18\x03 \x01(\x03\x12\x11\n\traft_term\x18\x04 \x01(\x04\"\xe4\x03\n\x0cRangeRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x11\n\trange_end\x18\x02 \x01(\x0c\x12\r\n\x05limit\x18\x03 \x01(\x03\x12\x10\n\x08revision\x18\x04 \x01(\x03\x12\x38\n\nsort_order\x18\x05 \x01(\x0e\x32$.etcdserverpb.RangeRequest.SortOrder\x12:\n\x0bsort_target\x18\x06 \x01(\x0e\x32%.etcdserverpb.RangeRequest.SortTarget\x12\x14\n\x0cserializable\x18\x07 \x01(\x08\x12\x11\n\tkeys_only\x18\x08 \x01(\x08\x12\x12\n\ncount_only\x18\t \x01(\x08\x12\x18\n\x10min_mod_revision\x18\n \x01(\x03\x12\x18\n\x10max_mod_revision\x18\x0b \x01(\x03\x12\x1b\n\x13min_create_revision\x18\x0c \x01(\x03\x12\x1b\n\x13max_create_revision\x18\r \x01(\x03\".\n\tSortOrder\x12\x08\n\x04NONE\x10\x00\x12\n\n\x06\x41SCEND\x10\x01\x12\x0b\n\x07\x44\x45SCEND\x10\x02\"B\n\nSortTarget\x12\x07\n\x03KEY\x10\x00\x12\x0b\n\x07VERSION\x10\x01\x12\n\n\x06\x43REATE\x10\x02\x12\x07\n\x03MOD\x10\x03\x12\t\n\x05VALUE\x10\x04\"y\n\rRangeResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x1d\n\x03kvs\x18\x02 \x03(\x0b\x32\x10.mvccpb.KeyValue\x12\x0c\n\x04more\x18\x03 \x01(\x08\x12\r\n\x05\x63ount\x18\x04 \x01(\x03\"t\n\nPutRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\r\n\x05value\x18\x02 \x01(\x0c\x12\r\n\x05lease\x18\x03 \x01(\x03\x12\x0f\n\x07prev_kv\x18\x04 \x01(\x08\x12\x14\n\x0cignore_value\x18\x05 \x01(\x08\x12\x14\n\x0cignore_lease\x18\x06 \x01(\x08\"^\n\x0bPutResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12!\n\x07prev_kv\x18\x02 \x01(\x0b\x32\x10.mvccpb.KeyValue\"E\n\x12\x44\x65leteRangeRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x11\n\trange_end\x18\x02 \x01(\x0c\x12\x0f\n\x07prev_kv\x18\x03 \x01(\x08\"x\n\x13\x44\x65leteRangeResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x0f\n\x07\x64\x65leted\x18\x02 \x01(\x03\x12\"\n\x08prev_kvs\x18\x03 \x03(\x0b\x32\x10.mvccpb.KeyValue\"\xef\x01\n\tRequestOp\x12\x33\n\rrequest_range\x18\x01 \x01(\x0b\x32\x1a.etcdserverpb.RangeRequestH\x00\x12/\n\x0brequest_put\x18\x02 \x01(\x0b\x32\x18.etcdserverpb.PutRequestH\x00\x12@\n\x14request_delete_range\x18\x03 \x01(\x0b\x32 .etcdserverpb.DeleteRangeRequestH\x00\x12/\n\x0brequest_txn\x18\x04 \x01(\x0b\x32\x18.etcdserverpb.TxnRequestH\x00\x42\t\n\x07request\"\xf9\x01\n\nResponseOp\x12\x35\n\x0eresponse_range\x18\x01 \x01(\x0b\x32\x1b.etcdserverpb.RangeResponseH\x00\x12\x31\n\x0cresponse_put\x18\x02 \x01(\x0b\x32\x19.etcdserverpb.PutResponseH\x00\x12\x42\n\x15response_delete_range\x18\x03 \x01(\x0b\x32!.etcdserverpb.DeleteRangeResponseH\x00\x12\x31\n\x0cresponse_txn\x18\x04 \x01(\x0b\x32\x19.etcdserverpb.TxnResponseH\x00\x42\n\n\x08response\"\x96\x03\n\x07\x43ompare\x12\x33\n\x06result\x18\x01 \x01(\x0e\x32#.etcdserverpb.Compare.CompareResult\x12\x33\n\x06target\x18\x02 \x01(\x0e\x32#.etcdserverpb.Compare.CompareTarget\x12\x0b\n\x03key\x18\x03 \x01(\x0c\x12\x11\n\x07version\x18\x04 \x01(\x03H\x00\x12\x19\n\x0f\x63reate_revision\x18\x05 \x01(\x03H\x00\x12\x16\n\x0cmod_revision\x18\x06 \x01(\x03H\x00\x12\x0f\n\x05value\x18\x07 \x01(\x0cH\x00\x12\x0f\n\x05lease\x18\x08 \x01(\x03H\x00\x12\x11\n\trange_end\x18@ \x01(\x0c\"@\n\rCompareResult\x12\t\n\x05\x45QUAL\x10\x00\x12\x0b\n\x07GREATER\x10\x01\x12\x08\n\x04LESS\x10\x02\x12\r\n\tNOT_EQUAL\x10\x03\"G\n\rCompareTarget\x12\x0b\n\x07VERSION\x10\x00\x12\n\n\x06\x43REATE\x10\x01\x12\x07\n\x03MOD\x10\x02\x12\t\n\x05VALUE\x10\x03\x12\t\n\x05LEASE\x10\x04\x42\x0e\n\x0ctarget_union\"\x88\x01\n\nTxnRequest\x12&\n\x07\x63ompare\x18\x01 \x03(\x0b\x32\x15.etcdserverpb.Compare\x12(\n\x07success\x18\x02 \x03(\x0b\x32\x17.etcdserverpb.RequestOp\x12(\n\x07\x66\x61ilure\x18\x03 \x03(\x0b\x32\x17.etcdserverpb.RequestOp\"{\n\x0bTxnResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x11\n\tsucceeded\x18\x02 \x01(\x08\x12+\n\tresponses\x18\x03 \x03(\x0b\x32\x18.etcdserverpb.ResponseOp\"7\n\x11\x43ompactionRequest\x12\x10\n\x08revision\x18\x01 \x01(\x03\x12\x10\n\x08physical\x18\x02 \x01(\x08\"B\n\x12\x43ompactionResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"\r\n\x0bHashRequest\"!\n\rHashKVRequest\x12\x10\n\x08revision\x18\x01 \x01(\x03\"f\n\x0eHashKVResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x0c\n\x04hash\x18\x02 \x01(\r\x12\x18\n\x10\x63ompact_revision\x18\x03 \x01(\x03\"J\n\x0cHashResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x0c\n\x04hash\x18\x02 \x01(\r\"\x11\n\x0fSnapshotRequest\"g\n\x10SnapshotResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x17\n\x0fremaining_bytes\x18\x02 \x01(\x04\x12\x0c\n\x04\x62lob\x18\x03 \x01(\x0c\"\x97\x01\n\x0cWatchRequest\x12:\n\x0e\x63reate_request\x18\x01 \x01(\x0b\x32 .etcdserverpb.WatchCreateRequestH\x00\x12:\n\x0e\x63\x61ncel_request\x18\x02 \x01(\x0b\x32 .etcdserverpb.WatchCancelRequestH\x00\x42\x0f\n\rrequest_union\"\xdb\x01\n\x12WatchCreateRequest\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x11\n\trange_end\x18\x02 \x01(\x0c\x12\x16\n\x0estart_revision\x18\x03 \x01(\x03\x12\x17\n\x0fprogress_notify\x18\x04 \x01(\x08\x12<\n\x07\x66ilters\x18\x05 \x03(\x0e\x32+.etcdserverpb.WatchCreateRequest.FilterType\x12\x0f\n\x07prev_kv\x18\x06 \x01(\x08\"%\n\nFilterType\x12\t\n\x05NOPUT\x10\x00\x12\x0c\n\x08NODELETE\x10\x01\"&\n\x12WatchCancelRequest\x12\x10\n\x08watch_id\x18\x01 \x01(\x03\"\xc2\x01\n\rWatchResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x10\n\x08watch_id\x18\x02 \x01(\x03\x12\x0f\n\x07\x63reated\x18\x03 \x01(\x08\x12\x10\n\x08\x63\x61nceled\x18\x04 \x01(\x08\x12\x18\n\x10\x63ompact_revision\x18\x05 \x01(\x03\x12\x15\n\rcancel_reason\x18\x06 \x01(\t\x12\x1d\n\x06\x65vents\x18\x0b \x03(\x0b\x32\r.mvccpb.Event\",\n\x11LeaseGrantRequest\x12\x0b\n\x03TTL\x18\x01 \x01(\x03\x12\n\n\x02ID\x18\x02 \x01(\x03\"j\n\x12LeaseGrantResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\n\n\x02ID\x18\x02 \x01(\x03\x12\x0b\n\x03TTL\x18\x03 \x01(\x03\x12\r\n\x05\x65rror\x18\x04 \x01(\t\" \n\x12LeaseRevokeRequest\x12\n\n\x02ID\x18\x01 \x01(\x03\"C\n\x13LeaseRevokeResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"#\n\x15LeaseKeepAliveRequest\x12\n\n\x02ID\x18\x01 \x01(\x03\"_\n\x16LeaseKeepAliveResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\n\n\x02ID\x18\x02 \x01(\x03\x12\x0b\n\x03TTL\x18\x03 \x01(\x03\"2\n\x16LeaseTimeToLiveRequest\x12\n\n\x02ID\x18\x01 \x01(\x03\x12\x0c\n\x04keys\x18\x02 \x01(\x08\"\x82\x01\n\x17LeaseTimeToLiveResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\n\n\x02ID\x18\x02 \x01(\x03\x12\x0b\n\x03TTL\x18\x03 \x01(\x03\x12\x12\n\ngrantedTTL\x18\x04 \x01(\x03\x12\x0c\n\x04keys\x18\x05 \x03(\x0c\"\x14\n\x12LeaseLeasesRequest\"\x19\n\x0bLeaseStatus\x12\n\n\x02ID\x18\x01 \x01(\x03\"n\n\x13LeaseLeasesResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12)\n\x06leases\x18\x02 \x03(\x0b\x32\x19.etcdserverpb.LeaseStatus\"H\n\x06Member\x12\n\n\x02ID\x18\x01 \x01(\x04\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x10\n\x08peerURLs\x18\x03 \x03(\t\x12\x12\n\nclientURLs\x18\x04 \x03(\t\"$\n\x10MemberAddRequest\x12\x10\n\x08peerURLs\x18\x01 \x03(\t\"\x8e\x01\n\x11MemberAddResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12$\n\x06member\x18\x02 \x01(\x0b\x32\x14.etcdserverpb.Member\x12%\n\x07members\x18\x03 \x03(\x0b\x32\x14.etcdserverpb.Member\"!\n\x13MemberRemoveRequest\x12\n\n\x02ID\x18\x01 \x01(\x04\"k\n\x14MemberRemoveResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12%\n\x07members\x18\x02 \x03(\x0b\x32\x14.etcdserverpb.Member\"3\n\x13MemberUpdateRequest\x12\n\n\x02ID\x18\x01 \x01(\x04\x12\x10\n\x08peerURLs\x18\x02 \x03(\t\"k\n\x14MemberUpdateResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12%\n\x07members\x18\x02 \x03(\x0b\x32\x14.etcdserverpb.Member\"\x13\n\x11MemberListRequest\"i\n\x12MemberListResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12%\n\x07members\x18\x02 \x03(\x0b\x32\x14.etcdserverpb.Member\"\x13\n\x11\x44\x65\x66ragmentRequest\"B\n\x12\x44\x65\x66ragmentResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"%\n\x11MoveLeaderRequest\x12\x10\n\x08targetID\x18\x01 \x01(\x04\"B\n\x12MoveLeaderResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"\xb6\x01\n\x0c\x41larmRequest\x12\x36\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32&.etcdserverpb.AlarmRequest.AlarmAction\x12\x10\n\x08memberID\x18\x02 \x01(\x04\x12&\n\x05\x61larm\x18\x03 \x01(\x0e\x32\x17.etcdserverpb.AlarmType\"4\n\x0b\x41larmAction\x12\x07\n\x03GET\x10\x00\x12\x0c\n\x08\x41\x43TIVATE\x10\x01\x12\x0e\n\nDEACTIVATE\x10\x02\"G\n\x0b\x41larmMember\x12\x10\n\x08memberID\x18\x01 \x01(\x04\x12&\n\x05\x61larm\x18\x02 \x01(\x0e\x32\x17.etcdserverpb.AlarmType\"h\n\rAlarmResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12)\n\x06\x61larms\x18\x02 \x03(\x0b\x32\x19.etcdserverpb.AlarmMember\"\x0f\n\rStatusRequest\"\x94\x01\n\x0eStatusResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\x0f\n\x07version\x18\x02 \x01(\t\x12\x0e\n\x06\x64\x62Size\x18\x03 \x01(\x03\x12\x0e\n\x06leader\x18\x04 \x01(\x04\x12\x11\n\traftIndex\x18\x05 \x01(\x04\x12\x10\n\x08raftTerm\x18\x06 \x01(\x04\"\x13\n\x11\x41uthEnableRequest\"\x14\n\x12\x41uthDisableRequest\"5\n\x13\x41uthenticateRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"4\n\x12\x41uthUserAddRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"\"\n\x12\x41uthUserGetRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"%\n\x15\x41uthUserDeleteRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"?\n\x1d\x41uthUserChangePasswordRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"6\n\x18\x41uthUserGrantRoleRequest\x12\x0c\n\x04user\x18\x01 \x01(\t\x12\x0c\n\x04role\x18\x02 \x01(\t\"7\n\x19\x41uthUserRevokeRoleRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0c\n\x04role\x18\x02 \x01(\t\"\"\n\x12\x41uthRoleAddRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\"\n\x12\x41uthRoleGetRequest\x12\x0c\n\x04role\x18\x01 \x01(\t\"\x15\n\x13\x41uthUserListRequest\"\x15\n\x13\x41uthRoleListRequest\"%\n\x15\x41uthRoleDeleteRequest\x12\x0c\n\x04role\x18\x01 \x01(\t\"P\n\x1e\x41uthRoleGrantPermissionRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\x12 \n\x04perm\x18\x02 \x01(\x0b\x32\x12.authpb.Permission\"O\n\x1f\x41uthRoleRevokePermissionRequest\x12\x0c\n\x04role\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\t\x12\x11\n\trange_end\x18\x03 \x01(\t\"B\n\x12\x41uthEnableResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"C\n\x13\x41uthDisableResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"S\n\x14\x41uthenticateResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05token\x18\x02 \x01(\t\"C\n\x13\x41uthUserAddResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"R\n\x13\x41uthUserGetResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05roles\x18\x02 \x03(\t\"F\n\x16\x41uthUserDeleteResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"N\n\x1e\x41uthUserChangePasswordResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"I\n\x19\x41uthUserGrantRoleResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"J\n\x1a\x41uthUserRevokeRoleResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"C\n\x13\x41uthRoleAddResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"e\n\x13\x41uthRoleGetResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12 \n\x04perm\x18\x02 \x03(\x0b\x32\x12.authpb.Permission\"S\n\x14\x41uthRoleListResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05roles\x18\x02 \x03(\t\"S\n\x14\x41uthUserListResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\x12\r\n\x05users\x18\x02 \x03(\t\"F\n\x16\x41uthRoleDeleteResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"O\n\x1f\x41uthRoleGrantPermissionResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader\"P\n AuthRoleRevokePermissionResponse\x12,\n\x06header\x18\x01 \x01(\x0b\x32\x1c.etcdserverpb.ResponseHeader*/\n\tAlarmType\x12\x08\n\x04NONE\x10\x00\x12\x0b\n\x07NOSPACE\x10\x01\x12\x0b\n\x07\x43ORRUPT\x10\x02\x32\xea\x02\n\x02KV\x12\x42\n\x05Range\x12\x1a.etcdserverpb.RangeRequest\x1a\x1b.etcdserverpb.RangeResponse\"\x00\x12<\n\x03Put\x12\x18.etcdserverpb.PutRequest\x1a\x19.etcdserverpb.PutResponse\"\x00\x12T\n\x0b\x44\x65leteRange\x12 .etcdserverpb.DeleteRangeRequest\x1a!.etcdserverpb.DeleteRangeResponse\"\x00\x12<\n\x03Txn\x12\x18.etcdserverpb.TxnRequest\x1a\x19.etcdserverpb.TxnResponse\"\x00\x12N\n\x07\x43ompact\x12\x1f.etcdserverpb.CompactionRequest\x1a .etcdserverpb.CompactionResponse\"\x00\x32O\n\x05Watch\x12\x46\n\x05Watch\x12\x1a.etcdserverpb.WatchRequest\x1a\x1b.etcdserverpb.WatchResponse\"\x00(\x01\x30\x01\x32\xcb\x03\n\x05Lease\x12Q\n\nLeaseGrant\x12\x1f.etcdserverpb.LeaseGrantRequest\x1a .etcdserverpb.LeaseGrantResponse\"\x00\x12T\n\x0bLeaseRevoke\x12 .etcdserverpb.LeaseRevokeRequest\x1a!.etcdserverpb.LeaseRevokeResponse\"\x00\x12\x61\n\x0eLeaseKeepAlive\x12#.etcdserverpb.LeaseKeepAliveRequest\x1a$.etcdserverpb.LeaseKeepAliveResponse\"\x00(\x01\x30\x01\x12`\n\x0fLeaseTimeToLive\x12$.etcdserverpb.LeaseTimeToLiveRequest\x1a%.etcdserverpb.LeaseTimeToLiveResponse\"\x00\x12T\n\x0bLeaseLeases\x12 .etcdserverpb.LeaseLeasesRequest\x1a!.etcdserverpb.LeaseLeasesResponse\"\x00\x32\xde\x02\n\x07\x43luster\x12N\n\tMemberAdd\x12\x1e.etcdserverpb.MemberAddRequest\x1a\x1f.etcdserverpb.MemberAddResponse\"\x00\x12W\n\x0cMemberRemove\x12!.etcdserverpb.MemberRemoveRequest\x1a\".etcdserverpb.MemberRemoveResponse\"\x00\x12W\n\x0cMemberUpdate\x12!.etcdserverpb.MemberUpdateRequest\x1a\".etcdserverpb.MemberUpdateResponse\"\x00\x12Q\n\nMemberList\x12\x1f.etcdserverpb.MemberListRequest\x1a .etcdserverpb.MemberListResponse\"\x00\x32\x95\x04\n\x0bMaintenance\x12\x42\n\x05\x41larm\x12\x1a.etcdserverpb.AlarmRequest\x1a\x1b.etcdserverpb.AlarmResponse\"\x00\x12\x45\n\x06Status\x12\x1b.etcdserverpb.StatusRequest\x1a\x1c.etcdserverpb.StatusResponse\"\x00\x12Q\n\nDefragment\x12\x1f.etcdserverpb.DefragmentRequest\x1a .etcdserverpb.DefragmentResponse\"\x00\x12?\n\x04Hash\x12\x19.etcdserverpb.HashRequest\x1a\x1a.etcdserverpb.HashResponse\"\x00\x12\x45\n\x06HashKV\x12\x1b.etcdserverpb.HashKVRequest\x1a\x1c.etcdserverpb.HashKVResponse\"\x00\x12M\n\x08Snapshot\x12\x1d.etcdserverpb.SnapshotRequest\x1a\x1e.etcdserverpb.SnapshotResponse\"\x00\x30\x01\x12Q\n\nMoveLeader\x12\x1f.etcdserverpb.MoveLeaderRequest\x1a .etcdserverpb.MoveLeaderResponse\"\x00\x32\xdd\x0b\n\x04\x41uth\x12Q\n\nAuthEnable\x12\x1f.etcdserverpb.AuthEnableRequest\x1a .etcdserverpb.AuthEnableResponse\"\x00\x12T\n\x0b\x41uthDisable\x12 .etcdserverpb.AuthDisableRequest\x1a!.etcdserverpb.AuthDisableResponse\"\x00\x12W\n\x0c\x41uthenticate\x12!.etcdserverpb.AuthenticateRequest\x1a\".etcdserverpb.AuthenticateResponse\"\x00\x12P\n\x07UserAdd\x12 .etcdserverpb.AuthUserAddRequest\x1a!.etcdserverpb.AuthUserAddResponse\"\x00\x12P\n\x07UserGet\x12 .etcdserverpb.AuthUserGetRequest\x1a!.etcdserverpb.AuthUserGetResponse\"\x00\x12S\n\x08UserList\x12!.etcdserverpb.AuthUserListRequest\x1a\".etcdserverpb.AuthUserListResponse\"\x00\x12Y\n\nUserDelete\x12#.etcdserverpb.AuthUserDeleteRequest\x1a$.etcdserverpb.AuthUserDeleteResponse\"\x00\x12q\n\x12UserChangePassword\x12+.etcdserverpb.AuthUserChangePasswordRequest\x1a,.etcdserverpb.AuthUserChangePasswordResponse\"\x00\x12\x62\n\rUserGrantRole\x12&.etcdserverpb.AuthUserGrantRoleRequest\x1a\'.etcdserverpb.AuthUserGrantRoleResponse\"\x00\x12\x65\n\x0eUserRevokeRole\x12\'.etcdserverpb.AuthUserRevokeRoleRequest\x1a(.etcdserverpb.AuthUserRevokeRoleResponse\"\x00\x12P\n\x07RoleAdd\x12 .etcdserverpb.AuthRoleAddRequest\x1a!.etcdserverpb.AuthRoleAddResponse\"\x00\x12P\n\x07RoleGet\x12 .etcdserverpb.AuthRoleGetRequest\x1a!.etcdserverpb.AuthRoleGetResponse\"\x00\x12S\n\x08RoleList\x12!.etcdserverpb.AuthRoleListRequest\x1a\".etcdserverpb.AuthRoleListResponse\"\x00\x12Y\n\nRoleDelete\x12#.etcdserverpb.AuthRoleDeleteRequest\x1a$.etcdserverpb.AuthRoleDeleteResponse\"\x00\x12t\n\x13RoleGrantPermission\x12,.etcdserverpb.AuthRoleGrantPermissionRequest\x1a-.etcdserverpb.AuthRoleGrantPermissionResponse\"\x00\x12w\n\x14RoleRevokePermission\x12-.etcdserverpb.AuthRoleRevokePermissionRequest\x1a..etcdserverpb.AuthRoleRevokePermissionResponse\"\x00\x62\x06proto3')
   ,
   dependencies=[kv__pb2.DESCRIPTOR,auth__pb2.DESCRIPTOR,])
-_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 _ALARMTYPE = _descriptor.EnumDescriptor(
   name='AlarmType',
@@ -35,23 +34,28 @@ _ALARMTYPE = _descriptor.EnumDescriptor(
   values=[
     _descriptor.EnumValueDescriptor(
       name='NONE', index=0, number=0,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='NOSPACE', index=1, number=1,
-      options=None,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='CORRUPT', index=2, number=2,
+      serialized_options=None,
       type=None),
   ],
   containing_type=None,
-  options=None,
-  serialized_start=7001,
-  serialized_end=7035,
+  serialized_options=None,
+  serialized_start=7555,
+  serialized_end=7602,
 )
 _sym_db.RegisterEnumDescriptor(_ALARMTYPE)
 
 AlarmType = enum_type_wrapper.EnumTypeWrapper(_ALARMTYPE)
 NONE = 0
 NOSPACE = 1
+CORRUPT = 2
 
 
 _RANGEREQUEST_SORTORDER = _descriptor.EnumDescriptor(
@@ -62,19 +66,19 @@ _RANGEREQUEST_SORTORDER = _descriptor.EnumDescriptor(
   values=[
     _descriptor.EnumValueDescriptor(
       name='NONE', index=0, number=0,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='ASCEND', index=1, number=1,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='DESCEND', index=2, number=2,
-      options=None,
+      serialized_options=None,
       type=None),
   ],
   containing_type=None,
-  options=None,
+  serialized_options=None,
   serialized_start=514,
   serialized_end=560,
 )
@@ -88,27 +92,27 @@ _RANGEREQUEST_SORTTARGET = _descriptor.EnumDescriptor(
   values=[
     _descriptor.EnumValueDescriptor(
       name='KEY', index=0, number=0,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='VERSION', index=1, number=1,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='CREATE', index=2, number=2,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='MOD', index=3, number=3,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='VALUE', index=4, number=4,
-      options=None,
+      serialized_options=None,
       type=None),
   ],
   containing_type=None,
-  options=None,
+  serialized_options=None,
   serialized_start=562,
   serialized_end=628,
 )
@@ -122,25 +126,25 @@ _COMPARE_COMPARERESULT = _descriptor.EnumDescriptor(
   values=[
     _descriptor.EnumValueDescriptor(
       name='EQUAL', index=0, number=0,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='GREATER', index=1, number=1,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='LESS', index=2, number=2,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='NOT_EQUAL', index=3, number=3,
-      options=None,
+      serialized_options=None,
       type=None),
   ],
   containing_type=None,
-  options=None,
-  serialized_start=1772,
-  serialized_end=1836,
+  serialized_options=None,
+  serialized_start=1908,
+  serialized_end=1972,
 )
 _sym_db.RegisterEnumDescriptor(_COMPARE_COMPARERESULT)
 
@@ -152,25 +156,29 @@ _COMPARE_COMPARETARGET = _descriptor.EnumDescriptor(
   values=[
     _descriptor.EnumValueDescriptor(
       name='VERSION', index=0, number=0,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='CREATE', index=1, number=1,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='MOD', index=2, number=2,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='VALUE', index=3, number=3,
-      options=None,
+      serialized_options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='LEASE', index=4, number=4,
+      serialized_options=None,
       type=None),
   ],
   containing_type=None,
-  options=None,
-  serialized_start=1838,
-  serialized_end=1898,
+  serialized_options=None,
+  serialized_start=1974,
+  serialized_end=2045,
 )
 _sym_db.RegisterEnumDescriptor(_COMPARE_COMPARETARGET)
 
@@ -182,17 +190,17 @@ _WATCHCREATEREQUEST_FILTERTYPE = _descriptor.EnumDescriptor(
   values=[
     _descriptor.EnumValueDescriptor(
       name='NOPUT', index=0, number=0,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='NODELETE', index=1, number=1,
-      options=None,
+      serialized_options=None,
       type=None),
   ],
   containing_type=None,
-  options=None,
-  serialized_start=2857,
-  serialized_end=2894,
+  serialized_options=None,
+  serialized_start=3143,
+  serialized_end=3180,
 )
 _sym_db.RegisterEnumDescriptor(_WATCHCREATEREQUEST_FILTERTYPE)
 
@@ -204,21 +212,21 @@ _ALARMREQUEST_ALARMACTION = _descriptor.EnumDescriptor(
   values=[
     _descriptor.EnumValueDescriptor(
       name='GET', index=0, number=0,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='ACTIVATE', index=1, number=1,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='DEACTIVATE', index=2, number=2,
-      options=None,
+      serialized_options=None,
       type=None),
   ],
   containing_type=None,
-  options=None,
-  serialized_start=4620,
-  serialized_end=4672,
+  serialized_options=None,
+  serialized_start=5174,
+  serialized_end=5226,
 )
 _sym_db.RegisterEnumDescriptor(_ALARMREQUEST_ALARMACTION)
 
@@ -236,35 +244,35 @@ _RESPONSEHEADER = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='member_id', full_name='etcdserverpb.ResponseHeader.member_id', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='revision', full_name='etcdserverpb.ResponseHeader.revision', index=2,
       number=3, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='raft_term', full_name='etcdserverpb.ResponseHeader.raft_term', index=3,
       number=4, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -288,91 +296,91 @@ _RANGEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='range_end', full_name='etcdserverpb.RangeRequest.range_end', index=1,
       number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='limit', full_name='etcdserverpb.RangeRequest.limit', index=2,
       number=3, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='revision', full_name='etcdserverpb.RangeRequest.revision', index=3,
       number=4, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='sort_order', full_name='etcdserverpb.RangeRequest.sort_order', index=4,
       number=5, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='sort_target', full_name='etcdserverpb.RangeRequest.sort_target', index=5,
       number=6, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='serializable', full_name='etcdserverpb.RangeRequest.serializable', index=6,
       number=7, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='keys_only', full_name='etcdserverpb.RangeRequest.keys_only', index=7,
       number=8, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='count_only', full_name='etcdserverpb.RangeRequest.count_only', index=8,
       number=9, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='min_mod_revision', full_name='etcdserverpb.RangeRequest.min_mod_revision', index=9,
       number=10, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='max_mod_revision', full_name='etcdserverpb.RangeRequest.max_mod_revision', index=10,
       number=11, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='min_create_revision', full_name='etcdserverpb.RangeRequest.min_create_revision', index=11,
       number=12, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='max_create_revision', full_name='etcdserverpb.RangeRequest.max_create_revision', index=12,
       number=13, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -381,7 +389,7 @@ _RANGEREQUEST = _descriptor.Descriptor(
     _RANGEREQUEST_SORTORDER,
     _RANGEREQUEST_SORTTARGET,
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -405,35 +413,35 @@ _RANGERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='kvs', full_name='etcdserverpb.RangeResponse.kvs', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='more', full_name='etcdserverpb.RangeResponse.more', index=2,
       number=3, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='count', full_name='etcdserverpb.RangeResponse.count', index=3,
       number=4, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -457,49 +465,49 @@ _PUTREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='value', full_name='etcdserverpb.PutRequest.value', index=1,
       number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='lease', full_name='etcdserverpb.PutRequest.lease', index=2,
       number=3, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='prev_kv', full_name='etcdserverpb.PutRequest.prev_kv', index=3,
       number=4, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='ignore_value', full_name='etcdserverpb.PutRequest.ignore_value', index=4,
       number=5, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='ignore_lease', full_name='etcdserverpb.PutRequest.ignore_lease', index=5,
       number=6, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -523,21 +531,21 @@ _PUTRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='prev_kv', full_name='etcdserverpb.PutResponse.prev_kv', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -561,28 +569,28 @@ _DELETERANGEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='range_end', full_name='etcdserverpb.DeleteRangeRequest.range_end', index=1,
       number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='prev_kv', full_name='etcdserverpb.DeleteRangeRequest.prev_kv', index=2,
       number=3, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -606,28 +614,28 @@ _DELETERANGERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='deleted', full_name='etcdserverpb.DeleteRangeResponse.deleted', index=1,
       number=2, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='prev_kvs', full_name='etcdserverpb.DeleteRangeResponse.prev_kvs', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -651,28 +659,35 @@ _REQUESTOP = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='request_put', full_name='etcdserverpb.RequestOp.request_put', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='request_delete_range', full_name='etcdserverpb.RequestOp.request_delete_range', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='request_txn', full_name='etcdserverpb.RequestOp.request_txn', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -682,7 +697,7 @@ _REQUESTOP = _descriptor.Descriptor(
       index=0, containing_type=None, fields=[]),
   ],
   serialized_start=1161,
-  serialized_end=1351,
+  serialized_end=1400,
 )
 
 
@@ -699,28 +714,35 @@ _RESPONSEOP = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='response_put', full_name='etcdserverpb.ResponseOp.response_put', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='response_delete_range', full_name='etcdserverpb.ResponseOp.response_delete_range', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='response_txn', full_name='etcdserverpb.ResponseOp.response_txn', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -729,8 +751,8 @@ _RESPONSEOP = _descriptor.Descriptor(
       name='response', full_name='etcdserverpb.ResponseOp.response',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1354,
-  serialized_end=1552,
+  serialized_start=1403,
+  serialized_end=1652,
 )
 
 
@@ -747,49 +769,63 @@ _COMPARE = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='target', full_name='etcdserverpb.Compare.target', index=1,
       number=2, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='key', full_name='etcdserverpb.Compare.key', index=2,
       number=3, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='version', full_name='etcdserverpb.Compare.version', index=3,
       number=4, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='create_revision', full_name='etcdserverpb.Compare.create_revision', index=4,
       number=5, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='mod_revision', full_name='etcdserverpb.Compare.mod_revision', index=5,
       number=6, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='value', full_name='etcdserverpb.Compare.value', index=6,
       number=7, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='lease', full_name='etcdserverpb.Compare.lease', index=7,
+      number=8, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='range_end', full_name='etcdserverpb.Compare.range_end', index=8,
+      number=64, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b(""),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -798,7 +834,7 @@ _COMPARE = _descriptor.Descriptor(
     _COMPARE_COMPARERESULT,
     _COMPARE_COMPARETARGET,
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -807,8 +843,8 @@ _COMPARE = _descriptor.Descriptor(
       name='target_union', full_name='etcdserverpb.Compare.target_union',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1555,
-  serialized_end=1914,
+  serialized_start=1655,
+  serialized_end=2061,
 )
 
 
@@ -825,35 +861,35 @@ _TXNREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='success', full_name='etcdserverpb.TxnRequest.success', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='failure', full_name='etcdserverpb.TxnRequest.failure', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1917,
-  serialized_end=2053,
+  serialized_start=2064,
+  serialized_end=2200,
 )
 
 
@@ -870,35 +906,35 @@ _TXNRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='succeeded', full_name='etcdserverpb.TxnResponse.succeeded', index=1,
       number=2, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='responses', full_name='etcdserverpb.TxnResponse.responses', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2055,
-  serialized_end=2178,
+  serialized_start=2202,
+  serialized_end=2325,
 )
 
 
@@ -915,28 +951,28 @@ _COMPACTIONREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='physical', full_name='etcdserverpb.CompactionRequest.physical', index=1,
       number=2, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2180,
-  serialized_end=2235,
+  serialized_start=2327,
+  serialized_end=2382,
 )
 
 
@@ -953,21 +989,21 @@ _COMPACTIONRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2237,
-  serialized_end=2303,
+  serialized_start=2384,
+  serialized_end=2450,
 )
 
 
@@ -984,14 +1020,90 @@ _HASHREQUEST = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2305,
-  serialized_end=2318,
+  serialized_start=2452,
+  serialized_end=2465,
+)
+
+
+_HASHKVREQUEST = _descriptor.Descriptor(
+  name='HashKVRequest',
+  full_name='etcdserverpb.HashKVRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='revision', full_name='etcdserverpb.HashKVRequest.revision', index=0,
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2467,
+  serialized_end=2500,
+)
+
+
+_HASHKVRESPONSE = _descriptor.Descriptor(
+  name='HashKVResponse',
+  full_name='etcdserverpb.HashKVResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='header', full_name='etcdserverpb.HashKVResponse.header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='hash', full_name='etcdserverpb.HashKVResponse.hash', index=1,
+      number=2, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='compact_revision', full_name='etcdserverpb.HashKVResponse.compact_revision', index=2,
+      number=3, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2502,
+  serialized_end=2604,
 )
 
 
@@ -1008,28 +1120,28 @@ _HASHRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='hash', full_name='etcdserverpb.HashResponse.hash', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2320,
-  serialized_end=2394,
+  serialized_start=2606,
+  serialized_end=2680,
 )
 
 
@@ -1046,14 +1158,14 @@ _SNAPSHOTREQUEST = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2396,
-  serialized_end=2413,
+  serialized_start=2682,
+  serialized_end=2699,
 )
 
 
@@ -1070,35 +1182,35 @@ _SNAPSHOTRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='remaining_bytes', full_name='etcdserverpb.SnapshotResponse.remaining_bytes', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='blob', full_name='etcdserverpb.SnapshotResponse.blob', index=2,
       number=3, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2415,
-  serialized_end=2518,
+  serialized_start=2701,
+  serialized_end=2804,
 )
 
 
@@ -1115,21 +1227,21 @@ _WATCHREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='cancel_request', full_name='etcdserverpb.WatchRequest.cancel_request', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -1138,8 +1250,8 @@ _WATCHREQUEST = _descriptor.Descriptor(
       name='request_union', full_name='etcdserverpb.WatchRequest.request_union',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=2521,
-  serialized_end=2672,
+  serialized_start=2807,
+  serialized_end=2958,
 )
 
 
@@ -1156,42 +1268,42 @@ _WATCHCREATEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='range_end', full_name='etcdserverpb.WatchCreateRequest.range_end', index=1,
       number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='start_revision', full_name='etcdserverpb.WatchCreateRequest.start_revision', index=2,
       number=3, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='progress_notify', full_name='etcdserverpb.WatchCreateRequest.progress_notify', index=3,
       number=4, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='filters', full_name='etcdserverpb.WatchCreateRequest.filters', index=4,
       number=5, type=14, cpp_type=8, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='prev_kv', full_name='etcdserverpb.WatchCreateRequest.prev_kv', index=5,
       number=6, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -1199,14 +1311,14 @@ _WATCHCREATEREQUEST = _descriptor.Descriptor(
   enum_types=[
     _WATCHCREATEREQUEST_FILTERTYPE,
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2675,
-  serialized_end=2894,
+  serialized_start=2961,
+  serialized_end=3180,
 )
 
 
@@ -1223,21 +1335,21 @@ _WATCHCANCELREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2896,
-  serialized_end=2934,
+  serialized_start=3182,
+  serialized_end=3220,
 )
 
 
@@ -1254,63 +1366,63 @@ _WATCHRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='watch_id', full_name='etcdserverpb.WatchResponse.watch_id', index=1,
       number=2, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='created', full_name='etcdserverpb.WatchResponse.created', index=2,
       number=3, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='canceled', full_name='etcdserverpb.WatchResponse.canceled', index=3,
       number=4, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='compact_revision', full_name='etcdserverpb.WatchResponse.compact_revision', index=4,
       number=5, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='cancel_reason', full_name='etcdserverpb.WatchResponse.cancel_reason', index=5,
       number=6, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='events', full_name='etcdserverpb.WatchResponse.events', index=6,
       number=11, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2937,
-  serialized_end=3131,
+  serialized_start=3223,
+  serialized_end=3417,
 )
 
 
@@ -1327,28 +1439,28 @@ _LEASEGRANTREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='ID', full_name='etcdserverpb.LeaseGrantRequest.ID', index=1,
       number=2, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3133,
-  serialized_end=3177,
+  serialized_start=3419,
+  serialized_end=3463,
 )
 
 
@@ -1365,42 +1477,42 @@ _LEASEGRANTRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='ID', full_name='etcdserverpb.LeaseGrantResponse.ID', index=1,
       number=2, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='TTL', full_name='etcdserverpb.LeaseGrantResponse.TTL', index=2,
       number=3, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='error', full_name='etcdserverpb.LeaseGrantResponse.error', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3179,
-  serialized_end=3285,
+  serialized_start=3465,
+  serialized_end=3571,
 )
 
 
@@ -1417,21 +1529,21 @@ _LEASEREVOKEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3287,
-  serialized_end=3319,
+  serialized_start=3573,
+  serialized_end=3605,
 )
 
 
@@ -1448,21 +1560,21 @@ _LEASEREVOKERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3321,
-  serialized_end=3388,
+  serialized_start=3607,
+  serialized_end=3674,
 )
 
 
@@ -1479,21 +1591,21 @@ _LEASEKEEPALIVEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3390,
-  serialized_end=3425,
+  serialized_start=3676,
+  serialized_end=3711,
 )
 
 
@@ -1510,35 +1622,35 @@ _LEASEKEEPALIVERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='ID', full_name='etcdserverpb.LeaseKeepAliveResponse.ID', index=1,
       number=2, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='TTL', full_name='etcdserverpb.LeaseKeepAliveResponse.TTL', index=2,
       number=3, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3427,
-  serialized_end=3522,
+  serialized_start=3713,
+  serialized_end=3808,
 )
 
 
@@ -1555,28 +1667,28 @@ _LEASETIMETOLIVEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='keys', full_name='etcdserverpb.LeaseTimeToLiveRequest.keys', index=1,
       number=2, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3524,
-  serialized_end=3574,
+  serialized_start=3810,
+  serialized_end=3860,
 )
 
 
@@ -1593,49 +1705,142 @@ _LEASETIMETOLIVERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='ID', full_name='etcdserverpb.LeaseTimeToLiveResponse.ID', index=1,
       number=2, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='TTL', full_name='etcdserverpb.LeaseTimeToLiveResponse.TTL', index=2,
       number=3, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='grantedTTL', full_name='etcdserverpb.LeaseTimeToLiveResponse.grantedTTL', index=3,
       number=4, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='keys', full_name='etcdserverpb.LeaseTimeToLiveResponse.keys', index=4,
       number=5, type=12, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3577,
-  serialized_end=3707,
+  serialized_start=3863,
+  serialized_end=3993,
+)
+
+
+_LEASELEASESREQUEST = _descriptor.Descriptor(
+  name='LeaseLeasesRequest',
+  full_name='etcdserverpb.LeaseLeasesRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=3995,
+  serialized_end=4015,
+)
+
+
+_LEASESTATUS = _descriptor.Descriptor(
+  name='LeaseStatus',
+  full_name='etcdserverpb.LeaseStatus',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='ID', full_name='etcdserverpb.LeaseStatus.ID', index=0,
+      number=1, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4017,
+  serialized_end=4042,
+)
+
+
+_LEASELEASESRESPONSE = _descriptor.Descriptor(
+  name='LeaseLeasesResponse',
+  full_name='etcdserverpb.LeaseLeasesResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='header', full_name='etcdserverpb.LeaseLeasesResponse.header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='leases', full_name='etcdserverpb.LeaseLeasesResponse.leases', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4044,
+  serialized_end=4154,
 )
 
 
@@ -1652,42 +1857,42 @@ _MEMBER = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='name', full_name='etcdserverpb.Member.name', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='peerURLs', full_name='etcdserverpb.Member.peerURLs', index=2,
       number=3, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='clientURLs', full_name='etcdserverpb.Member.clientURLs', index=3,
       number=4, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3709,
-  serialized_end=3781,
+  serialized_start=4156,
+  serialized_end=4228,
 )
 
 
@@ -1704,21 +1909,21 @@ _MEMBERADDREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3783,
-  serialized_end=3819,
+  serialized_start=4230,
+  serialized_end=4266,
 )
 
 
@@ -1735,35 +1940,35 @@ _MEMBERADDRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='member', full_name='etcdserverpb.MemberAddResponse.member', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='members', full_name='etcdserverpb.MemberAddResponse.members', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3822,
-  serialized_end=3964,
+  serialized_start=4269,
+  serialized_end=4411,
 )
 
 
@@ -1780,21 +1985,21 @@ _MEMBERREMOVEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=3966,
-  serialized_end=3999,
+  serialized_start=4413,
+  serialized_end=4446,
 )
 
 
@@ -1811,28 +2016,28 @@ _MEMBERREMOVERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='members', full_name='etcdserverpb.MemberRemoveResponse.members', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4001,
-  serialized_end=4108,
+  serialized_start=4448,
+  serialized_end=4555,
 )
 
 
@@ -1849,28 +2054,28 @@ _MEMBERUPDATEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='peerURLs', full_name='etcdserverpb.MemberUpdateRequest.peerURLs', index=1,
       number=2, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4110,
-  serialized_end=4161,
+  serialized_start=4557,
+  serialized_end=4608,
 )
 
 
@@ -1887,28 +2092,28 @@ _MEMBERUPDATERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='members', full_name='etcdserverpb.MemberUpdateResponse.members', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4163,
-  serialized_end=4270,
+  serialized_start=4610,
+  serialized_end=4717,
 )
 
 
@@ -1925,14 +2130,14 @@ _MEMBERLISTREQUEST = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4272,
-  serialized_end=4291,
+  serialized_start=4719,
+  serialized_end=4738,
 )
 
 
@@ -1949,28 +2154,28 @@ _MEMBERLISTRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='members', full_name='etcdserverpb.MemberListResponse.members', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4293,
-  serialized_end=4398,
+  serialized_start=4740,
+  serialized_end=4845,
 )
 
 
@@ -1987,14 +2192,14 @@ _DEFRAGMENTREQUEST = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4400,
-  serialized_end=4419,
+  serialized_start=4847,
+  serialized_end=4866,
 )
 
 
@@ -2011,21 +2216,83 @@ _DEFRAGMENTRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4421,
-  serialized_end=4487,
+  serialized_start=4868,
+  serialized_end=4934,
+)
+
+
+_MOVELEADERREQUEST = _descriptor.Descriptor(
+  name='MoveLeaderRequest',
+  full_name='etcdserverpb.MoveLeaderRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='targetID', full_name='etcdserverpb.MoveLeaderRequest.targetID', index=0,
+      number=1, type=4, cpp_type=4, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4936,
+  serialized_end=4973,
+)
+
+
+_MOVELEADERRESPONSE = _descriptor.Descriptor(
+  name='MoveLeaderResponse',
+  full_name='etcdserverpb.MoveLeaderResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='header', full_name='etcdserverpb.MoveLeaderResponse.header', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=4975,
+  serialized_end=5041,
 )
 
 
@@ -2042,21 +2309,21 @@ _ALARMREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='memberID', full_name='etcdserverpb.AlarmRequest.memberID', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='alarm', full_name='etcdserverpb.AlarmRequest.alarm', index=2,
       number=3, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -2064,14 +2331,14 @@ _ALARMREQUEST = _descriptor.Descriptor(
   enum_types=[
     _ALARMREQUEST_ALARMACTION,
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4490,
-  serialized_end=4672,
+  serialized_start=5044,
+  serialized_end=5226,
 )
 
 
@@ -2088,28 +2355,28 @@ _ALARMMEMBER = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='alarm', full_name='etcdserverpb.AlarmMember.alarm', index=1,
       number=2, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4674,
-  serialized_end=4745,
+  serialized_start=5228,
+  serialized_end=5299,
 )
 
 
@@ -2126,28 +2393,28 @@ _ALARMRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='alarms', full_name='etcdserverpb.AlarmResponse.alarms', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4747,
-  serialized_end=4851,
+  serialized_start=5301,
+  serialized_end=5405,
 )
 
 
@@ -2164,14 +2431,14 @@ _STATUSREQUEST = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4853,
-  serialized_end=4868,
+  serialized_start=5407,
+  serialized_end=5422,
 )
 
 
@@ -2188,56 +2455,56 @@ _STATUSRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='version', full_name='etcdserverpb.StatusResponse.version', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='dbSize', full_name='etcdserverpb.StatusResponse.dbSize', index=2,
       number=3, type=3, cpp_type=2, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='leader', full_name='etcdserverpb.StatusResponse.leader', index=3,
       number=4, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='raftIndex', full_name='etcdserverpb.StatusResponse.raftIndex', index=4,
       number=5, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='raftTerm', full_name='etcdserverpb.StatusResponse.raftTerm', index=5,
       number=6, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=4871,
-  serialized_end=5019,
+  serialized_start=5425,
+  serialized_end=5573,
 )
 
 
@@ -2254,14 +2521,14 @@ _AUTHENABLEREQUEST = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5021,
-  serialized_end=5040,
+  serialized_start=5575,
+  serialized_end=5594,
 )
 
 
@@ -2278,14 +2545,14 @@ _AUTHDISABLEREQUEST = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5042,
-  serialized_end=5062,
+  serialized_start=5596,
+  serialized_end=5616,
 )
 
 
@@ -2302,28 +2569,28 @@ _AUTHENTICATEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='password', full_name='etcdserverpb.AuthenticateRequest.password', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5064,
-  serialized_end=5117,
+  serialized_start=5618,
+  serialized_end=5671,
 )
 
 
@@ -2340,28 +2607,28 @@ _AUTHUSERADDREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='password', full_name='etcdserverpb.AuthUserAddRequest.password', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5119,
-  serialized_end=5171,
+  serialized_start=5673,
+  serialized_end=5725,
 )
 
 
@@ -2378,21 +2645,21 @@ _AUTHUSERGETREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5173,
-  serialized_end=5207,
+  serialized_start=5727,
+  serialized_end=5761,
 )
 
 
@@ -2409,21 +2676,21 @@ _AUTHUSERDELETEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5209,
-  serialized_end=5246,
+  serialized_start=5763,
+  serialized_end=5800,
 )
 
 
@@ -2440,28 +2707,28 @@ _AUTHUSERCHANGEPASSWORDREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='password', full_name='etcdserverpb.AuthUserChangePasswordRequest.password', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5248,
-  serialized_end=5311,
+  serialized_start=5802,
+  serialized_end=5865,
 )
 
 
@@ -2478,28 +2745,28 @@ _AUTHUSERGRANTROLEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='role', full_name='etcdserverpb.AuthUserGrantRoleRequest.role', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5313,
-  serialized_end=5367,
+  serialized_start=5867,
+  serialized_end=5921,
 )
 
 
@@ -2516,28 +2783,28 @@ _AUTHUSERREVOKEROLEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='role', full_name='etcdserverpb.AuthUserRevokeRoleRequest.role', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5369,
-  serialized_end=5424,
+  serialized_start=5923,
+  serialized_end=5978,
 )
 
 
@@ -2554,21 +2821,21 @@ _AUTHROLEADDREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5426,
-  serialized_end=5460,
+  serialized_start=5980,
+  serialized_end=6014,
 )
 
 
@@ -2585,21 +2852,21 @@ _AUTHROLEGETREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5462,
-  serialized_end=5496,
+  serialized_start=6016,
+  serialized_end=6050,
 )
 
 
@@ -2616,14 +2883,14 @@ _AUTHUSERLISTREQUEST = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5498,
-  serialized_end=5519,
+  serialized_start=6052,
+  serialized_end=6073,
 )
 
 
@@ -2640,14 +2907,14 @@ _AUTHROLELISTREQUEST = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5521,
-  serialized_end=5542,
+  serialized_start=6075,
+  serialized_end=6096,
 )
 
 
@@ -2664,21 +2931,21 @@ _AUTHROLEDELETEREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5544,
-  serialized_end=5581,
+  serialized_start=6098,
+  serialized_end=6135,
 )
 
 
@@ -2695,28 +2962,28 @@ _AUTHROLEGRANTPERMISSIONREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='perm', full_name='etcdserverpb.AuthRoleGrantPermissionRequest.perm', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5583,
-  serialized_end=5663,
+  serialized_start=6137,
+  serialized_end=6217,
 )
 
 
@@ -2733,35 +3000,35 @@ _AUTHROLEREVOKEPERMISSIONREQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='key', full_name='etcdserverpb.AuthRoleRevokePermissionRequest.key', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='range_end', full_name='etcdserverpb.AuthRoleRevokePermissionRequest.range_end', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5665,
-  serialized_end=5744,
+  serialized_start=6219,
+  serialized_end=6298,
 )
 
 
@@ -2778,21 +3045,21 @@ _AUTHENABLERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5746,
-  serialized_end=5812,
+  serialized_start=6300,
+  serialized_end=6366,
 )
 
 
@@ -2809,21 +3076,21 @@ _AUTHDISABLERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5814,
-  serialized_end=5881,
+  serialized_start=6368,
+  serialized_end=6435,
 )
 
 
@@ -2840,28 +3107,28 @@ _AUTHENTICATERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='token', full_name='etcdserverpb.AuthenticateResponse.token', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5883,
-  serialized_end=5966,
+  serialized_start=6437,
+  serialized_end=6520,
 )
 
 
@@ -2878,21 +3145,21 @@ _AUTHUSERADDRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=5968,
-  serialized_end=6035,
+  serialized_start=6522,
+  serialized_end=6589,
 )
 
 
@@ -2909,28 +3176,28 @@ _AUTHUSERGETRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='roles', full_name='etcdserverpb.AuthUserGetResponse.roles', index=1,
       number=2, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6037,
-  serialized_end=6119,
+  serialized_start=6591,
+  serialized_end=6673,
 )
 
 
@@ -2947,21 +3214,21 @@ _AUTHUSERDELETERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6121,
-  serialized_end=6191,
+  serialized_start=6675,
+  serialized_end=6745,
 )
 
 
@@ -2978,21 +3245,21 @@ _AUTHUSERCHANGEPASSWORDRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6193,
-  serialized_end=6271,
+  serialized_start=6747,
+  serialized_end=6825,
 )
 
 
@@ -3009,21 +3276,21 @@ _AUTHUSERGRANTROLERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6273,
-  serialized_end=6346,
+  serialized_start=6827,
+  serialized_end=6900,
 )
 
 
@@ -3040,21 +3307,21 @@ _AUTHUSERREVOKEROLERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6348,
-  serialized_end=6422,
+  serialized_start=6902,
+  serialized_end=6976,
 )
 
 
@@ -3071,21 +3338,21 @@ _AUTHROLEADDRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6424,
-  serialized_end=6491,
+  serialized_start=6978,
+  serialized_end=7045,
 )
 
 
@@ -3102,28 +3369,28 @@ _AUTHROLEGETRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='perm', full_name='etcdserverpb.AuthRoleGetResponse.perm', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6493,
-  serialized_end=6594,
+  serialized_start=7047,
+  serialized_end=7148,
 )
 
 
@@ -3140,28 +3407,28 @@ _AUTHROLELISTRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='roles', full_name='etcdserverpb.AuthRoleListResponse.roles', index=1,
       number=2, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6596,
-  serialized_end=6679,
+  serialized_start=7150,
+  serialized_end=7233,
 )
 
 
@@ -3178,28 +3445,28 @@ _AUTHUSERLISTRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='users', full_name='etcdserverpb.AuthUserListResponse.users', index=1,
       number=2, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6681,
-  serialized_end=6764,
+  serialized_start=7235,
+  serialized_end=7318,
 )
 
 
@@ -3216,21 +3483,21 @@ _AUTHROLEDELETERESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6766,
-  serialized_end=6836,
+  serialized_start=7320,
+  serialized_end=7390,
 )
 
 
@@ -3247,21 +3514,21 @@ _AUTHROLEGRANTPERMISSIONRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6838,
-  serialized_end=6917,
+  serialized_start=7392,
+  serialized_end=7471,
 )
 
 
@@ -3278,21 +3545,21 @@ _AUTHROLEREVOKEPERMISSIONRESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=6919,
-  serialized_end=6999,
+  serialized_start=7473,
+  serialized_end=7553,
 )
 
 _RANGEREQUEST.fields_by_name['sort_order'].enum_type = _RANGEREQUEST_SORTORDER
@@ -3308,6 +3575,7 @@ _DELETERANGERESPONSE.fields_by_name['prev_kvs'].message_type = kv__pb2._KEYVALUE
 _REQUESTOP.fields_by_name['request_range'].message_type = _RANGEREQUEST
 _REQUESTOP.fields_by_name['request_put'].message_type = _PUTREQUEST
 _REQUESTOP.fields_by_name['request_delete_range'].message_type = _DELETERANGEREQUEST
+_REQUESTOP.fields_by_name['request_txn'].message_type = _TXNREQUEST
 _REQUESTOP.oneofs_by_name['request'].fields.append(
   _REQUESTOP.fields_by_name['request_range'])
 _REQUESTOP.fields_by_name['request_range'].containing_oneof = _REQUESTOP.oneofs_by_name['request']
@@ -3317,9 +3585,13 @@ _REQUESTOP.fields_by_name['request_put'].containing_oneof = _REQUESTOP.oneofs_by
 _REQUESTOP.oneofs_by_name['request'].fields.append(
   _REQUESTOP.fields_by_name['request_delete_range'])
 _REQUESTOP.fields_by_name['request_delete_range'].containing_oneof = _REQUESTOP.oneofs_by_name['request']
+_REQUESTOP.oneofs_by_name['request'].fields.append(
+  _REQUESTOP.fields_by_name['request_txn'])
+_REQUESTOP.fields_by_name['request_txn'].containing_oneof = _REQUESTOP.oneofs_by_name['request']
 _RESPONSEOP.fields_by_name['response_range'].message_type = _RANGERESPONSE
 _RESPONSEOP.fields_by_name['response_put'].message_type = _PUTRESPONSE
 _RESPONSEOP.fields_by_name['response_delete_range'].message_type = _DELETERANGERESPONSE
+_RESPONSEOP.fields_by_name['response_txn'].message_type = _TXNRESPONSE
 _RESPONSEOP.oneofs_by_name['response'].fields.append(
   _RESPONSEOP.fields_by_name['response_range'])
 _RESPONSEOP.fields_by_name['response_range'].containing_oneof = _RESPONSEOP.oneofs_by_name['response']
@@ -3329,6 +3601,9 @@ _RESPONSEOP.fields_by_name['response_put'].containing_oneof = _RESPONSEOP.oneofs
 _RESPONSEOP.oneofs_by_name['response'].fields.append(
   _RESPONSEOP.fields_by_name['response_delete_range'])
 _RESPONSEOP.fields_by_name['response_delete_range'].containing_oneof = _RESPONSEOP.oneofs_by_name['response']
+_RESPONSEOP.oneofs_by_name['response'].fields.append(
+  _RESPONSEOP.fields_by_name['response_txn'])
+_RESPONSEOP.fields_by_name['response_txn'].containing_oneof = _RESPONSEOP.oneofs_by_name['response']
 _COMPARE.fields_by_name['result'].enum_type = _COMPARE_COMPARERESULT
 _COMPARE.fields_by_name['target'].enum_type = _COMPARE_COMPARETARGET
 _COMPARE_COMPARERESULT.containing_type = _COMPARE
@@ -3345,12 +3620,16 @@ _COMPARE.fields_by_name['mod_revision'].containing_oneof = _COMPARE.oneofs_by_na
 _COMPARE.oneofs_by_name['target_union'].fields.append(
   _COMPARE.fields_by_name['value'])
 _COMPARE.fields_by_name['value'].containing_oneof = _COMPARE.oneofs_by_name['target_union']
+_COMPARE.oneofs_by_name['target_union'].fields.append(
+  _COMPARE.fields_by_name['lease'])
+_COMPARE.fields_by_name['lease'].containing_oneof = _COMPARE.oneofs_by_name['target_union']
 _TXNREQUEST.fields_by_name['compare'].message_type = _COMPARE
 _TXNREQUEST.fields_by_name['success'].message_type = _REQUESTOP
 _TXNREQUEST.fields_by_name['failure'].message_type = _REQUESTOP
 _TXNRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _TXNRESPONSE.fields_by_name['responses'].message_type = _RESPONSEOP
 _COMPACTIONRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
+_HASHKVRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _HASHRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _SNAPSHOTRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _WATCHREQUEST.fields_by_name['create_request'].message_type = _WATCHCREATEREQUEST
@@ -3369,6 +3648,8 @@ _LEASEGRANTRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _LEASEREVOKERESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _LEASEKEEPALIVERESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _LEASETIMETOLIVERESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
+_LEASELEASESRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
+_LEASELEASESRESPONSE.fields_by_name['leases'].message_type = _LEASESTATUS
 _MEMBERADDRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _MEMBERADDRESPONSE.fields_by_name['member'].message_type = _MEMBER
 _MEMBERADDRESPONSE.fields_by_name['members'].message_type = _MEMBER
@@ -3379,6 +3660,7 @@ _MEMBERUPDATERESPONSE.fields_by_name['members'].message_type = _MEMBER
 _MEMBERLISTRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _MEMBERLISTRESPONSE.fields_by_name['members'].message_type = _MEMBER
 _DEFRAGMENTRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
+_MOVELEADERRESPONSE.fields_by_name['header'].message_type = _RESPONSEHEADER
 _ALARMREQUEST.fields_by_name['action'].enum_type = _ALARMREQUEST_ALARMACTION
 _ALARMREQUEST.fields_by_name['alarm'].enum_type = _ALARMTYPE
 _ALARMREQUEST_ALARMACTION.containing_type = _ALARMREQUEST
@@ -3419,6 +3701,8 @@ DESCRIPTOR.message_types_by_name['TxnResponse'] = _TXNRESPONSE
 DESCRIPTOR.message_types_by_name['CompactionRequest'] = _COMPACTIONREQUEST
 DESCRIPTOR.message_types_by_name['CompactionResponse'] = _COMPACTIONRESPONSE
 DESCRIPTOR.message_types_by_name['HashRequest'] = _HASHREQUEST
+DESCRIPTOR.message_types_by_name['HashKVRequest'] = _HASHKVREQUEST
+DESCRIPTOR.message_types_by_name['HashKVResponse'] = _HASHKVRESPONSE
 DESCRIPTOR.message_types_by_name['HashResponse'] = _HASHRESPONSE
 DESCRIPTOR.message_types_by_name['SnapshotRequest'] = _SNAPSHOTREQUEST
 DESCRIPTOR.message_types_by_name['SnapshotResponse'] = _SNAPSHOTRESPONSE
@@ -3434,6 +3718,9 @@ DESCRIPTOR.message_types_by_name['LeaseKeepAliveRequest'] = _LEASEKEEPALIVEREQUE
 DESCRIPTOR.message_types_by_name['LeaseKeepAliveResponse'] = _LEASEKEEPALIVERESPONSE
 DESCRIPTOR.message_types_by_name['LeaseTimeToLiveRequest'] = _LEASETIMETOLIVEREQUEST
 DESCRIPTOR.message_types_by_name['LeaseTimeToLiveResponse'] = _LEASETIMETOLIVERESPONSE
+DESCRIPTOR.message_types_by_name['LeaseLeasesRequest'] = _LEASELEASESREQUEST
+DESCRIPTOR.message_types_by_name['LeaseStatus'] = _LEASESTATUS
+DESCRIPTOR.message_types_by_name['LeaseLeasesResponse'] = _LEASELEASESRESPONSE
 DESCRIPTOR.message_types_by_name['Member'] = _MEMBER
 DESCRIPTOR.message_types_by_name['MemberAddRequest'] = _MEMBERADDREQUEST
 DESCRIPTOR.message_types_by_name['MemberAddResponse'] = _MEMBERADDRESPONSE
@@ -3445,6 +3732,8 @@ DESCRIPTOR.message_types_by_name['MemberListRequest'] = _MEMBERLISTREQUEST
 DESCRIPTOR.message_types_by_name['MemberListResponse'] = _MEMBERLISTRESPONSE
 DESCRIPTOR.message_types_by_name['DefragmentRequest'] = _DEFRAGMENTREQUEST
 DESCRIPTOR.message_types_by_name['DefragmentResponse'] = _DEFRAGMENTRESPONSE
+DESCRIPTOR.message_types_by_name['MoveLeaderRequest'] = _MOVELEADERREQUEST
+DESCRIPTOR.message_types_by_name['MoveLeaderResponse'] = _MOVELEADERRESPONSE
 DESCRIPTOR.message_types_by_name['AlarmRequest'] = _ALARMREQUEST
 DESCRIPTOR.message_types_by_name['AlarmMember'] = _ALARMMEMBER
 DESCRIPTOR.message_types_by_name['AlarmResponse'] = _ALARMRESPONSE
@@ -3483,6 +3772,7 @@ DESCRIPTOR.message_types_by_name['AuthRoleDeleteResponse'] = _AUTHROLEDELETERESP
 DESCRIPTOR.message_types_by_name['AuthRoleGrantPermissionResponse'] = _AUTHROLEGRANTPERMISSIONRESPONSE
 DESCRIPTOR.message_types_by_name['AuthRoleRevokePermissionResponse'] = _AUTHROLEREVOKEPERMISSIONRESPONSE
 DESCRIPTOR.enum_types_by_name['AlarmType'] = _ALARMTYPE
+_sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 ResponseHeader = _reflection.GeneratedProtocolMessageType('ResponseHeader', (_message.Message,), dict(
   DESCRIPTOR = _RESPONSEHEADER,
@@ -3589,6 +3879,20 @@ HashRequest = _reflection.GeneratedProtocolMessageType('HashRequest', (_message.
   ))
 _sym_db.RegisterMessage(HashRequest)
 
+HashKVRequest = _reflection.GeneratedProtocolMessageType('HashKVRequest', (_message.Message,), dict(
+  DESCRIPTOR = _HASHKVREQUEST,
+  __module__ = 'rpc_pb2'
+  # @@protoc_insertion_point(class_scope:etcdserverpb.HashKVRequest)
+  ))
+_sym_db.RegisterMessage(HashKVRequest)
+
+HashKVResponse = _reflection.GeneratedProtocolMessageType('HashKVResponse', (_message.Message,), dict(
+  DESCRIPTOR = _HASHKVRESPONSE,
+  __module__ = 'rpc_pb2'
+  # @@protoc_insertion_point(class_scope:etcdserverpb.HashKVResponse)
+  ))
+_sym_db.RegisterMessage(HashKVResponse)
+
 HashResponse = _reflection.GeneratedProtocolMessageType('HashResponse', (_message.Message,), dict(
   DESCRIPTOR = _HASHRESPONSE,
   __module__ = 'rpc_pb2'
@@ -3694,6 +3998,27 @@ LeaseTimeToLiveResponse = _reflection.GeneratedProtocolMessageType('LeaseTimeToL
   ))
 _sym_db.RegisterMessage(LeaseTimeToLiveResponse)
 
+LeaseLeasesRequest = _reflection.GeneratedProtocolMessageType('LeaseLeasesRequest', (_message.Message,), dict(
+  DESCRIPTOR = _LEASELEASESREQUEST,
+  __module__ = 'rpc_pb2'
+  # @@protoc_insertion_point(class_scope:etcdserverpb.LeaseLeasesRequest)
+  ))
+_sym_db.RegisterMessage(LeaseLeasesRequest)
+
+LeaseStatus = _reflection.GeneratedProtocolMessageType('LeaseStatus', (_message.Message,), dict(
+  DESCRIPTOR = _LEASESTATUS,
+  __module__ = 'rpc_pb2'
+  # @@protoc_insertion_point(class_scope:etcdserverpb.LeaseStatus)
+  ))
+_sym_db.RegisterMessage(LeaseStatus)
+
+LeaseLeasesResponse = _reflection.GeneratedProtocolMessageType('LeaseLeasesResponse', (_message.Message,), dict(
+  DESCRIPTOR = _LEASELEASESRESPONSE,
+  __module__ = 'rpc_pb2'
+  # @@protoc_insertion_point(class_scope:etcdserverpb.LeaseLeasesResponse)
+  ))
+_sym_db.RegisterMessage(LeaseLeasesResponse)
+
 Member = _reflection.GeneratedProtocolMessageType('Member', (_message.Message,), dict(
   DESCRIPTOR = _MEMBER,
   __module__ = 'rpc_pb2'
@@ -3770,6 +4095,20 @@ DefragmentResponse = _reflection.GeneratedProtocolMessageType('DefragmentRespons
   # @@protoc_insertion_point(class_scope:etcdserverpb.DefragmentResponse)
   ))
 _sym_db.RegisterMessage(DefragmentResponse)
+
+MoveLeaderRequest = _reflection.GeneratedProtocolMessageType('MoveLeaderRequest', (_message.Message,), dict(
+  DESCRIPTOR = _MOVELEADERREQUEST,
+  __module__ = 'rpc_pb2'
+  # @@protoc_insertion_point(class_scope:etcdserverpb.MoveLeaderRequest)
+  ))
+_sym_db.RegisterMessage(MoveLeaderRequest)
+
+MoveLeaderResponse = _reflection.GeneratedProtocolMessageType('MoveLeaderResponse', (_message.Message,), dict(
+  DESCRIPTOR = _MOVELEADERRESPONSE,
+  __module__ = 'rpc_pb2'
+  # @@protoc_insertion_point(class_scope:etcdserverpb.MoveLeaderResponse)
+  ))
+_sym_db.RegisterMessage(MoveLeaderResponse)
 
 AlarmRequest = _reflection.GeneratedProtocolMessageType('AlarmRequest', (_message.Message,), dict(
   DESCRIPTOR = _ALARMREQUEST,
@@ -4031,1611 +4370,436 @@ AuthRoleRevokePermissionResponse = _reflection.GeneratedProtocolMessageType('Aut
 _sym_db.RegisterMessage(AuthRoleRevokePermissionResponse)
 
 
-try:
-  # THESE ELEMENTS WILL BE DEPRECATED.
-  # Please use the generated *_pb2_grpc.py files instead.
-  import grpc
-  from grpc.beta import implementations as beta_implementations
-  from grpc.beta import interfaces as beta_interfaces
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
 
+_KV = _descriptor.ServiceDescriptor(
+  name='KV',
+  full_name='etcdserverpb.KV',
+  file=DESCRIPTOR,
+  index=0,
+  serialized_options=None,
+  serialized_start=7605,
+  serialized_end=7967,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='Range',
+    full_name='etcdserverpb.KV.Range',
+    index=0,
+    containing_service=None,
+    input_type=_RANGEREQUEST,
+    output_type=_RANGERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='Put',
+    full_name='etcdserverpb.KV.Put',
+    index=1,
+    containing_service=None,
+    input_type=_PUTREQUEST,
+    output_type=_PUTRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='DeleteRange',
+    full_name='etcdserverpb.KV.DeleteRange',
+    index=2,
+    containing_service=None,
+    input_type=_DELETERANGEREQUEST,
+    output_type=_DELETERANGERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='Txn',
+    full_name='etcdserverpb.KV.Txn',
+    index=3,
+    containing_service=None,
+    input_type=_TXNREQUEST,
+    output_type=_TXNRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='Compact',
+    full_name='etcdserverpb.KV.Compact',
+    index=4,
+    containing_service=None,
+    input_type=_COMPACTIONREQUEST,
+    output_type=_COMPACTIONRESPONSE,
+    serialized_options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_KV)
+
+DESCRIPTOR.services_by_name['KV'] = _KV
+
+
+_WATCH = _descriptor.ServiceDescriptor(
+  name='Watch',
+  full_name='etcdserverpb.Watch',
+  file=DESCRIPTOR,
+  index=1,
+  serialized_options=None,
+  serialized_start=7969,
+  serialized_end=8048,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='Watch',
+    full_name='etcdserverpb.Watch.Watch',
+    index=0,
+    containing_service=None,
+    input_type=_WATCHREQUEST,
+    output_type=_WATCHRESPONSE,
+    serialized_options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_WATCH)
+
+DESCRIPTOR.services_by_name['Watch'] = _WATCH
+
+
+_LEASE = _descriptor.ServiceDescriptor(
+  name='Lease',
+  full_name='etcdserverpb.Lease',
+  file=DESCRIPTOR,
+  index=2,
+  serialized_options=None,
+  serialized_start=8051,
+  serialized_end=8510,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='LeaseGrant',
+    full_name='etcdserverpb.Lease.LeaseGrant',
+    index=0,
+    containing_service=None,
+    input_type=_LEASEGRANTREQUEST,
+    output_type=_LEASEGRANTRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='LeaseRevoke',
+    full_name='etcdserverpb.Lease.LeaseRevoke',
+    index=1,
+    containing_service=None,
+    input_type=_LEASEREVOKEREQUEST,
+    output_type=_LEASEREVOKERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='LeaseKeepAlive',
+    full_name='etcdserverpb.Lease.LeaseKeepAlive',
+    index=2,
+    containing_service=None,
+    input_type=_LEASEKEEPALIVEREQUEST,
+    output_type=_LEASEKEEPALIVERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='LeaseTimeToLive',
+    full_name='etcdserverpb.Lease.LeaseTimeToLive',
+    index=3,
+    containing_service=None,
+    input_type=_LEASETIMETOLIVEREQUEST,
+    output_type=_LEASETIMETOLIVERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='LeaseLeases',
+    full_name='etcdserverpb.Lease.LeaseLeases',
+    index=4,
+    containing_service=None,
+    input_type=_LEASELEASESREQUEST,
+    output_type=_LEASELEASESRESPONSE,
+    serialized_options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_LEASE)
+
+DESCRIPTOR.services_by_name['Lease'] = _LEASE
+
+
+_CLUSTER = _descriptor.ServiceDescriptor(
+  name='Cluster',
+  full_name='etcdserverpb.Cluster',
+  file=DESCRIPTOR,
+  index=3,
+  serialized_options=None,
+  serialized_start=8513,
+  serialized_end=8863,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='MemberAdd',
+    full_name='etcdserverpb.Cluster.MemberAdd',
+    index=0,
+    containing_service=None,
+    input_type=_MEMBERADDREQUEST,
+    output_type=_MEMBERADDRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='MemberRemove',
+    full_name='etcdserverpb.Cluster.MemberRemove',
+    index=1,
+    containing_service=None,
+    input_type=_MEMBERREMOVEREQUEST,
+    output_type=_MEMBERREMOVERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='MemberUpdate',
+    full_name='etcdserverpb.Cluster.MemberUpdate',
+    index=2,
+    containing_service=None,
+    input_type=_MEMBERUPDATEREQUEST,
+    output_type=_MEMBERUPDATERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='MemberList',
+    full_name='etcdserverpb.Cluster.MemberList',
+    index=3,
+    containing_service=None,
+    input_type=_MEMBERLISTREQUEST,
+    output_type=_MEMBERLISTRESPONSE,
+    serialized_options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_CLUSTER)
+
+DESCRIPTOR.services_by_name['Cluster'] = _CLUSTER
+
+
+_MAINTENANCE = _descriptor.ServiceDescriptor(
+  name='Maintenance',
+  full_name='etcdserverpb.Maintenance',
+  file=DESCRIPTOR,
+  index=4,
+  serialized_options=None,
+  serialized_start=8866,
+  serialized_end=9399,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='Alarm',
+    full_name='etcdserverpb.Maintenance.Alarm',
+    index=0,
+    containing_service=None,
+    input_type=_ALARMREQUEST,
+    output_type=_ALARMRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='Status',
+    full_name='etcdserverpb.Maintenance.Status',
+    index=1,
+    containing_service=None,
+    input_type=_STATUSREQUEST,
+    output_type=_STATUSRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='Defragment',
+    full_name='etcdserverpb.Maintenance.Defragment',
+    index=2,
+    containing_service=None,
+    input_type=_DEFRAGMENTREQUEST,
+    output_type=_DEFRAGMENTRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='Hash',
+    full_name='etcdserverpb.Maintenance.Hash',
+    index=3,
+    containing_service=None,
+    input_type=_HASHREQUEST,
+    output_type=_HASHRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='HashKV',
+    full_name='etcdserverpb.Maintenance.HashKV',
+    index=4,
+    containing_service=None,
+    input_type=_HASHKVREQUEST,
+    output_type=_HASHKVRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='Snapshot',
+    full_name='etcdserverpb.Maintenance.Snapshot',
+    index=5,
+    containing_service=None,
+    input_type=_SNAPSHOTREQUEST,
+    output_type=_SNAPSHOTRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='MoveLeader',
+    full_name='etcdserverpb.Maintenance.MoveLeader',
+    index=6,
+    containing_service=None,
+    input_type=_MOVELEADERREQUEST,
+    output_type=_MOVELEADERRESPONSE,
+    serialized_options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_MAINTENANCE)
+
+DESCRIPTOR.services_by_name['Maintenance'] = _MAINTENANCE
+
+
+_AUTH = _descriptor.ServiceDescriptor(
+  name='Auth',
+  full_name='etcdserverpb.Auth',
+  file=DESCRIPTOR,
+  index=5,
+  serialized_options=None,
+  serialized_start=9402,
+  serialized_end=10903,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='AuthEnable',
+    full_name='etcdserverpb.Auth.AuthEnable',
+    index=0,
+    containing_service=None,
+    input_type=_AUTHENABLEREQUEST,
+    output_type=_AUTHENABLERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='AuthDisable',
+    full_name='etcdserverpb.Auth.AuthDisable',
+    index=1,
+    containing_service=None,
+    input_type=_AUTHDISABLEREQUEST,
+    output_type=_AUTHDISABLERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='Authenticate',
+    full_name='etcdserverpb.Auth.Authenticate',
+    index=2,
+    containing_service=None,
+    input_type=_AUTHENTICATEREQUEST,
+    output_type=_AUTHENTICATERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='UserAdd',
+    full_name='etcdserverpb.Auth.UserAdd',
+    index=3,
+    containing_service=None,
+    input_type=_AUTHUSERADDREQUEST,
+    output_type=_AUTHUSERADDRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='UserGet',
+    full_name='etcdserverpb.Auth.UserGet',
+    index=4,
+    containing_service=None,
+    input_type=_AUTHUSERGETREQUEST,
+    output_type=_AUTHUSERGETRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='UserList',
+    full_name='etcdserverpb.Auth.UserList',
+    index=5,
+    containing_service=None,
+    input_type=_AUTHUSERLISTREQUEST,
+    output_type=_AUTHUSERLISTRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='UserDelete',
+    full_name='etcdserverpb.Auth.UserDelete',
+    index=6,
+    containing_service=None,
+    input_type=_AUTHUSERDELETEREQUEST,
+    output_type=_AUTHUSERDELETERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='UserChangePassword',
+    full_name='etcdserverpb.Auth.UserChangePassword',
+    index=7,
+    containing_service=None,
+    input_type=_AUTHUSERCHANGEPASSWORDREQUEST,
+    output_type=_AUTHUSERCHANGEPASSWORDRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='UserGrantRole',
+    full_name='etcdserverpb.Auth.UserGrantRole',
+    index=8,
+    containing_service=None,
+    input_type=_AUTHUSERGRANTROLEREQUEST,
+    output_type=_AUTHUSERGRANTROLERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='UserRevokeRole',
+    full_name='etcdserverpb.Auth.UserRevokeRole',
+    index=9,
+    containing_service=None,
+    input_type=_AUTHUSERREVOKEROLEREQUEST,
+    output_type=_AUTHUSERREVOKEROLERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='RoleAdd',
+    full_name='etcdserverpb.Auth.RoleAdd',
+    index=10,
+    containing_service=None,
+    input_type=_AUTHROLEADDREQUEST,
+    output_type=_AUTHROLEADDRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='RoleGet',
+    full_name='etcdserverpb.Auth.RoleGet',
+    index=11,
+    containing_service=None,
+    input_type=_AUTHROLEGETREQUEST,
+    output_type=_AUTHROLEGETRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='RoleList',
+    full_name='etcdserverpb.Auth.RoleList',
+    index=12,
+    containing_service=None,
+    input_type=_AUTHROLELISTREQUEST,
+    output_type=_AUTHROLELISTRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='RoleDelete',
+    full_name='etcdserverpb.Auth.RoleDelete',
+    index=13,
+    containing_service=None,
+    input_type=_AUTHROLEDELETEREQUEST,
+    output_type=_AUTHROLEDELETERESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='RoleGrantPermission',
+    full_name='etcdserverpb.Auth.RoleGrantPermission',
+    index=14,
+    containing_service=None,
+    input_type=_AUTHROLEGRANTPERMISSIONREQUEST,
+    output_type=_AUTHROLEGRANTPERMISSIONRESPONSE,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='RoleRevokePermission',
+    full_name='etcdserverpb.Auth.RoleRevokePermission',
+    index=15,
+    containing_service=None,
+    input_type=_AUTHROLEREVOKEPERMISSIONREQUEST,
+    output_type=_AUTHROLEREVOKEPERMISSIONRESPONSE,
+    serialized_options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_AUTH)
+
+DESCRIPTOR.services_by_name['Auth'] = _AUTH
 
-  class KVStub(object):
-    """for grpc-gateway
-
-    """
-
-    def __init__(self, channel):
-      """Constructor.
-
-      Args:
-        channel: A grpc.Channel.
-      """
-      self.Range = channel.unary_unary(
-          '/etcdserverpb.KV/Range',
-          request_serializer=RangeRequest.SerializeToString,
-          response_deserializer=RangeResponse.FromString,
-          )
-      self.Put = channel.unary_unary(
-          '/etcdserverpb.KV/Put',
-          request_serializer=PutRequest.SerializeToString,
-          response_deserializer=PutResponse.FromString,
-          )
-      self.DeleteRange = channel.unary_unary(
-          '/etcdserverpb.KV/DeleteRange',
-          request_serializer=DeleteRangeRequest.SerializeToString,
-          response_deserializer=DeleteRangeResponse.FromString,
-          )
-      self.Txn = channel.unary_unary(
-          '/etcdserverpb.KV/Txn',
-          request_serializer=TxnRequest.SerializeToString,
-          response_deserializer=TxnResponse.FromString,
-          )
-      self.Compact = channel.unary_unary(
-          '/etcdserverpb.KV/Compact',
-          request_serializer=CompactionRequest.SerializeToString,
-          response_deserializer=CompactionResponse.FromString,
-          )
-
-
-  class KVServicer(object):
-    """for grpc-gateway
-
-    """
-
-    def Range(self, request, context):
-      """Range gets the keys in the range from the key-value store.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def Put(self, request, context):
-      """Put puts the given key into the key-value store.
-      A put request increments the revision of the key-value store
-      and generates one event in the event history.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def DeleteRange(self, request, context):
-      """DeleteRange deletes the given range from the key-value store.
-      A delete request increments the revision of the key-value store
-      and generates a delete event in the event history for every deleted key.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def Txn(self, request, context):
-      """Txn processes multiple requests in a single transaction.
-      A txn request increments the revision of the key-value store
-      and generates events with the same revision for every completed request.
-      It is not allowed to modify the same key several times within one txn.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def Compact(self, request, context):
-      """Compact compacts the event history in the etcd key-value store. The key-value
-      store should be periodically compacted or the event history will continue to grow
-      indefinitely.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-
-  def add_KVServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-        'Range': grpc.unary_unary_rpc_method_handler(
-            servicer.Range,
-            request_deserializer=RangeRequest.FromString,
-            response_serializer=RangeResponse.SerializeToString,
-        ),
-        'Put': grpc.unary_unary_rpc_method_handler(
-            servicer.Put,
-            request_deserializer=PutRequest.FromString,
-            response_serializer=PutResponse.SerializeToString,
-        ),
-        'DeleteRange': grpc.unary_unary_rpc_method_handler(
-            servicer.DeleteRange,
-            request_deserializer=DeleteRangeRequest.FromString,
-            response_serializer=DeleteRangeResponse.SerializeToString,
-        ),
-        'Txn': grpc.unary_unary_rpc_method_handler(
-            servicer.Txn,
-            request_deserializer=TxnRequest.FromString,
-            response_serializer=TxnResponse.SerializeToString,
-        ),
-        'Compact': grpc.unary_unary_rpc_method_handler(
-            servicer.Compact,
-            request_deserializer=CompactionRequest.FromString,
-            response_serializer=CompactionResponse.SerializeToString,
-        ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-        'etcdserverpb.KV', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler,))
-
-
-  class WatchStub(object):
-
-    def __init__(self, channel):
-      """Constructor.
-
-      Args:
-        channel: A grpc.Channel.
-      """
-      self.Watch = channel.stream_stream(
-          '/etcdserverpb.Watch/Watch',
-          request_serializer=WatchRequest.SerializeToString,
-          response_deserializer=WatchResponse.FromString,
-          )
-
-
-  class WatchServicer(object):
-
-    def Watch(self, request_iterator, context):
-      """Watch watches for events happening or that have happened. Both input and output
-      are streams; the input stream is for creating and canceling watchers and the output
-      stream sends events. One watch RPC can watch on multiple key ranges, streaming events
-      for several watches at once. The entire event history can be watched starting from the
-      last compaction revision.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-
-  def add_WatchServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-        'Watch': grpc.stream_stream_rpc_method_handler(
-            servicer.Watch,
-            request_deserializer=WatchRequest.FromString,
-            response_serializer=WatchResponse.SerializeToString,
-        ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-        'etcdserverpb.Watch', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler,))
-
-
-  class LeaseStub(object):
-
-    def __init__(self, channel):
-      """Constructor.
-
-      Args:
-        channel: A grpc.Channel.
-      """
-      self.LeaseGrant = channel.unary_unary(
-          '/etcdserverpb.Lease/LeaseGrant',
-          request_serializer=LeaseGrantRequest.SerializeToString,
-          response_deserializer=LeaseGrantResponse.FromString,
-          )
-      self.LeaseRevoke = channel.unary_unary(
-          '/etcdserverpb.Lease/LeaseRevoke',
-          request_serializer=LeaseRevokeRequest.SerializeToString,
-          response_deserializer=LeaseRevokeResponse.FromString,
-          )
-      self.LeaseKeepAlive = channel.stream_stream(
-          '/etcdserverpb.Lease/LeaseKeepAlive',
-          request_serializer=LeaseKeepAliveRequest.SerializeToString,
-          response_deserializer=LeaseKeepAliveResponse.FromString,
-          )
-      self.LeaseTimeToLive = channel.unary_unary(
-          '/etcdserverpb.Lease/LeaseTimeToLive',
-          request_serializer=LeaseTimeToLiveRequest.SerializeToString,
-          response_deserializer=LeaseTimeToLiveResponse.FromString,
-          )
-
-
-  class LeaseServicer(object):
-
-    def LeaseGrant(self, request, context):
-      """LeaseGrant creates a lease which expires if the server does not receive a keepAlive
-      within a given time to live period. All keys attached to the lease will be expired and
-      deleted if the lease expires. Each expired key generates a delete event in the event history.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def LeaseRevoke(self, request, context):
-      """LeaseRevoke revokes a lease. All keys attached to the lease will expire and be deleted.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def LeaseKeepAlive(self, request_iterator, context):
-      """LeaseKeepAlive keeps the lease alive by streaming keep alive requests from the client
-      to the server and streaming keep alive responses from the server to the client.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def LeaseTimeToLive(self, request, context):
-      """LeaseTimeToLive retrieves lease information.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-
-  def add_LeaseServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-        'LeaseGrant': grpc.unary_unary_rpc_method_handler(
-            servicer.LeaseGrant,
-            request_deserializer=LeaseGrantRequest.FromString,
-            response_serializer=LeaseGrantResponse.SerializeToString,
-        ),
-        'LeaseRevoke': grpc.unary_unary_rpc_method_handler(
-            servicer.LeaseRevoke,
-            request_deserializer=LeaseRevokeRequest.FromString,
-            response_serializer=LeaseRevokeResponse.SerializeToString,
-        ),
-        'LeaseKeepAlive': grpc.stream_stream_rpc_method_handler(
-            servicer.LeaseKeepAlive,
-            request_deserializer=LeaseKeepAliveRequest.FromString,
-            response_serializer=LeaseKeepAliveResponse.SerializeToString,
-        ),
-        'LeaseTimeToLive': grpc.unary_unary_rpc_method_handler(
-            servicer.LeaseTimeToLive,
-            request_deserializer=LeaseTimeToLiveRequest.FromString,
-            response_serializer=LeaseTimeToLiveResponse.SerializeToString,
-        ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-        'etcdserverpb.Lease', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler,))
-
-
-  class ClusterStub(object):
-
-    def __init__(self, channel):
-      """Constructor.
-
-      Args:
-        channel: A grpc.Channel.
-      """
-      self.MemberAdd = channel.unary_unary(
-          '/etcdserverpb.Cluster/MemberAdd',
-          request_serializer=MemberAddRequest.SerializeToString,
-          response_deserializer=MemberAddResponse.FromString,
-          )
-      self.MemberRemove = channel.unary_unary(
-          '/etcdserverpb.Cluster/MemberRemove',
-          request_serializer=MemberRemoveRequest.SerializeToString,
-          response_deserializer=MemberRemoveResponse.FromString,
-          )
-      self.MemberUpdate = channel.unary_unary(
-          '/etcdserverpb.Cluster/MemberUpdate',
-          request_serializer=MemberUpdateRequest.SerializeToString,
-          response_deserializer=MemberUpdateResponse.FromString,
-          )
-      self.MemberList = channel.unary_unary(
-          '/etcdserverpb.Cluster/MemberList',
-          request_serializer=MemberListRequest.SerializeToString,
-          response_deserializer=MemberListResponse.FromString,
-          )
-
-
-  class ClusterServicer(object):
-
-    def MemberAdd(self, request, context):
-      """MemberAdd adds a member into the cluster.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def MemberRemove(self, request, context):
-      """MemberRemove removes an existing member from the cluster.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def MemberUpdate(self, request, context):
-      """MemberUpdate updates the member configuration.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def MemberList(self, request, context):
-      """MemberList lists all the members in the cluster.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-
-  def add_ClusterServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-        'MemberAdd': grpc.unary_unary_rpc_method_handler(
-            servicer.MemberAdd,
-            request_deserializer=MemberAddRequest.FromString,
-            response_serializer=MemberAddResponse.SerializeToString,
-        ),
-        'MemberRemove': grpc.unary_unary_rpc_method_handler(
-            servicer.MemberRemove,
-            request_deserializer=MemberRemoveRequest.FromString,
-            response_serializer=MemberRemoveResponse.SerializeToString,
-        ),
-        'MemberUpdate': grpc.unary_unary_rpc_method_handler(
-            servicer.MemberUpdate,
-            request_deserializer=MemberUpdateRequest.FromString,
-            response_serializer=MemberUpdateResponse.SerializeToString,
-        ),
-        'MemberList': grpc.unary_unary_rpc_method_handler(
-            servicer.MemberList,
-            request_deserializer=MemberListRequest.FromString,
-            response_serializer=MemberListResponse.SerializeToString,
-        ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-        'etcdserverpb.Cluster', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler,))
-
-
-  class MaintenanceStub(object):
-
-    def __init__(self, channel):
-      """Constructor.
-
-      Args:
-        channel: A grpc.Channel.
-      """
-      self.Alarm = channel.unary_unary(
-          '/etcdserverpb.Maintenance/Alarm',
-          request_serializer=AlarmRequest.SerializeToString,
-          response_deserializer=AlarmResponse.FromString,
-          )
-      self.Status = channel.unary_unary(
-          '/etcdserverpb.Maintenance/Status',
-          request_serializer=StatusRequest.SerializeToString,
-          response_deserializer=StatusResponse.FromString,
-          )
-      self.Defragment = channel.unary_unary(
-          '/etcdserverpb.Maintenance/Defragment',
-          request_serializer=DefragmentRequest.SerializeToString,
-          response_deserializer=DefragmentResponse.FromString,
-          )
-      self.Hash = channel.unary_unary(
-          '/etcdserverpb.Maintenance/Hash',
-          request_serializer=HashRequest.SerializeToString,
-          response_deserializer=HashResponse.FromString,
-          )
-      self.Snapshot = channel.unary_stream(
-          '/etcdserverpb.Maintenance/Snapshot',
-          request_serializer=SnapshotRequest.SerializeToString,
-          response_deserializer=SnapshotResponse.FromString,
-          )
-
-
-  class MaintenanceServicer(object):
-
-    def Alarm(self, request, context):
-      """Alarm activates, deactivates, and queries alarms regarding cluster health.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def Status(self, request, context):
-      """Status gets the status of the member.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def Defragment(self, request, context):
-      """Defragment defragments a member's backend database to recover storage space.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def Hash(self, request, context):
-      """Hash returns the hash of the local KV state for consistency checking purpose.
-      This is designed for testing; do not use this in production when there
-      are ongoing transactions.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def Snapshot(self, request, context):
-      """Snapshot sends a snapshot of the entire backend from a member over a stream to a client.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-
-  def add_MaintenanceServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-        'Alarm': grpc.unary_unary_rpc_method_handler(
-            servicer.Alarm,
-            request_deserializer=AlarmRequest.FromString,
-            response_serializer=AlarmResponse.SerializeToString,
-        ),
-        'Status': grpc.unary_unary_rpc_method_handler(
-            servicer.Status,
-            request_deserializer=StatusRequest.FromString,
-            response_serializer=StatusResponse.SerializeToString,
-        ),
-        'Defragment': grpc.unary_unary_rpc_method_handler(
-            servicer.Defragment,
-            request_deserializer=DefragmentRequest.FromString,
-            response_serializer=DefragmentResponse.SerializeToString,
-        ),
-        'Hash': grpc.unary_unary_rpc_method_handler(
-            servicer.Hash,
-            request_deserializer=HashRequest.FromString,
-            response_serializer=HashResponse.SerializeToString,
-        ),
-        'Snapshot': grpc.unary_stream_rpc_method_handler(
-            servicer.Snapshot,
-            request_deserializer=SnapshotRequest.FromString,
-            response_serializer=SnapshotResponse.SerializeToString,
-        ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-        'etcdserverpb.Maintenance', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler,))
-
-
-  class AuthStub(object):
-
-    def __init__(self, channel):
-      """Constructor.
-
-      Args:
-        channel: A grpc.Channel.
-      """
-      self.AuthEnable = channel.unary_unary(
-          '/etcdserverpb.Auth/AuthEnable',
-          request_serializer=AuthEnableRequest.SerializeToString,
-          response_deserializer=AuthEnableResponse.FromString,
-          )
-      self.AuthDisable = channel.unary_unary(
-          '/etcdserverpb.Auth/AuthDisable',
-          request_serializer=AuthDisableRequest.SerializeToString,
-          response_deserializer=AuthDisableResponse.FromString,
-          )
-      self.Authenticate = channel.unary_unary(
-          '/etcdserverpb.Auth/Authenticate',
-          request_serializer=AuthenticateRequest.SerializeToString,
-          response_deserializer=AuthenticateResponse.FromString,
-          )
-      self.UserAdd = channel.unary_unary(
-          '/etcdserverpb.Auth/UserAdd',
-          request_serializer=AuthUserAddRequest.SerializeToString,
-          response_deserializer=AuthUserAddResponse.FromString,
-          )
-      self.UserGet = channel.unary_unary(
-          '/etcdserverpb.Auth/UserGet',
-          request_serializer=AuthUserGetRequest.SerializeToString,
-          response_deserializer=AuthUserGetResponse.FromString,
-          )
-      self.UserList = channel.unary_unary(
-          '/etcdserverpb.Auth/UserList',
-          request_serializer=AuthUserListRequest.SerializeToString,
-          response_deserializer=AuthUserListResponse.FromString,
-          )
-      self.UserDelete = channel.unary_unary(
-          '/etcdserverpb.Auth/UserDelete',
-          request_serializer=AuthUserDeleteRequest.SerializeToString,
-          response_deserializer=AuthUserDeleteResponse.FromString,
-          )
-      self.UserChangePassword = channel.unary_unary(
-          '/etcdserverpb.Auth/UserChangePassword',
-          request_serializer=AuthUserChangePasswordRequest.SerializeToString,
-          response_deserializer=AuthUserChangePasswordResponse.FromString,
-          )
-      self.UserGrantRole = channel.unary_unary(
-          '/etcdserverpb.Auth/UserGrantRole',
-          request_serializer=AuthUserGrantRoleRequest.SerializeToString,
-          response_deserializer=AuthUserGrantRoleResponse.FromString,
-          )
-      self.UserRevokeRole = channel.unary_unary(
-          '/etcdserverpb.Auth/UserRevokeRole',
-          request_serializer=AuthUserRevokeRoleRequest.SerializeToString,
-          response_deserializer=AuthUserRevokeRoleResponse.FromString,
-          )
-      self.RoleAdd = channel.unary_unary(
-          '/etcdserverpb.Auth/RoleAdd',
-          request_serializer=AuthRoleAddRequest.SerializeToString,
-          response_deserializer=AuthRoleAddResponse.FromString,
-          )
-      self.RoleGet = channel.unary_unary(
-          '/etcdserverpb.Auth/RoleGet',
-          request_serializer=AuthRoleGetRequest.SerializeToString,
-          response_deserializer=AuthRoleGetResponse.FromString,
-          )
-      self.RoleList = channel.unary_unary(
-          '/etcdserverpb.Auth/RoleList',
-          request_serializer=AuthRoleListRequest.SerializeToString,
-          response_deserializer=AuthRoleListResponse.FromString,
-          )
-      self.RoleDelete = channel.unary_unary(
-          '/etcdserverpb.Auth/RoleDelete',
-          request_serializer=AuthRoleDeleteRequest.SerializeToString,
-          response_deserializer=AuthRoleDeleteResponse.FromString,
-          )
-      self.RoleGrantPermission = channel.unary_unary(
-          '/etcdserverpb.Auth/RoleGrantPermission',
-          request_serializer=AuthRoleGrantPermissionRequest.SerializeToString,
-          response_deserializer=AuthRoleGrantPermissionResponse.FromString,
-          )
-      self.RoleRevokePermission = channel.unary_unary(
-          '/etcdserverpb.Auth/RoleRevokePermission',
-          request_serializer=AuthRoleRevokePermissionRequest.SerializeToString,
-          response_deserializer=AuthRoleRevokePermissionResponse.FromString,
-          )
-
-
-  class AuthServicer(object):
-
-    def AuthEnable(self, request, context):
-      """AuthEnable enables authentication.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def AuthDisable(self, request, context):
-      """AuthDisable disables authentication.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def Authenticate(self, request, context):
-      """Authenticate processes an authenticate request.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def UserAdd(self, request, context):
-      """UserAdd adds a new user.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def UserGet(self, request, context):
-      """UserGet gets detailed user information.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def UserList(self, request, context):
-      """UserList gets a list of all users.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def UserDelete(self, request, context):
-      """UserDelete deletes a specified user.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def UserChangePassword(self, request, context):
-      """UserChangePassword changes the password of a specified user.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def UserGrantRole(self, request, context):
-      """UserGrant grants a role to a specified user.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def UserRevokeRole(self, request, context):
-      """UserRevokeRole revokes a role of specified user.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def RoleAdd(self, request, context):
-      """RoleAdd adds a new role.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def RoleGet(self, request, context):
-      """RoleGet gets detailed role information.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def RoleList(self, request, context):
-      """RoleList gets lists of all roles.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def RoleDelete(self, request, context):
-      """RoleDelete deletes a specified role.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def RoleGrantPermission(self, request, context):
-      """RoleGrantPermission grants a permission of a specified key or range to a specified role.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-    def RoleRevokePermission(self, request, context):
-      """RoleRevokePermission revokes a key or range permission of a specified role.
-      """
-      context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-      context.set_details('Method not implemented!')
-      raise NotImplementedError('Method not implemented!')
-
-
-  def add_AuthServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-        'AuthEnable': grpc.unary_unary_rpc_method_handler(
-            servicer.AuthEnable,
-            request_deserializer=AuthEnableRequest.FromString,
-            response_serializer=AuthEnableResponse.SerializeToString,
-        ),
-        'AuthDisable': grpc.unary_unary_rpc_method_handler(
-            servicer.AuthDisable,
-            request_deserializer=AuthDisableRequest.FromString,
-            response_serializer=AuthDisableResponse.SerializeToString,
-        ),
-        'Authenticate': grpc.unary_unary_rpc_method_handler(
-            servicer.Authenticate,
-            request_deserializer=AuthenticateRequest.FromString,
-            response_serializer=AuthenticateResponse.SerializeToString,
-        ),
-        'UserAdd': grpc.unary_unary_rpc_method_handler(
-            servicer.UserAdd,
-            request_deserializer=AuthUserAddRequest.FromString,
-            response_serializer=AuthUserAddResponse.SerializeToString,
-        ),
-        'UserGet': grpc.unary_unary_rpc_method_handler(
-            servicer.UserGet,
-            request_deserializer=AuthUserGetRequest.FromString,
-            response_serializer=AuthUserGetResponse.SerializeToString,
-        ),
-        'UserList': grpc.unary_unary_rpc_method_handler(
-            servicer.UserList,
-            request_deserializer=AuthUserListRequest.FromString,
-            response_serializer=AuthUserListResponse.SerializeToString,
-        ),
-        'UserDelete': grpc.unary_unary_rpc_method_handler(
-            servicer.UserDelete,
-            request_deserializer=AuthUserDeleteRequest.FromString,
-            response_serializer=AuthUserDeleteResponse.SerializeToString,
-        ),
-        'UserChangePassword': grpc.unary_unary_rpc_method_handler(
-            servicer.UserChangePassword,
-            request_deserializer=AuthUserChangePasswordRequest.FromString,
-            response_serializer=AuthUserChangePasswordResponse.SerializeToString,
-        ),
-        'UserGrantRole': grpc.unary_unary_rpc_method_handler(
-            servicer.UserGrantRole,
-            request_deserializer=AuthUserGrantRoleRequest.FromString,
-            response_serializer=AuthUserGrantRoleResponse.SerializeToString,
-        ),
-        'UserRevokeRole': grpc.unary_unary_rpc_method_handler(
-            servicer.UserRevokeRole,
-            request_deserializer=AuthUserRevokeRoleRequest.FromString,
-            response_serializer=AuthUserRevokeRoleResponse.SerializeToString,
-        ),
-        'RoleAdd': grpc.unary_unary_rpc_method_handler(
-            servicer.RoleAdd,
-            request_deserializer=AuthRoleAddRequest.FromString,
-            response_serializer=AuthRoleAddResponse.SerializeToString,
-        ),
-        'RoleGet': grpc.unary_unary_rpc_method_handler(
-            servicer.RoleGet,
-            request_deserializer=AuthRoleGetRequest.FromString,
-            response_serializer=AuthRoleGetResponse.SerializeToString,
-        ),
-        'RoleList': grpc.unary_unary_rpc_method_handler(
-            servicer.RoleList,
-            request_deserializer=AuthRoleListRequest.FromString,
-            response_serializer=AuthRoleListResponse.SerializeToString,
-        ),
-        'RoleDelete': grpc.unary_unary_rpc_method_handler(
-            servicer.RoleDelete,
-            request_deserializer=AuthRoleDeleteRequest.FromString,
-            response_serializer=AuthRoleDeleteResponse.SerializeToString,
-        ),
-        'RoleGrantPermission': grpc.unary_unary_rpc_method_handler(
-            servicer.RoleGrantPermission,
-            request_deserializer=AuthRoleGrantPermissionRequest.FromString,
-            response_serializer=AuthRoleGrantPermissionResponse.SerializeToString,
-        ),
-        'RoleRevokePermission': grpc.unary_unary_rpc_method_handler(
-            servicer.RoleRevokePermission,
-            request_deserializer=AuthRoleRevokePermissionRequest.FromString,
-            response_serializer=AuthRoleRevokePermissionResponse.SerializeToString,
-        ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-        'etcdserverpb.Auth', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler,))
-
-
-  class BetaKVServicer(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    """for grpc-gateway
-
-    """
-    def Range(self, request, context):
-      """Range gets the keys in the range from the key-value store.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def Put(self, request, context):
-      """Put puts the given key into the key-value store.
-      A put request increments the revision of the key-value store
-      and generates one event in the event history.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def DeleteRange(self, request, context):
-      """DeleteRange deletes the given range from the key-value store.
-      A delete request increments the revision of the key-value store
-      and generates a delete event in the event history for every deleted key.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def Txn(self, request, context):
-      """Txn processes multiple requests in a single transaction.
-      A txn request increments the revision of the key-value store
-      and generates events with the same revision for every completed request.
-      It is not allowed to modify the same key several times within one txn.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def Compact(self, request, context):
-      """Compact compacts the event history in the etcd key-value store. The key-value
-      store should be periodically compacted or the event history will continue to grow
-      indefinitely.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-
-
-  class BetaKVStub(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    """for grpc-gateway
-
-    """
-    def Range(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """Range gets the keys in the range from the key-value store.
-      """
-      raise NotImplementedError()
-    Range.future = None
-    def Put(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """Put puts the given key into the key-value store.
-      A put request increments the revision of the key-value store
-      and generates one event in the event history.
-      """
-      raise NotImplementedError()
-    Put.future = None
-    def DeleteRange(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """DeleteRange deletes the given range from the key-value store.
-      A delete request increments the revision of the key-value store
-      and generates a delete event in the event history for every deleted key.
-      """
-      raise NotImplementedError()
-    DeleteRange.future = None
-    def Txn(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """Txn processes multiple requests in a single transaction.
-      A txn request increments the revision of the key-value store
-      and generates events with the same revision for every completed request.
-      It is not allowed to modify the same key several times within one txn.
-      """
-      raise NotImplementedError()
-    Txn.future = None
-    def Compact(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """Compact compacts the event history in the etcd key-value store. The key-value
-      store should be periodically compacted or the event history will continue to grow
-      indefinitely.
-      """
-      raise NotImplementedError()
-    Compact.future = None
-
-
-  def beta_create_KV_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_deserializers = {
-      ('etcdserverpb.KV', 'Compact'): CompactionRequest.FromString,
-      ('etcdserverpb.KV', 'DeleteRange'): DeleteRangeRequest.FromString,
-      ('etcdserverpb.KV', 'Put'): PutRequest.FromString,
-      ('etcdserverpb.KV', 'Range'): RangeRequest.FromString,
-      ('etcdserverpb.KV', 'Txn'): TxnRequest.FromString,
-    }
-    response_serializers = {
-      ('etcdserverpb.KV', 'Compact'): CompactionResponse.SerializeToString,
-      ('etcdserverpb.KV', 'DeleteRange'): DeleteRangeResponse.SerializeToString,
-      ('etcdserverpb.KV', 'Put'): PutResponse.SerializeToString,
-      ('etcdserverpb.KV', 'Range'): RangeResponse.SerializeToString,
-      ('etcdserverpb.KV', 'Txn'): TxnResponse.SerializeToString,
-    }
-    method_implementations = {
-      ('etcdserverpb.KV', 'Compact'): face_utilities.unary_unary_inline(servicer.Compact),
-      ('etcdserverpb.KV', 'DeleteRange'): face_utilities.unary_unary_inline(servicer.DeleteRange),
-      ('etcdserverpb.KV', 'Put'): face_utilities.unary_unary_inline(servicer.Put),
-      ('etcdserverpb.KV', 'Range'): face_utilities.unary_unary_inline(servicer.Range),
-      ('etcdserverpb.KV', 'Txn'): face_utilities.unary_unary_inline(servicer.Txn),
-    }
-    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
-    return beta_implementations.server(method_implementations, options=server_options)
-
-
-  def beta_create_KV_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_serializers = {
-      ('etcdserverpb.KV', 'Compact'): CompactionRequest.SerializeToString,
-      ('etcdserverpb.KV', 'DeleteRange'): DeleteRangeRequest.SerializeToString,
-      ('etcdserverpb.KV', 'Put'): PutRequest.SerializeToString,
-      ('etcdserverpb.KV', 'Range'): RangeRequest.SerializeToString,
-      ('etcdserverpb.KV', 'Txn'): TxnRequest.SerializeToString,
-    }
-    response_deserializers = {
-      ('etcdserverpb.KV', 'Compact'): CompactionResponse.FromString,
-      ('etcdserverpb.KV', 'DeleteRange'): DeleteRangeResponse.FromString,
-      ('etcdserverpb.KV', 'Put'): PutResponse.FromString,
-      ('etcdserverpb.KV', 'Range'): RangeResponse.FromString,
-      ('etcdserverpb.KV', 'Txn'): TxnResponse.FromString,
-    }
-    cardinalities = {
-      'Compact': cardinality.Cardinality.UNARY_UNARY,
-      'DeleteRange': cardinality.Cardinality.UNARY_UNARY,
-      'Put': cardinality.Cardinality.UNARY_UNARY,
-      'Range': cardinality.Cardinality.UNARY_UNARY,
-      'Txn': cardinality.Cardinality.UNARY_UNARY,
-    }
-    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-    return beta_implementations.dynamic_stub(channel, 'etcdserverpb.KV', cardinalities, options=stub_options)
-
-
-  class BetaWatchServicer(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    def Watch(self, request_iterator, context):
-      """Watch watches for events happening or that have happened. Both input and output
-      are streams; the input stream is for creating and canceling watchers and the output
-      stream sends events. One watch RPC can watch on multiple key ranges, streaming events
-      for several watches at once. The entire event history can be watched starting from the
-      last compaction revision.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-
-
-  class BetaWatchStub(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    def Watch(self, request_iterator, timeout, metadata=None, with_call=False, protocol_options=None):
-      """Watch watches for events happening or that have happened. Both input and output
-      are streams; the input stream is for creating and canceling watchers and the output
-      stream sends events. One watch RPC can watch on multiple key ranges, streaming events
-      for several watches at once. The entire event history can be watched starting from the
-      last compaction revision.
-      """
-      raise NotImplementedError()
-
-
-  def beta_create_Watch_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_deserializers = {
-      ('etcdserverpb.Watch', 'Watch'): WatchRequest.FromString,
-    }
-    response_serializers = {
-      ('etcdserverpb.Watch', 'Watch'): WatchResponse.SerializeToString,
-    }
-    method_implementations = {
-      ('etcdserverpb.Watch', 'Watch'): face_utilities.stream_stream_inline(servicer.Watch),
-    }
-    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
-    return beta_implementations.server(method_implementations, options=server_options)
-
-
-  def beta_create_Watch_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_serializers = {
-      ('etcdserverpb.Watch', 'Watch'): WatchRequest.SerializeToString,
-    }
-    response_deserializers = {
-      ('etcdserverpb.Watch', 'Watch'): WatchResponse.FromString,
-    }
-    cardinalities = {
-      'Watch': cardinality.Cardinality.STREAM_STREAM,
-    }
-    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-    return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Watch', cardinalities, options=stub_options)
-
-
-  class BetaLeaseServicer(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    def LeaseGrant(self, request, context):
-      """LeaseGrant creates a lease which expires if the server does not receive a keepAlive
-      within a given time to live period. All keys attached to the lease will be expired and
-      deleted if the lease expires. Each expired key generates a delete event in the event history.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def LeaseRevoke(self, request, context):
-      """LeaseRevoke revokes a lease. All keys attached to the lease will expire and be deleted.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def LeaseKeepAlive(self, request_iterator, context):
-      """LeaseKeepAlive keeps the lease alive by streaming keep alive requests from the client
-      to the server and streaming keep alive responses from the server to the client.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def LeaseTimeToLive(self, request, context):
-      """LeaseTimeToLive retrieves lease information.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-
-
-  class BetaLeaseStub(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    def LeaseGrant(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """LeaseGrant creates a lease which expires if the server does not receive a keepAlive
-      within a given time to live period. All keys attached to the lease will be expired and
-      deleted if the lease expires. Each expired key generates a delete event in the event history.
-      """
-      raise NotImplementedError()
-    LeaseGrant.future = None
-    def LeaseRevoke(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """LeaseRevoke revokes a lease. All keys attached to the lease will expire and be deleted.
-      """
-      raise NotImplementedError()
-    LeaseRevoke.future = None
-    def LeaseKeepAlive(self, request_iterator, timeout, metadata=None, with_call=False, protocol_options=None):
-      """LeaseKeepAlive keeps the lease alive by streaming keep alive requests from the client
-      to the server and streaming keep alive responses from the server to the client.
-      """
-      raise NotImplementedError()
-    def LeaseTimeToLive(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """LeaseTimeToLive retrieves lease information.
-      """
-      raise NotImplementedError()
-    LeaseTimeToLive.future = None
-
-
-  def beta_create_Lease_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_deserializers = {
-      ('etcdserverpb.Lease', 'LeaseGrant'): LeaseGrantRequest.FromString,
-      ('etcdserverpb.Lease', 'LeaseKeepAlive'): LeaseKeepAliveRequest.FromString,
-      ('etcdserverpb.Lease', 'LeaseRevoke'): LeaseRevokeRequest.FromString,
-      ('etcdserverpb.Lease', 'LeaseTimeToLive'): LeaseTimeToLiveRequest.FromString,
-    }
-    response_serializers = {
-      ('etcdserverpb.Lease', 'LeaseGrant'): LeaseGrantResponse.SerializeToString,
-      ('etcdserverpb.Lease', 'LeaseKeepAlive'): LeaseKeepAliveResponse.SerializeToString,
-      ('etcdserverpb.Lease', 'LeaseRevoke'): LeaseRevokeResponse.SerializeToString,
-      ('etcdserverpb.Lease', 'LeaseTimeToLive'): LeaseTimeToLiveResponse.SerializeToString,
-    }
-    method_implementations = {
-      ('etcdserverpb.Lease', 'LeaseGrant'): face_utilities.unary_unary_inline(servicer.LeaseGrant),
-      ('etcdserverpb.Lease', 'LeaseKeepAlive'): face_utilities.stream_stream_inline(servicer.LeaseKeepAlive),
-      ('etcdserverpb.Lease', 'LeaseRevoke'): face_utilities.unary_unary_inline(servicer.LeaseRevoke),
-      ('etcdserverpb.Lease', 'LeaseTimeToLive'): face_utilities.unary_unary_inline(servicer.LeaseTimeToLive),
-    }
-    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
-    return beta_implementations.server(method_implementations, options=server_options)
-
-
-  def beta_create_Lease_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_serializers = {
-      ('etcdserverpb.Lease', 'LeaseGrant'): LeaseGrantRequest.SerializeToString,
-      ('etcdserverpb.Lease', 'LeaseKeepAlive'): LeaseKeepAliveRequest.SerializeToString,
-      ('etcdserverpb.Lease', 'LeaseRevoke'): LeaseRevokeRequest.SerializeToString,
-      ('etcdserverpb.Lease', 'LeaseTimeToLive'): LeaseTimeToLiveRequest.SerializeToString,
-    }
-    response_deserializers = {
-      ('etcdserverpb.Lease', 'LeaseGrant'): LeaseGrantResponse.FromString,
-      ('etcdserverpb.Lease', 'LeaseKeepAlive'): LeaseKeepAliveResponse.FromString,
-      ('etcdserverpb.Lease', 'LeaseRevoke'): LeaseRevokeResponse.FromString,
-      ('etcdserverpb.Lease', 'LeaseTimeToLive'): LeaseTimeToLiveResponse.FromString,
-    }
-    cardinalities = {
-      'LeaseGrant': cardinality.Cardinality.UNARY_UNARY,
-      'LeaseKeepAlive': cardinality.Cardinality.STREAM_STREAM,
-      'LeaseRevoke': cardinality.Cardinality.UNARY_UNARY,
-      'LeaseTimeToLive': cardinality.Cardinality.UNARY_UNARY,
-    }
-    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-    return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Lease', cardinalities, options=stub_options)
-
-
-  class BetaClusterServicer(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    def MemberAdd(self, request, context):
-      """MemberAdd adds a member into the cluster.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def MemberRemove(self, request, context):
-      """MemberRemove removes an existing member from the cluster.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def MemberUpdate(self, request, context):
-      """MemberUpdate updates the member configuration.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def MemberList(self, request, context):
-      """MemberList lists all the members in the cluster.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-
-
-  class BetaClusterStub(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    def MemberAdd(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """MemberAdd adds a member into the cluster.
-      """
-      raise NotImplementedError()
-    MemberAdd.future = None
-    def MemberRemove(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """MemberRemove removes an existing member from the cluster.
-      """
-      raise NotImplementedError()
-    MemberRemove.future = None
-    def MemberUpdate(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """MemberUpdate updates the member configuration.
-      """
-      raise NotImplementedError()
-    MemberUpdate.future = None
-    def MemberList(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """MemberList lists all the members in the cluster.
-      """
-      raise NotImplementedError()
-    MemberList.future = None
-
-
-  def beta_create_Cluster_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_deserializers = {
-      ('etcdserverpb.Cluster', 'MemberAdd'): MemberAddRequest.FromString,
-      ('etcdserverpb.Cluster', 'MemberList'): MemberListRequest.FromString,
-      ('etcdserverpb.Cluster', 'MemberRemove'): MemberRemoveRequest.FromString,
-      ('etcdserverpb.Cluster', 'MemberUpdate'): MemberUpdateRequest.FromString,
-    }
-    response_serializers = {
-      ('etcdserverpb.Cluster', 'MemberAdd'): MemberAddResponse.SerializeToString,
-      ('etcdserverpb.Cluster', 'MemberList'): MemberListResponse.SerializeToString,
-      ('etcdserverpb.Cluster', 'MemberRemove'): MemberRemoveResponse.SerializeToString,
-      ('etcdserverpb.Cluster', 'MemberUpdate'): MemberUpdateResponse.SerializeToString,
-    }
-    method_implementations = {
-      ('etcdserverpb.Cluster', 'MemberAdd'): face_utilities.unary_unary_inline(servicer.MemberAdd),
-      ('etcdserverpb.Cluster', 'MemberList'): face_utilities.unary_unary_inline(servicer.MemberList),
-      ('etcdserverpb.Cluster', 'MemberRemove'): face_utilities.unary_unary_inline(servicer.MemberRemove),
-      ('etcdserverpb.Cluster', 'MemberUpdate'): face_utilities.unary_unary_inline(servicer.MemberUpdate),
-    }
-    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
-    return beta_implementations.server(method_implementations, options=server_options)
-
-
-  def beta_create_Cluster_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_serializers = {
-      ('etcdserverpb.Cluster', 'MemberAdd'): MemberAddRequest.SerializeToString,
-      ('etcdserverpb.Cluster', 'MemberList'): MemberListRequest.SerializeToString,
-      ('etcdserverpb.Cluster', 'MemberRemove'): MemberRemoveRequest.SerializeToString,
-      ('etcdserverpb.Cluster', 'MemberUpdate'): MemberUpdateRequest.SerializeToString,
-    }
-    response_deserializers = {
-      ('etcdserverpb.Cluster', 'MemberAdd'): MemberAddResponse.FromString,
-      ('etcdserverpb.Cluster', 'MemberList'): MemberListResponse.FromString,
-      ('etcdserverpb.Cluster', 'MemberRemove'): MemberRemoveResponse.FromString,
-      ('etcdserverpb.Cluster', 'MemberUpdate'): MemberUpdateResponse.FromString,
-    }
-    cardinalities = {
-      'MemberAdd': cardinality.Cardinality.UNARY_UNARY,
-      'MemberList': cardinality.Cardinality.UNARY_UNARY,
-      'MemberRemove': cardinality.Cardinality.UNARY_UNARY,
-      'MemberUpdate': cardinality.Cardinality.UNARY_UNARY,
-    }
-    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-    return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Cluster', cardinalities, options=stub_options)
-
-
-  class BetaMaintenanceServicer(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    def Alarm(self, request, context):
-      """Alarm activates, deactivates, and queries alarms regarding cluster health.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def Status(self, request, context):
-      """Status gets the status of the member.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def Defragment(self, request, context):
-      """Defragment defragments a member's backend database to recover storage space.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def Hash(self, request, context):
-      """Hash returns the hash of the local KV state for consistency checking purpose.
-      This is designed for testing; do not use this in production when there
-      are ongoing transactions.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def Snapshot(self, request, context):
-      """Snapshot sends a snapshot of the entire backend from a member over a stream to a client.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-
-
-  class BetaMaintenanceStub(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    def Alarm(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """Alarm activates, deactivates, and queries alarms regarding cluster health.
-      """
-      raise NotImplementedError()
-    Alarm.future = None
-    def Status(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """Status gets the status of the member.
-      """
-      raise NotImplementedError()
-    Status.future = None
-    def Defragment(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """Defragment defragments a member's backend database to recover storage space.
-      """
-      raise NotImplementedError()
-    Defragment.future = None
-    def Hash(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """Hash returns the hash of the local KV state for consistency checking purpose.
-      This is designed for testing; do not use this in production when there
-      are ongoing transactions.
-      """
-      raise NotImplementedError()
-    Hash.future = None
-    def Snapshot(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """Snapshot sends a snapshot of the entire backend from a member over a stream to a client.
-      """
-      raise NotImplementedError()
-
-
-  def beta_create_Maintenance_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_deserializers = {
-      ('etcdserverpb.Maintenance', 'Alarm'): AlarmRequest.FromString,
-      ('etcdserverpb.Maintenance', 'Defragment'): DefragmentRequest.FromString,
-      ('etcdserverpb.Maintenance', 'Hash'): HashRequest.FromString,
-      ('etcdserverpb.Maintenance', 'Snapshot'): SnapshotRequest.FromString,
-      ('etcdserverpb.Maintenance', 'Status'): StatusRequest.FromString,
-    }
-    response_serializers = {
-      ('etcdserverpb.Maintenance', 'Alarm'): AlarmResponse.SerializeToString,
-      ('etcdserverpb.Maintenance', 'Defragment'): DefragmentResponse.SerializeToString,
-      ('etcdserverpb.Maintenance', 'Hash'): HashResponse.SerializeToString,
-      ('etcdserverpb.Maintenance', 'Snapshot'): SnapshotResponse.SerializeToString,
-      ('etcdserverpb.Maintenance', 'Status'): StatusResponse.SerializeToString,
-    }
-    method_implementations = {
-      ('etcdserverpb.Maintenance', 'Alarm'): face_utilities.unary_unary_inline(servicer.Alarm),
-      ('etcdserverpb.Maintenance', 'Defragment'): face_utilities.unary_unary_inline(servicer.Defragment),
-      ('etcdserverpb.Maintenance', 'Hash'): face_utilities.unary_unary_inline(servicer.Hash),
-      ('etcdserverpb.Maintenance', 'Snapshot'): face_utilities.unary_stream_inline(servicer.Snapshot),
-      ('etcdserverpb.Maintenance', 'Status'): face_utilities.unary_unary_inline(servicer.Status),
-    }
-    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
-    return beta_implementations.server(method_implementations, options=server_options)
-
-
-  def beta_create_Maintenance_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_serializers = {
-      ('etcdserverpb.Maintenance', 'Alarm'): AlarmRequest.SerializeToString,
-      ('etcdserverpb.Maintenance', 'Defragment'): DefragmentRequest.SerializeToString,
-      ('etcdserverpb.Maintenance', 'Hash'): HashRequest.SerializeToString,
-      ('etcdserverpb.Maintenance', 'Snapshot'): SnapshotRequest.SerializeToString,
-      ('etcdserverpb.Maintenance', 'Status'): StatusRequest.SerializeToString,
-    }
-    response_deserializers = {
-      ('etcdserverpb.Maintenance', 'Alarm'): AlarmResponse.FromString,
-      ('etcdserverpb.Maintenance', 'Defragment'): DefragmentResponse.FromString,
-      ('etcdserverpb.Maintenance', 'Hash'): HashResponse.FromString,
-      ('etcdserverpb.Maintenance', 'Snapshot'): SnapshotResponse.FromString,
-      ('etcdserverpb.Maintenance', 'Status'): StatusResponse.FromString,
-    }
-    cardinalities = {
-      'Alarm': cardinality.Cardinality.UNARY_UNARY,
-      'Defragment': cardinality.Cardinality.UNARY_UNARY,
-      'Hash': cardinality.Cardinality.UNARY_UNARY,
-      'Snapshot': cardinality.Cardinality.UNARY_STREAM,
-      'Status': cardinality.Cardinality.UNARY_UNARY,
-    }
-    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-    return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Maintenance', cardinalities, options=stub_options)
-
-
-  class BetaAuthServicer(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    def AuthEnable(self, request, context):
-      """AuthEnable enables authentication.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def AuthDisable(self, request, context):
-      """AuthDisable disables authentication.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def Authenticate(self, request, context):
-      """Authenticate processes an authenticate request.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def UserAdd(self, request, context):
-      """UserAdd adds a new user.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def UserGet(self, request, context):
-      """UserGet gets detailed user information.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def UserList(self, request, context):
-      """UserList gets a list of all users.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def UserDelete(self, request, context):
-      """UserDelete deletes a specified user.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def UserChangePassword(self, request, context):
-      """UserChangePassword changes the password of a specified user.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def UserGrantRole(self, request, context):
-      """UserGrant grants a role to a specified user.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def UserRevokeRole(self, request, context):
-      """UserRevokeRole revokes a role of specified user.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def RoleAdd(self, request, context):
-      """RoleAdd adds a new role.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def RoleGet(self, request, context):
-      """RoleGet gets detailed role information.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def RoleList(self, request, context):
-      """RoleList gets lists of all roles.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def RoleDelete(self, request, context):
-      """RoleDelete deletes a specified role.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def RoleGrantPermission(self, request, context):
-      """RoleGrantPermission grants a permission of a specified key or range to a specified role.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-    def RoleRevokePermission(self, request, context):
-      """RoleRevokePermission revokes a key or range permission of a specified role.
-      """
-      context.code(beta_interfaces.StatusCode.UNIMPLEMENTED)
-
-
-  class BetaAuthStub(object):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This class was generated
-    only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0."""
-    def AuthEnable(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """AuthEnable enables authentication.
-      """
-      raise NotImplementedError()
-    AuthEnable.future = None
-    def AuthDisable(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """AuthDisable disables authentication.
-      """
-      raise NotImplementedError()
-    AuthDisable.future = None
-    def Authenticate(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """Authenticate processes an authenticate request.
-      """
-      raise NotImplementedError()
-    Authenticate.future = None
-    def UserAdd(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """UserAdd adds a new user.
-      """
-      raise NotImplementedError()
-    UserAdd.future = None
-    def UserGet(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """UserGet gets detailed user information.
-      """
-      raise NotImplementedError()
-    UserGet.future = None
-    def UserList(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """UserList gets a list of all users.
-      """
-      raise NotImplementedError()
-    UserList.future = None
-    def UserDelete(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """UserDelete deletes a specified user.
-      """
-      raise NotImplementedError()
-    UserDelete.future = None
-    def UserChangePassword(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """UserChangePassword changes the password of a specified user.
-      """
-      raise NotImplementedError()
-    UserChangePassword.future = None
-    def UserGrantRole(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """UserGrant grants a role to a specified user.
-      """
-      raise NotImplementedError()
-    UserGrantRole.future = None
-    def UserRevokeRole(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """UserRevokeRole revokes a role of specified user.
-      """
-      raise NotImplementedError()
-    UserRevokeRole.future = None
-    def RoleAdd(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """RoleAdd adds a new role.
-      """
-      raise NotImplementedError()
-    RoleAdd.future = None
-    def RoleGet(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """RoleGet gets detailed role information.
-      """
-      raise NotImplementedError()
-    RoleGet.future = None
-    def RoleList(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """RoleList gets lists of all roles.
-      """
-      raise NotImplementedError()
-    RoleList.future = None
-    def RoleDelete(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """RoleDelete deletes a specified role.
-      """
-      raise NotImplementedError()
-    RoleDelete.future = None
-    def RoleGrantPermission(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """RoleGrantPermission grants a permission of a specified key or range to a specified role.
-      """
-      raise NotImplementedError()
-    RoleGrantPermission.future = None
-    def RoleRevokePermission(self, request, timeout, metadata=None, with_call=False, protocol_options=None):
-      """RoleRevokePermission revokes a key or range permission of a specified role.
-      """
-      raise NotImplementedError()
-    RoleRevokePermission.future = None
-
-
-  def beta_create_Auth_server(servicer, pool=None, pool_size=None, default_timeout=None, maximum_timeout=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_deserializers = {
-      ('etcdserverpb.Auth', 'AuthDisable'): AuthDisableRequest.FromString,
-      ('etcdserverpb.Auth', 'AuthEnable'): AuthEnableRequest.FromString,
-      ('etcdserverpb.Auth', 'Authenticate'): AuthenticateRequest.FromString,
-      ('etcdserverpb.Auth', 'RoleAdd'): AuthRoleAddRequest.FromString,
-      ('etcdserverpb.Auth', 'RoleDelete'): AuthRoleDeleteRequest.FromString,
-      ('etcdserverpb.Auth', 'RoleGet'): AuthRoleGetRequest.FromString,
-      ('etcdserverpb.Auth', 'RoleGrantPermission'): AuthRoleGrantPermissionRequest.FromString,
-      ('etcdserverpb.Auth', 'RoleList'): AuthRoleListRequest.FromString,
-      ('etcdserverpb.Auth', 'RoleRevokePermission'): AuthRoleRevokePermissionRequest.FromString,
-      ('etcdserverpb.Auth', 'UserAdd'): AuthUserAddRequest.FromString,
-      ('etcdserverpb.Auth', 'UserChangePassword'): AuthUserChangePasswordRequest.FromString,
-      ('etcdserverpb.Auth', 'UserDelete'): AuthUserDeleteRequest.FromString,
-      ('etcdserverpb.Auth', 'UserGet'): AuthUserGetRequest.FromString,
-      ('etcdserverpb.Auth', 'UserGrantRole'): AuthUserGrantRoleRequest.FromString,
-      ('etcdserverpb.Auth', 'UserList'): AuthUserListRequest.FromString,
-      ('etcdserverpb.Auth', 'UserRevokeRole'): AuthUserRevokeRoleRequest.FromString,
-    }
-    response_serializers = {
-      ('etcdserverpb.Auth', 'AuthDisable'): AuthDisableResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'AuthEnable'): AuthEnableResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'Authenticate'): AuthenticateResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'RoleAdd'): AuthRoleAddResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'RoleDelete'): AuthRoleDeleteResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'RoleGet'): AuthRoleGetResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'RoleGrantPermission'): AuthRoleGrantPermissionResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'RoleList'): AuthRoleListResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'RoleRevokePermission'): AuthRoleRevokePermissionResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'UserAdd'): AuthUserAddResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'UserChangePassword'): AuthUserChangePasswordResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'UserDelete'): AuthUserDeleteResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'UserGet'): AuthUserGetResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'UserGrantRole'): AuthUserGrantRoleResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'UserList'): AuthUserListResponse.SerializeToString,
-      ('etcdserverpb.Auth', 'UserRevokeRole'): AuthUserRevokeRoleResponse.SerializeToString,
-    }
-    method_implementations = {
-      ('etcdserverpb.Auth', 'AuthDisable'): face_utilities.unary_unary_inline(servicer.AuthDisable),
-      ('etcdserverpb.Auth', 'AuthEnable'): face_utilities.unary_unary_inline(servicer.AuthEnable),
-      ('etcdserverpb.Auth', 'Authenticate'): face_utilities.unary_unary_inline(servicer.Authenticate),
-      ('etcdserverpb.Auth', 'RoleAdd'): face_utilities.unary_unary_inline(servicer.RoleAdd),
-      ('etcdserverpb.Auth', 'RoleDelete'): face_utilities.unary_unary_inline(servicer.RoleDelete),
-      ('etcdserverpb.Auth', 'RoleGet'): face_utilities.unary_unary_inline(servicer.RoleGet),
-      ('etcdserverpb.Auth', 'RoleGrantPermission'): face_utilities.unary_unary_inline(servicer.RoleGrantPermission),
-      ('etcdserverpb.Auth', 'RoleList'): face_utilities.unary_unary_inline(servicer.RoleList),
-      ('etcdserverpb.Auth', 'RoleRevokePermission'): face_utilities.unary_unary_inline(servicer.RoleRevokePermission),
-      ('etcdserverpb.Auth', 'UserAdd'): face_utilities.unary_unary_inline(servicer.UserAdd),
-      ('etcdserverpb.Auth', 'UserChangePassword'): face_utilities.unary_unary_inline(servicer.UserChangePassword),
-      ('etcdserverpb.Auth', 'UserDelete'): face_utilities.unary_unary_inline(servicer.UserDelete),
-      ('etcdserverpb.Auth', 'UserGet'): face_utilities.unary_unary_inline(servicer.UserGet),
-      ('etcdserverpb.Auth', 'UserGrantRole'): face_utilities.unary_unary_inline(servicer.UserGrantRole),
-      ('etcdserverpb.Auth', 'UserList'): face_utilities.unary_unary_inline(servicer.UserList),
-      ('etcdserverpb.Auth', 'UserRevokeRole'): face_utilities.unary_unary_inline(servicer.UserRevokeRole),
-    }
-    server_options = beta_implementations.server_options(request_deserializers=request_deserializers, response_serializers=response_serializers, thread_pool=pool, thread_pool_size=pool_size, default_timeout=default_timeout, maximum_timeout=maximum_timeout)
-    return beta_implementations.server(method_implementations, options=server_options)
-
-
-  def beta_create_Auth_stub(channel, host=None, metadata_transformer=None, pool=None, pool_size=None):
-    """The Beta API is deprecated for 0.15.0 and later.
-
-    It is recommended to use the GA API (classes and functions in this
-    file not marked beta) for all further purposes. This function was
-    generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
-    request_serializers = {
-      ('etcdserverpb.Auth', 'AuthDisable'): AuthDisableRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'AuthEnable'): AuthEnableRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'Authenticate'): AuthenticateRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'RoleAdd'): AuthRoleAddRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'RoleDelete'): AuthRoleDeleteRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'RoleGet'): AuthRoleGetRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'RoleGrantPermission'): AuthRoleGrantPermissionRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'RoleList'): AuthRoleListRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'RoleRevokePermission'): AuthRoleRevokePermissionRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'UserAdd'): AuthUserAddRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'UserChangePassword'): AuthUserChangePasswordRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'UserDelete'): AuthUserDeleteRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'UserGet'): AuthUserGetRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'UserGrantRole'): AuthUserGrantRoleRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'UserList'): AuthUserListRequest.SerializeToString,
-      ('etcdserverpb.Auth', 'UserRevokeRole'): AuthUserRevokeRoleRequest.SerializeToString,
-    }
-    response_deserializers = {
-      ('etcdserverpb.Auth', 'AuthDisable'): AuthDisableResponse.FromString,
-      ('etcdserverpb.Auth', 'AuthEnable'): AuthEnableResponse.FromString,
-      ('etcdserverpb.Auth', 'Authenticate'): AuthenticateResponse.FromString,
-      ('etcdserverpb.Auth', 'RoleAdd'): AuthRoleAddResponse.FromString,
-      ('etcdserverpb.Auth', 'RoleDelete'): AuthRoleDeleteResponse.FromString,
-      ('etcdserverpb.Auth', 'RoleGet'): AuthRoleGetResponse.FromString,
-      ('etcdserverpb.Auth', 'RoleGrantPermission'): AuthRoleGrantPermissionResponse.FromString,
-      ('etcdserverpb.Auth', 'RoleList'): AuthRoleListResponse.FromString,
-      ('etcdserverpb.Auth', 'RoleRevokePermission'): AuthRoleRevokePermissionResponse.FromString,
-      ('etcdserverpb.Auth', 'UserAdd'): AuthUserAddResponse.FromString,
-      ('etcdserverpb.Auth', 'UserChangePassword'): AuthUserChangePasswordResponse.FromString,
-      ('etcdserverpb.Auth', 'UserDelete'): AuthUserDeleteResponse.FromString,
-      ('etcdserverpb.Auth', 'UserGet'): AuthUserGetResponse.FromString,
-      ('etcdserverpb.Auth', 'UserGrantRole'): AuthUserGrantRoleResponse.FromString,
-      ('etcdserverpb.Auth', 'UserList'): AuthUserListResponse.FromString,
-      ('etcdserverpb.Auth', 'UserRevokeRole'): AuthUserRevokeRoleResponse.FromString,
-    }
-    cardinalities = {
-      'AuthDisable': cardinality.Cardinality.UNARY_UNARY,
-      'AuthEnable': cardinality.Cardinality.UNARY_UNARY,
-      'Authenticate': cardinality.Cardinality.UNARY_UNARY,
-      'RoleAdd': cardinality.Cardinality.UNARY_UNARY,
-      'RoleDelete': cardinality.Cardinality.UNARY_UNARY,
-      'RoleGet': cardinality.Cardinality.UNARY_UNARY,
-      'RoleGrantPermission': cardinality.Cardinality.UNARY_UNARY,
-      'RoleList': cardinality.Cardinality.UNARY_UNARY,
-      'RoleRevokePermission': cardinality.Cardinality.UNARY_UNARY,
-      'UserAdd': cardinality.Cardinality.UNARY_UNARY,
-      'UserChangePassword': cardinality.Cardinality.UNARY_UNARY,
-      'UserDelete': cardinality.Cardinality.UNARY_UNARY,
-      'UserGet': cardinality.Cardinality.UNARY_UNARY,
-      'UserGrantRole': cardinality.Cardinality.UNARY_UNARY,
-      'UserList': cardinality.Cardinality.UNARY_UNARY,
-      'UserRevokeRole': cardinality.Cardinality.UNARY_UNARY,
-    }
-    stub_options = beta_implementations.stub_options(host=host, metadata_transformer=metadata_transformer, request_serializers=request_serializers, response_deserializers=response_deserializers, thread_pool=pool, thread_pool_size=pool_size)
-    return beta_implementations.dynamic_stub(channel, 'etcdserverpb.Auth', cardinalities, options=stub_options)
-except ImportError:
-  pass
 # @@protoc_insertion_point(module_scope)
