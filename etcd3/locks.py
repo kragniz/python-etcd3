@@ -24,22 +24,30 @@ class Lock(object):
             # refresh the timeout on the lease
             lock.refresh()
 
+        # Create a Lock with a custom lock prefix
+        with etcd.lock('my-lock', prefix='/lock-prefix') as lock:
+            print(lock.is_acquired())
+
+            print(lock.key) #/lock-prefix/my-lock
+
     :param name: name of the lock
     :type name: string or bytes
     :param ttl: length of time for the lock to live for in seconds. The lock
                 will be released after this time elapses, unless refreshed
+    :param prefix: Prefix to use while creating the lock name.
+                Used to override the value provided by :class:`.Etcd3Client`
     :type ttl: int
     """
 
     def __init__(self, name, ttl=60,
-                 etcd_client=None):
+                 etcd_client=None, prefix=None):
         self.name = name
         self.ttl = ttl
         if etcd_client is not None:
             self.etcd_client = etcd_client
 
-        _etcd_prefix = self.etcd_client.lock_prefix
-        self.key = "/".join([_etcd_prefix, name]) if _etcd_prefix else name
+        self._prefix = prefix or self.etcd_client.lock_prefix
+        self.key = "/".join([self._prefix, name]) if self._prefix else name
         self.lease = None
         # store uuid as bytes, since it avoids having to decode each time we
         # need to compare

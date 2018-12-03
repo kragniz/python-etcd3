@@ -100,6 +100,20 @@ class TestEtcd3(object):
 
         delete_keys_definitely()
 
+    @pytest.fixture
+    def etcd_with_lock_prefix(self):
+        with etcd3.client(lock_prefix="/prefix") as client:
+            yield client
+
+        @retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
+        def delete_keys_definitely():
+            # clean up after fixture goes out of scope
+            etcdctl('del', '--prefix', '/')
+            out = etcdctl('get', '--prefix', '/')
+            assert 'kvs' not in out
+
+        delete_keys_definitely()
+
     def test_get_unknown_key(self, etcd):
         value, meta = etcd.get('probably-invalid-key')
         assert value is None
@@ -143,10 +157,6 @@ class TestEtcd3(object):
 
     def test_lock_prefix_default(self, etcd):
         assert etcd.lock_prefix is None
-
-    def test_lock_prefix_change(self, etcd):
-        etcd.lock_prefix = "/prefix"
-        assert etcd.lock_prefix == "/prefix"
 
     def test_delete_key(self, etcd):
         etcdctl('put', '/doot/delete_this', 'delete pls')
@@ -564,10 +574,14 @@ class TestEtcd3(object):
         lock = etcd.lock('without-prefix', ttl=10)
         assert lock.key == 'without-prefix'
 
-    def test_lock_name_with_prefix(self, etcd):
-        etcd.lock_prefix = "/prefix"
-        lock = etcd.lock('with-prefix', ttl=10)
-        assert lock.key == '/prefix/with-prefix'
+    def test_lock_with_default_prefix(self, etcd_with_lock_prefix):
+        lock = etcd_with_lock_prefix.lock('default-prefix', ttl=10)
+        assert lock.key == '/prefix/default-prefix'
+
+    def test_lock_name_with_custom_prefix(self, etcd_with_lock_prefix):
+        lock = etcd_with_lock_prefix.lock(
+            'with-prefix', ttl=10, prefix="/custom-prefix")
+        assert lock.key == '/custom-prefix/with-prefix'
 
     def test_lock_acquire(self, etcd):
         lock = etcd.lock('lock-1', ttl=10)

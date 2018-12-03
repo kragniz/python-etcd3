@@ -179,17 +179,13 @@ class Etcd3Client(object):
 
     def __exit__(self, *args):
         self.close()
-        
+
     def __del__(self):
         self.close()
 
     @property
     def lock_prefix(self):
         return self._lock_prefix
-
-    @lock_prefix.setter
-    def lock_prefix(self, lock_prefix):
-        self._lock_prefix = lock_prefix
 
     def _get_secure_creds(self, ca_cert, cert_key=None, cert_cert=None):
         cert_key_file = None
@@ -803,7 +799,7 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
-    def lock(self, name, ttl=60):
+    def lock(self, name, ttl=60, prefix=None):
         """
         Create a new lock.
 
@@ -812,11 +808,14 @@ class Etcd3Client(object):
         :param ttl: length of time for the lock to live for in seconds. The
                     lock will be released after this time elapses, unless
                     refreshed
+        :param prefix: Prefix to use while creating the lock name. Used to
+                    override the value provided by :class:`.Etcd3Client`
         :type ttl: int
+        :type prefix: str
         :returns: new lock
         :rtype: :class:`.Lock`
         """
-        return locks.Lock(name, ttl=ttl, etcd_client=self)
+        return locks.Lock(name, ttl=ttl, etcd_client=self, prefix=prefix)
 
     @_handle_errors
     def add_member(self, urls):
