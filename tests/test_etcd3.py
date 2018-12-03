@@ -421,6 +421,23 @@ class TestEtcd3(object):
         with pytest.raises(TypeError):
             etcd._ops_to_requests(0)
 
+    @pytest.mark.skipif(etcd_version < 'v3.3',
+                        reason="requires etcd v3.3 or higher")
+    def test_nested_transactions(self, etcd):
+        etcd.transaction(
+            compare=[],
+            success=[etcd.transactions.put('/doot/txn1', '1'),
+                     etcd.transactions.txn(
+                         compare=[],
+                         success=[etcd.transactions.put('/doot/txn2', '2')],
+                         failure=[])],
+            failure=[]
+        )
+        value, _ = etcd.get('/doot/txn1')
+        assert value == b'1'
+        value, _ = etcd.get('/doot/txn2')
+        assert value == b'2'
+
     def test_replace_success(self, etcd):
         etcd.put('/doot/thing', 'toot')
         status = etcd.replace('/doot/thing', 'toot', 'doot')
