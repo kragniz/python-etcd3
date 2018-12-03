@@ -60,6 +60,7 @@ class Transactions(object):
         self.put = transactions.Put
         self.get = transactions.Get
         self.delete = transactions.Delete
+        self.txn = transactions.Txn
 
 
 class KVMetadata(object):
@@ -630,7 +631,7 @@ class Etcd3Client(object):
         Return a list of grpc requests.
 
         Returns list from an input list of etcd3.transactions.{Put, Get,
-        Delete} objects.
+        Delete, Txn} objects.
         """
         request_ops = []
         for op in ops:
@@ -649,6 +650,16 @@ class Etcd3Client(object):
                 request = self._build_delete_request(op.key, op.range_end,
                                                      op.prev_kv)
                 request_op = etcdrpc.RequestOp(request_delete_range=request)
+                request_ops.append(request_op)
+
+            elif isinstance(op, transactions.Txn):
+                compare = [c.build_message() for c in op.compare]
+                success_ops = self._ops_to_requests(op.success)
+                failure_ops = self._ops_to_requests(op.failure)
+                request = etcdrpc.TxnRequest(compare=compare,
+                                             success=success_ops,
+                                             failure=failure_ops)
+                request_op = etcdrpc.RequestOp(request_txn=request)
                 request_ops.append(request_op)
 
             else:
@@ -703,7 +714,8 @@ class Etcd3Client(object):
         responses = []
         for response in txn_response.responses:
             response_type = response.WhichOneof('response')
-            if response_type in ['response_put', 'response_delete_range']:
+            if response_type in ['response_put', 'response_delete_range',
+                                 'response_txn']:
                 responses.append(response)
 
             elif response_type == 'response_range':
