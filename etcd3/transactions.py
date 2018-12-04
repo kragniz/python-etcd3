@@ -72,17 +72,28 @@ class Mod(BaseCompare):
 
 
 class Put(object):
-    def __init__(self, key, value, lease=None):
+    def __init__(self, key, value, lease=None, prev_kv=False):
         self.key = key
         self.value = value
         self.lease = lease
+        self.prev_kv = prev_kv
 
 
 class Get(object):
-    def __init__(self, key):
+    def __init__(self, key, range_end=None):
         self.key = key
+        self.range_end = range_end
 
 
 class Delete(object):
-    def __init__(self, key):
+    def __init__(self, key, range_end=None, prev_kv=False):
         self.key = key
+        self.range_end = range_end
+        self.prev_kv = prev_kv
+
+
+class Txn(object):
+    def __init__(self, compare, success=None, failure=None):
+        self.compare = compare
+        self.success = success
+        self.failure = failure
