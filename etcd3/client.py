@@ -60,6 +60,7 @@ class Transactions(object):
         self.put = transactions.Put
         self.get = transactions.Get
         self.delete = transactions.Delete
+        self.txn = transactions.Txn
 
 
 class KVMetadata(object):
@@ -175,6 +176,9 @@ class Etcd3Client(object):
         return self
 
     def __exit__(self, *args):
+        self.close()
+        
+    def __del__(self):
         self.close()
 
     def _get_secure_creds(self, ca_cert, cert_key=None, cert_cert=None):
@@ -303,6 +307,37 @@ class Etcd3Client(object):
                 yield (kv.value, KVMetadata(kv, range_response.header))
 
     @_handle_errors
+    def get_range(self, range_start, range_end, sort_order=None,
+                  sort_target='key', **kwargs):
+        """
+        Get a range of keys.
+
+        :param range_start: first key in range
+        :param range_end: last key in range
+        :returns: sequence of (value, metadata) tuples
+        """
+        range_request = self._build_get_range_request(
+            key=range_start,
+            range_end=range_end,
+            sort_order=sort_order,
+            sort_target=sort_target,
+            **kwargs
+        )
+
+        range_response = self.kvstub.Range(
+            range_request,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+        if range_response.count < 1:
+            return
+        else:
+            for kv in range_response.kvs:
+                yield (kv.value, KVMetadata(kv, range_response.header))
+
+    @_handle_errors
     def get_all(self, sort_order=None, sort_target='key'):
         """
         Get all keys currently stored in etcd.
@@ -329,15 +364,17 @@ class Etcd3Client(object):
             for kv in range_response.kvs:
                 yield (kv.value, KVMetadata(kv, range_response.header))
 
-    def _build_put_request(self, key, value, lease=None):
+    def _build_put_request(self, key, value, lease=None, prev_kv=False):
         put_request = etcdrpc.PutRequest()
         put_request.key = utils.to_bytes(key)
         put_request.value = utils.to_bytes(value)
         put_request.lease = utils.lease_to_id(lease)
+        put_request.prev_kv = prev_kv
+
         return put_request
 
     @_handle_errors
-    def put(self, key, value, lease=None):
+    def put(self, key, value, lease=None, prev_kv=False):
         """
         Save a value to etcd.
 
@@ -354,9 +391,14 @@ class Etcd3Client(object):
         :type value: bytes
         :param lease: Lease to associate with this key.
         :type lease: either :class:`.Lease`, or int (ID of lease)
+        :param prev_kv: return the previous key-value pair
+        :type prev_kv: bool
+        :returns: a response containing a header and the prev_kv
+        :rtype: :class:`.rpc_pb2.PutResponse`
         """
-        put_request = self._build_put_request(key, value, lease=lease)
-        self.kvstub.Put(
+        put_request = self._build_put_request(key, value, lease=lease,
+                                              prev_kv=prev_kv)
+        return self.kvstub.Put(
             put_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -391,33 +433,40 @@ class Etcd3Client(object):
 
     def _build_delete_request(self, key,
                               range_end=None,
-                              prev_kv=None):
+                              prev_kv=False):
         delete_request = etcdrpc.DeleteRangeRequest()
         delete_request.key = utils.to_bytes(key)
+        delete_request.prev_kv = prev_kv
 
         if range_end is not None:
             delete_request.range_end = utils.to_bytes(range_end)
 
-        if prev_kv is not None:
-            delete_request.prev_kv = prev_kv
-
         return delete_request
 
     @_handle_errors
-    def delete(self, key):
+    def delete(self, key, prev_kv=False, return_response=False):
         """
         Delete a single key in etcd.
 
         :param key: key in etcd to delete
-        :returns: True if the key has been deleted
+        :param prev_kv: return the deleted key-value pair
+        :type prev_kv: bool
+        :param return_response: return the full response
+        :type return_response: bool
+        :returns: True if the key has been deleted when
+                  ``return_response`` is False and a response containing
+                  a header, the number of deleted keys and prev_kvs when
+                  ``return_response`` is True
         """
-        delete_request = self._build_delete_request(key)
+        delete_request = self._build_delete_request(key, prev_kv=prev_kv)
         delete_response = self.kvstub.DeleteRange(
             delete_request,
             self.timeout,
             credentials=self.call_credentials,
             metadata=self.metadata
         )
+        if return_response:
+            return delete_response
         return delete_response.deleted >= 1
 
     @_handle_errors
@@ -582,23 +631,35 @@ class Etcd3Client(object):
         Return a list of grpc requests.
 
         Returns list from an input list of etcd3.transactions.{Put, Get,
-        Delete} objects.
+        Delete, Txn} objects.
         """
         request_ops = []
         for op in ops:
             if isinstance(op, transactions.Put):
-                request = self._build_put_request(op.key, op.value, op.lease)
+                request = self._build_put_request(op.key, op.value,
+                                                  op.lease, op.prev_kv)
                 request_op = etcdrpc.RequestOp(request_put=request)
                 request_ops.append(request_op)
 
             elif isinstance(op, transactions.Get):
-                request = self._build_get_range_request(op.key)
+                request = self._build_get_range_request(op.key, op.range_end)
                 request_op = etcdrpc.RequestOp(request_range=request)
                 request_ops.append(request_op)
 
             elif isinstance(op, transactions.Delete):
-                request = self._build_delete_request(op.key)
+                request = self._build_delete_request(op.key, op.range_end,
+                                                     op.prev_kv)
                 request_op = etcdrpc.RequestOp(request_delete_range=request)
+                request_ops.append(request_op)
+
+            elif isinstance(op, transactions.Txn):
+                compare = [c.build_message() for c in op.compare]
+                success_ops = self._ops_to_requests(op.success)
+                failure_ops = self._ops_to_requests(op.failure)
+                request = etcdrpc.TxnRequest(compare=compare,
+                                             success=success_ops,
+                                             failure=failure_ops)
+                request_op = etcdrpc.RequestOp(request_txn=request)
                 request_ops.append(request_op)
 
             else:
@@ -653,8 +714,9 @@ class Etcd3Client(object):
         responses = []
         for response in txn_response.responses:
             response_type = response.WhichOneof('response')
-            if response_type == 'response_put':
-                responses.append(None)
+            if response_type in ['response_put', 'response_delete_range',
+                                 'response_txn']:
+                responses.append(response)
 
             elif response_type == 'response_range':
                 range_kvs = []
