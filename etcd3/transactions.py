@@ -90,3 +90,10 @@ class Delete(object):
         self.key = key
         self.range_end = range_end
         self.prev_kv = prev_kv
+
+
+class Txn(object):
+    def __init__(self, compare, success=None, failure=None):
+        self.compare = compare
+        self.success = success
+        self.failure = failure
