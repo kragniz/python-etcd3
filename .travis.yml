@@ -6,9 +6,9 @@ python:
 
 env:
   matrix:
-    - TEST_ETCD_VERSION=v3.1.13
-    - TEST_ETCD_VERSION=v3.2.18
-    - TEST_ETCD_VERSION=v3.3.3
+    - TEST_ETCD_VERSION=v3.1.20
+    - TEST_ETCD_VERSION=v3.2.25
+    - TEST_ETCD_VERSION=v3.3.10
 
 install:
     - pip install -U tox tox-travis codecov
@@ -30,4 +30,4 @@ deploy:
     tags: true
     distributions: sdist bdist_wheel
     repo: kragniz/python-etcd3
-    condition: $TOXENV == py27
+    python: "3.6"
