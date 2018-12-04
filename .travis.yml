@@ -6,9 +6,9 @@ python:
 
 env:
   matrix:
-    - TEST_ETCD_VERSION=v3.1.13
-    - TEST_ETCD_VERSION=v3.2.18
-    - TEST_ETCD_VERSION=v3.3.3
+    - TEST_ETCD_VERSION=v3.1.20
+    - TEST_ETCD_VERSION=v3.2.25
+    - TEST_ETCD_VERSION=v3.3.10
 
 install:
     - pip install -U tox tox-travis codecov
