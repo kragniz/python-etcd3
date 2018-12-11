@@ -458,6 +458,19 @@ class TestEtcd3(object):
         value, _ = etcd.get('/doot/txn2')
         assert value == b'2'
 
+    @pytest.mark.skipif(etcd_version < 'v3.3',
+                        reason="requires etcd v3.3 or higher")
+    def test_transaction_range_conditions(self, etcd):
+        etcdctl('put', '/doot/key1', 'dootdoot')
+        etcdctl('put', '/doot/key2', 'notdootdoot')
+        range_end = utils.increment_last_byte(utils.to_bytes('/doot/'))
+        compare = [etcd.transactions.value('/doot/', range_end) == 'dootdoot']
+        status, _ = etcd.transaction(compare=compare, success=[], failure=[])
+        assert not status
+        etcdctl('put', '/doot/key2', 'dootdoot')
+        status, _ = etcd.transaction(compare=compare, success=[], failure=[])
+        assert status
+
     def test_replace_success(self, etcd):
         etcd.put('/doot/thing', 'toot')
         status = etcd.replace('/doot/thing', 'toot', 'doot')
