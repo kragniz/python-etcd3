@@ -407,7 +407,7 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
-    def replace(self, key, initial_value, new_value):
+    async def replace(self, key, initial_value, new_value):
         """
         Atomically replace the value of a key with a new value.
 
@@ -424,7 +424,7 @@ class Etcd3Client(object):
                   successful, ``False`` otherwise
         :rtype: bool
         """
-        status, _ = self.transaction(
+        status, _ = await self.transaction(
             compare=[self.transactions.value(key) == initial_value],
             success=[self.transactions.put(key, new_value)],
             failure=[],
