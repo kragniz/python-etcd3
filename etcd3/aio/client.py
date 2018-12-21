@@ -594,7 +594,7 @@ class Etcd3Client(object):
 
         try:
             return await asyncio.wait_for(event_queue.get(), timeout)
-        except asyncio.QueueEmpty:
+        except (asyncio.QueueEmpty, asyncio.TimeoutError):
             raise exceptions.WatchTimedOut()
         finally:
             await self.cancel_watch(watch_id)

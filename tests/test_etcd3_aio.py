@@ -302,7 +302,10 @@ class TestEtcd3(object):
                     await cancel()
 
         # Compact etcd and test watcher
-        await etcd.compact(2)
+        try:
+            await etcd.compact(2)
+        except grpc.RpcError:
+            pass
 
         watch_compacted_revision_test()
 
@@ -319,6 +322,7 @@ class TestEtcd3(object):
             t = threading.Thread(name="pass_exception_to_callback",
                                  target=pass_exception_to_callback,
                                  args=[callback])
+            t.daemon = True
             t.start()
             return 1
 
@@ -326,7 +330,7 @@ class TestEtcd3(object):
         watcher_mock.add_callback = add_callback_mock
         etcd.watcher = watcher_mock
 
-        events_iterator, cancel = etcd.watch('foo')
+        events_iterator, cancel = await etcd.watch('foo')
 
         with pytest.raises(etcd3.exceptions.ConnectionFailedError):
             async for _ in events_iterator:
@@ -336,13 +340,19 @@ class TestEtcd3(object):
     async def test_watch_timeout_on_establishment(self, etcd, event_loop):
         foo_etcd = etcd3.client(timeout=3, loop=event_loop, backend="asyncio")
 
-        async def slow_watch_mock(*args, **kwargs):
+        async def slow_response():
             await asyncio.sleep(4)
+            yield "foo"
+
+        def slow_watch_mock(*args, **kwargs):
+            return slow_response
 
         foo_etcd.watcher._watch_stub.Watch = slow_watch_mock  # noqa
 
         with pytest.raises(etcd3.exceptions.WatchTimedOut):
-            await foo_etcd.watch('foo')
+            events_iterator, cancel = await foo_etcd.watch('foo')
+            async for _ in events_iterator:
+                pass
 
     @pytest.mark.asyncio
     async def test_watch_prefix(self, etcd):
@@ -390,14 +400,17 @@ class TestEtcd3(object):
         try:
             await etcd.watch_prefix_once('/doot/', 1)
         except etcd3.exceptions.WatchTimedOut:
+            print("timeout1")
             pass
         try:
             await etcd.watch_prefix_once('/doot/', 1)
         except etcd3.exceptions.WatchTimedOut:
+            print("timeout2")
             pass
         try:
             await etcd.watch_prefix_once('/doot/', 1)
         except etcd3.exceptions.WatchTimedOut:
+            print("timeout3")
             pass
 
     @pytest.mark.asyncio
@@ -916,7 +929,7 @@ class TestClient(object):
         )
         assert client.uses_secure_channel is False
 
-    @mock.patch('etcdrpc.AuthStub')
+    @mock.patch('etcd3.etcdrpc.AuthStub')
     def test_user_pwd_auth(self, auth_mock, event_loop):
         auth_resp_mock = mock.MagicMock()
         auth_resp_mock.token = 'foo'

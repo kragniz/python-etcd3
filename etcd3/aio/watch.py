@@ -67,6 +67,7 @@ class Watcher(object):
         rq = etcdrpc.WatchRequest(create_request=create_watch)
 
         async with self._lock:
+            print("watch.add_callback 1")
             # Start the callback thread if it is not yet running.
             if not self._callback_thread:
                 self._callback_thread = create_task(self._run())
@@ -75,6 +76,7 @@ class Watcher(object):
             # there one already, then wait for it to complete first.
             while self._new_watch:
                 await self._new_watch_cond.wait()
+            print("watch.add_callback 2")
 
             # Submit a create watch request.
             new_watch = _NewWatch(callback)
@@ -86,12 +88,13 @@ class Watcher(object):
                 await asyncio.wait_for(self._new_watch_cond.wait(),
                                        self.timeout)
             except asyncio.TimeoutError:
-                pass
+                await self._lock.acquire()
             self._new_watch = None
 
             # If the request not completed yet, then raise a timeout exception.
             if new_watch.id is None and new_watch.err is None:
                 raise exceptions.WatchTimedOut()
+            print("watch.add_callback 3")
 
             # Raise an exception if the watch request failed.
             if new_watch.err:
@@ -102,19 +105,23 @@ class Watcher(object):
             return new_watch.id
 
     async def cancel(self, watch_id):
+        print("cancelling watch", watch_id)
         async with self._lock:
             callback = self._callbacks.pop(watch_id, None)
             if not callback:
                 return
 
-            self._cancel_no_lock(watch_id)
+            await self._cancel_no_lock(watch_id)
+        print("cancelled watch", watch_id)
 
     async def _run(self):
         while True:
+            print("stub.Watch")
             response_iter = self._watch_stub.Watch(
                 _new_request_iter(self._request_queue),
                 credentials=self._credentials,
                 metadata=self._metadata)
+            print("stub.Watch returned")
             try:
                 async for rs in response_iter:
                     await self._handle_response(rs)
@@ -131,6 +138,7 @@ class Watcher(object):
                     # Rotate request queue. This way we can terminate one gRPC
                     # stream and initiate another one whilst avoiding a race
                     # between them over requests in the queue.
+                    print("rotate request queue")
                     await self._request_queue.put(None)
                     self._request_queue = asyncio.Queue(maxsize=10)
 
@@ -143,7 +151,7 @@ class Watcher(object):
                 # If the new watch request has already expired then cancel the
                 # created watch right away.
                 if not self._new_watch:
-                    self._cancel_no_lock(rs.watch_id)
+                    await self._cancel_no_lock(rs.watch_id)
                     return
 
                 if rs.compact_revision != 0:
