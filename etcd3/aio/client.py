@@ -1,20 +1,20 @@
 import functools
 import inspect
-import threading
+import asyncio
 
 import grpc
-import grpc._channel
+import aiogrpc
 
 from six.moves import queue
 
 import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions as exceptions
-import etcd3.leases as leases
-import etcd3.locks as locks
-import etcd3.members
+import etcd3.aio.leases as leases
+import etcd3.aio.locks as locks
+import etcd3.aio.members
 import etcd3.transactions as transactions
 import etcd3.utils as utils
-import etcd3.watch as watch
+import etcd3.aio.watch as watch
 
 _EXCEPTIONS_BY_CODE = {
     grpc.StatusCode.INTERNAL: exceptions.InternalServerError,
@@ -102,7 +102,8 @@ class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
 class Etcd3Client(object):
     def __init__(self, host='localhost', port=2379,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
-                 user=None, password=None, grpc_options=None):
+                 user=None, password=None, grpc_options=None,
+                 loop=None):
 
         self._url = '{host}:{port}'.format(host=host, port=port)
         self.metadata = None
@@ -116,8 +117,9 @@ class Etcd3Client(object):
                     cert_cert
                 )
                 self.uses_secure_channel = True
-                self.channel = grpc.secure_channel(self._url, credentials,
-                                                   options=grpc_options)
+                self.channel = aiogrpc.secure_channel(self._url, credentials,
+                                                      options=grpc_options,
+                                                      loop=loop)
             elif any(cert_params):
                 # some of the cert parameters are set
                 raise ValueError(
@@ -126,12 +128,14 @@ class Etcd3Client(object):
             else:
                 credentials = self._get_secure_creds(ca_cert, None, None)
                 self.uses_secure_channel = True
-                self.channel = grpc.secure_channel(self._url, credentials,
-                                                   options=grpc_options)
+                self.channel = aiogrpc.secure_channel(self._url, credentials,
+                                                      options=grpc_options,
+                                                      loop=loop)
         else:
             self.uses_secure_channel = False
-            self.channel = grpc.insecure_channel(self._url,
-                                                 options=grpc_options)
+            self.channel = aiogrpc.insecure_channel(self._url,
+                                                    options=grpc_options,
+                                                    loop=loop)
 
         self.timeout = timeout
         self.call_credentials = None
@@ -168,18 +172,15 @@ class Etcd3Client(object):
         self.maintenancestub = etcdrpc.MaintenanceStub(self.channel)
         self.transactions = Transactions()
 
-    def close(self):
+    async def close(self):
         """Call the GRPC channel close semantics."""
-        self.channel.close()
+        await self.channel.close()
 
-    def __enter__(self):
+    async def __aenter__(self):
         return self
 
-    def __exit__(self, *args):
-        self.close()
-
-    def __del__(self):
-        self.close()
+    async def __aexit__(self, *args):
+        await self.close()
 
     def _get_secure_creds(self, ca_cert, cert_key=None, cert_cert=None):
         cert_key_file = None
@@ -246,7 +247,7 @@ class Etcd3Client(object):
         return range_request
 
     @_handle_errors
-    def get(self, key):
+    async def get(self, key):
         """
         Get the value of a key from etcd.
 
@@ -264,7 +265,7 @@ class Etcd3Client(object):
         :rtype: bytes, ``KVMetadata``
         """
         range_request = self._build_get_range_request(key)
-        range_response = self.kvstub.Range(
+        range_response = await self.kvstub.Range(
             range_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -278,7 +279,7 @@ class Etcd3Client(object):
             return kv.value, KVMetadata(kv, range_response.header)
 
     @_handle_errors
-    def get_prefix(self, key_prefix, sort_order=None, sort_target='key'):
+    async def get_prefix(self, key_prefix, sort_order=None, sort_target='key'):
         """
         Get a range of keys with a prefix.
 
@@ -293,7 +294,7 @@ class Etcd3Client(object):
             sort_target=sort_target,
         )
 
-        range_response = self.kvstub.Range(
+        range_response = await self.kvstub.Range(
             range_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -307,7 +308,7 @@ class Etcd3Client(object):
                 yield (kv.value, KVMetadata(kv, range_response.header))
 
     @_handle_errors
-    def get_range(self, range_start, range_end, sort_order=None,
+    async def get_range(self, range_start, range_end, sort_order=None,
                   sort_target='key', **kwargs):
         """
         Get a range of keys.
@@ -324,7 +325,7 @@ class Etcd3Client(object):
             **kwargs
         )
 
-        range_response = self.kvstub.Range(
+        range_response = await self.kvstub.Range(
             range_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -338,7 +339,7 @@ class Etcd3Client(object):
                 yield (kv.value, KVMetadata(kv, range_response.header))
 
     @_handle_errors
-    def get_all(self, sort_order=None, sort_target='key'):
+    async def get_all(self, sort_order=None, sort_target='key'):
         """
         Get all keys currently stored in etcd.
 
@@ -351,7 +352,7 @@ class Etcd3Client(object):
             sort_target=sort_target,
         )
 
-        range_response = self.kvstub.Range(
+        range_response = await self.kvstub.Range(
             range_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -374,7 +375,7 @@ class Etcd3Client(object):
         return put_request
 
     @_handle_errors
-    def put(self, key, value, lease=None, prev_kv=False):
+    async def put(self, key, value, lease=None, prev_kv=False):
         """
         Save a value to etcd.
 
@@ -398,7 +399,7 @@ class Etcd3Client(object):
         """
         put_request = self._build_put_request(key, value, lease=lease,
                                               prev_kv=prev_kv)
-        return self.kvstub.Put(
+        return await self.kvstub.Put(
             put_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -444,7 +445,7 @@ class Etcd3Client(object):
         return delete_request
 
     @_handle_errors
-    def delete(self, key, prev_kv=False, return_response=False):
+    async def delete(self, key, prev_kv=False, return_response=False):
         """
         Delete a single key in etcd.
 
@@ -459,7 +460,7 @@ class Etcd3Client(object):
                   ``return_response`` is True
         """
         delete_request = self._build_delete_request(key, prev_kv=prev_kv)
-        delete_response = self.kvstub.DeleteRange(
+        delete_response = await self.kvstub.DeleteRange(
             delete_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -470,13 +471,13 @@ class Etcd3Client(object):
         return delete_response.deleted >= 1
 
     @_handle_errors
-    def delete_prefix(self, prefix):
+    async def delete_prefix(self, prefix):
         """Delete a range of keys with a prefix in etcd."""
         delete_request = self._build_delete_request(
             prefix,
             range_end=utils.increment_last_byte(utils.to_bytes(prefix))
         )
-        return self.kvstub.DeleteRange(
+        return await self.kvstub.DeleteRange(
             delete_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -484,17 +485,17 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
-    def status(self):
+    async def status(self):
         """Get the status of the responding member."""
         status_request = etcdrpc.StatusRequest()
-        status_response = self.maintenancestub.Status(
+        status_response = await self.maintenancestub.Status(
             status_request,
             self.timeout,
             credentials=self.call_credentials,
             metadata=self.metadata
         )
 
-        for m in self.members:
+        async for m in self.members():
             if m.id == status_response.leader:
                 leader = m
                 break
@@ -509,7 +510,7 @@ class Etcd3Client(object):
                       status_response.raftTerm)
 
     @_handle_errors
-    def add_watch_callback(self, *args, **kwargs):
+    async def add_watch_callback(self, *args, **kwargs):
         """
         Watch a key or range of keys and call a callback on every event.
 
@@ -523,12 +524,12 @@ class Etcd3Client(object):
         :returns: watch_id. Later it could be used for cancelling watch.
         """
         try:
-            return self.watcher.add_callback(*args, **kwargs)
-        except queue.Empty:
+            return await self.watcher.add_callback(*args, **kwargs)
+        except asyncio.QueueEmpty:
             raise exceptions.WatchTimedOut()
 
     @_handle_errors
-    def watch(self, key, **kwargs):
+    async def watch(self, key, **kwargs):
         """
         Watch a key.
 
@@ -545,23 +546,19 @@ class Etcd3Client(object):
                   Use ``events_iterator`` to get the events of key changes
                   and ``cancel`` to cancel the watch request
         """
-        event_queue = queue.Queue()
+        event_queue = asyncio.Queue()
+        watch_id = await self.add_watch_callback(key, event_queue.put, **kwargs)
+        canceled = asyncio.Event()
 
-        def callback(event):
-            event_queue.put(event)
-
-        watch_id = self.add_watch_callback(key, callback, **kwargs)
-        canceled = threading.Event()
-
-        def cancel():
+        async def cancel():
             canceled.set()
-            event_queue.put(None)
-            self.cancel_watch(watch_id)
+            await event_queue.put(None)
+            await self.cancel_watch(watch_id)
 
         @_handle_errors
-        def iterator():
+        async def iterator():
             while not canceled.is_set():
-                event = event_queue.get()
+                event = await event_queue.get()
                 if event is None:
                     canceled.set()
                 if isinstance(event, Exception):
@@ -573,14 +570,14 @@ class Etcd3Client(object):
         return iterator(), cancel
 
     @_handle_errors
-    def watch_prefix(self, key_prefix, **kwargs):
+    async def watch_prefix(self, key_prefix, **kwargs):
         """Watches a range of keys with a prefix."""
         kwargs['range_end'] = \
             utils.increment_last_byte(utils.to_bytes(key_prefix))
-        return self.watch(key_prefix, **kwargs)
+        return await self.watch(key_prefix, **kwargs)
 
     @_handle_errors
-    def watch_once(self, key, timeout=None, **kwargs):
+    async def watch_once(self, key, timeout=None, **kwargs):
         """
         Watch a key and stops after the first event.
 
@@ -591,22 +588,19 @@ class Etcd3Client(object):
         :param timeout: (optional) timeout in seconds.
         :returns: ``Event``
         """
-        event_queue = queue.Queue()
+        event_queue = asyncio.Queue()
 
-        def callback(event):
-            event_queue.put(event)
-
-        watch_id = self.add_watch_callback(key, callback, **kwargs)
+        watch_id = await self.add_watch_callback(key, event_queue.put, **kwargs)
 
         try:
-            return event_queue.get(timeout=timeout)
-        except queue.Empty:
+            return await asyncio.wait_for(event_queue.get(), timeout)
+        except asyncio.QueueEmpty:
             raise exceptions.WatchTimedOut()
         finally:
-            self.cancel_watch(watch_id)
+            await self.cancel_watch(watch_id)
 
     @_handle_errors
-    def watch_prefix_once(self, key_prefix, timeout=None, **kwargs):
+    async def watch_prefix_once(self, key_prefix, timeout=None, **kwargs):
         """
         Watches a range of keys with a prefix and stops after the first event.
 
@@ -615,16 +609,16 @@ class Etcd3Client(object):
         """
         kwargs['range_end'] = \
             utils.increment_last_byte(utils.to_bytes(key_prefix))
-        return self.watch_once(key_prefix, timeout=timeout, **kwargs)
+        return await self.watch_once(key_prefix, timeout=timeout, **kwargs)
 
     @_handle_errors
-    def cancel_watch(self, watch_id):
+    async def cancel_watch(self, watch_id):
         """
         Stop watching a key or range of keys.
 
         :param watch_id: watch_id returned by ``add_watch_callback`` method
         """
-        self.watcher.cancel(watch_id)
+        await self.watcher.cancel(watch_id)
 
     def _ops_to_requests(self, ops):
         """
@@ -668,7 +662,7 @@ class Etcd3Client(object):
         return request_ops
 
     @_handle_errors
-    def transaction(self, compare, success=None, failure=None):
+    async def transaction(self, compare, success=None, failure=None):
         """
         Perform a transaction.
 
@@ -704,7 +698,7 @@ class Etcd3Client(object):
         transaction_request = etcdrpc.TxnRequest(compare=compare,
                                                  success=success_ops,
                                                  failure=failure_ops)
-        txn_response = self.kvstub.Txn(
+        txn_response = await self.kvstub.Txn(
             transaction_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -729,7 +723,7 @@ class Etcd3Client(object):
         return txn_response.succeeded, responses
 
     @_handle_errors
-    def lease(self, ttl, lease_id=None):
+    async def lease(self, ttl, lease_id=None):
         """
         Create a new lease.
 
@@ -744,7 +738,7 @@ class Etcd3Client(object):
         :rtype: :class:`.Lease`
         """
         lease_grant_request = etcdrpc.LeaseGrantRequest(TTL=ttl, ID=lease_id)
-        lease_grant_response = self.leasestub.LeaseGrant(
+        lease_grant_response = await self.leasestub.LeaseGrant(
             lease_grant_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -755,14 +749,14 @@ class Etcd3Client(object):
                             etcd_client=self)
 
     @_handle_errors
-    def revoke_lease(self, lease_id):
+    async def revoke_lease(self, lease_id):
         """
         Revoke a lease.
 
         :param lease_id: ID of the lease to revoke.
         """
         lease_revoke_request = etcdrpc.LeaseRevokeRequest(ID=lease_id)
-        self.leasestub.LeaseRevoke(
+        await self.leasestub.LeaseRevoke(
             lease_revoke_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -771,21 +765,22 @@ class Etcd3Client(object):
 
     @_handle_errors
     def refresh_lease(self, lease_id):
-        keep_alive_request = etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
-        request_stream = [keep_alive_request]
-        for response in self.leasestub.LeaseKeepAlive(
-                iter(request_stream),
-                self.timeout,
-                credentials=self.call_credentials,
-                metadata=self.metadata):
-            yield response
+
+        async def request_stream():
+            yield etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
+
+        return self.leasestub.LeaseKeepAlive(
+            request_stream(),
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata)
 
     @_handle_errors
-    def get_lease_info(self, lease_id):
+    async def get_lease_info(self, lease_id):
         # only available in etcd v3.1.0 and later
         ttl_request = etcdrpc.LeaseTimeToLiveRequest(ID=lease_id,
                                                      keys=True)
-        return self.leasestub.LeaseTimeToLive(
+        return await self.leasestub.LeaseTimeToLive(
             ttl_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -809,7 +804,7 @@ class Etcd3Client(object):
         return locks.Lock(name, ttl=ttl, etcd_client=self)
 
     @_handle_errors
-    def add_member(self, urls):
+    async def add_member(self, urls):
         """
         Add a member into the cluster.
 
@@ -818,7 +813,7 @@ class Etcd3Client(object):
         """
         member_add_request = etcdrpc.MemberAddRequest(peerURLs=urls)
 
-        member_add_response = self.clusterstub.MemberAdd(
+        member_add_response = await self.clusterstub.MemberAdd(
             member_add_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -833,14 +828,14 @@ class Etcd3Client(object):
                                     etcd_client=self)
 
     @_handle_errors
-    def remove_member(self, member_id):
+    async def remove_member(self, member_id):
         """
         Remove an existing member from the cluster.
 
         :param member_id: ID of the member to remove
         """
         member_rm_request = etcdrpc.MemberRemoveRequest(ID=member_id)
-        self.clusterstub.MemberRemove(
+        await self.clusterstub.MemberRemove(
             member_rm_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -848,7 +843,7 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
-    def update_member(self, member_id, peer_urls):
+    async def update_member(self, member_id, peer_urls):
         """
         Update the configuration of an existing member in the cluster.
 
@@ -858,15 +853,15 @@ class Etcd3Client(object):
         """
         member_update_request = etcdrpc.MemberUpdateRequest(ID=member_id,
                                                             peerURLs=peer_urls)
-        self.clusterstub.MemberUpdate(
+        await self.clusterstub.MemberUpdate(
             member_update_request,
             self.timeout,
             credentials=self.call_credentials,
             metadata=self.metadata
         )
 
-    @property
-    def members(self):
+    # @property
+    async def members(self):
         """
         List of all members associated with the cluster.
 
@@ -874,7 +869,7 @@ class Etcd3Client(object):
 
         """
         member_list_request = etcdrpc.MemberListRequest()
-        member_list_response = self.clusterstub.MemberList(
+        member_list_response = await self.clusterstub.MemberList(
             member_list_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -889,7 +884,7 @@ class Etcd3Client(object):
                                        etcd_client=self)
 
     @_handle_errors
-    def compact(self, revision, physical=False):
+    async def compact(self, revision, physical=False):
         """
         Compact the event history in etcd up to a given revision.
 
@@ -904,7 +899,7 @@ class Etcd3Client(object):
         """
         compact_request = etcdrpc.CompactionRequest(revision=revision,
                                                     physical=physical)
-        self.kvstub.Compact(
+        await self.kvstub.Compact(
             compact_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -912,10 +907,10 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
-    def defragment(self):
+    async def defragment(self):
         """Defragment a member's backend database to recover storage space."""
         defrag_request = etcdrpc.DefragmentRequest()
-        self.maintenancestub.Defragment(
+        await self.maintenancestub.Defragment(
             defrag_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -923,7 +918,7 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
-    def hash(self):
+    async def hash(self):
         """
         Return the hash of the local KV state.
 
@@ -931,7 +926,7 @@ class Etcd3Client(object):
         :rtype: int
         """
         hash_request = etcdrpc.HashRequest()
-        return self.maintenancestub.Hash(hash_request).hash
+        return (await self.maintenancestub.Hash(hash_request)).hash
 
     def _build_alarm_request(self, alarm_action, member_id, alarm_type):
         alarm_request = etcdrpc.AlarmRequest()
@@ -957,7 +952,7 @@ class Etcd3Client(object):
         return alarm_request
 
     @_handle_errors
-    def create_alarm(self, member_id=0):
+    async def create_alarm(self, member_id=0):
         """Create an alarm.
 
         If no member id is given, the alarm is activated for all the
@@ -971,7 +966,7 @@ class Etcd3Client(object):
         alarm_request = self._build_alarm_request('activate',
                                                   member_id,
                                                   'no space')
-        alarm_response = self.maintenancestub.Alarm(
+        alarm_response = await self.maintenancestub.Alarm(
             alarm_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -982,7 +977,7 @@ class Etcd3Client(object):
                 for alarm in alarm_response.alarms]
 
     @_handle_errors
-    def list_alarms(self, member_id=0, alarm_type='none'):
+    async def list_alarms(self, member_id=0, alarm_type='none'):
         """List the activated alarms.
 
         :param member_id:
@@ -994,7 +989,7 @@ class Etcd3Client(object):
         alarm_request = self._build_alarm_request('get',
                                                   member_id,
                                                   alarm_type)
-        alarm_response = self.maintenancestub.Alarm(
+        alarm_response = await self.maintenancestub.Alarm(
             alarm_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -1005,7 +1000,7 @@ class Etcd3Client(object):
             yield Alarm(alarm.alarm, alarm.memberID)
 
     @_handle_errors
-    def disarm_alarm(self, member_id=0):
+    async def disarm_alarm(self, member_id=0):
         """Cancel an alarm.
 
         :param member_id: The cluster member id to cancel an alarm.
@@ -1016,7 +1011,7 @@ class Etcd3Client(object):
         alarm_request = self._build_alarm_request('deactivate',
                                                   member_id,
                                                   'no space')
-        alarm_response = self.maintenancestub.Alarm(
+        alarm_response = await self.maintenancestub.Alarm(
             alarm_request,
             self.timeout,
             credentials=self.call_credentials,
@@ -1027,7 +1022,7 @@ class Etcd3Client(object):
                 for alarm in alarm_response.alarms]
 
     @_handle_errors
-    def snapshot(self, file_obj):
+    async def snapshot(self, file_obj):
         """Take a snapshot of the database.
 
         :param file_obj: A file-like object to write the database contents in.
@@ -1040,30 +1035,6 @@ class Etcd3Client(object):
             metadata=self.metadata
         )
 
-        for response in snapshot_response:
+        async for response in snapshot_response:
             file_obj.write(response.blob)
 
-
-def client(host='localhost', port=2379,
-           ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
-           user=None, password=None, grpc_options=None,
-           backend="sync", **kwargs):
-    """Return an instance of an Etcd3Client."""
-    if backend == "sync":
-        client_class = Etcd3Client
-    elif backend == "asyncio":
-        import etcd3.aio.client
-        client_class = etcd3.aio.client.Etcd3Client
-    else:
-        raise ValueError("invalid backend, choose one of 'sync', 'asyncio'")
-
-    return client_class(host=host,
-                        port=port,
-                        ca_cert=ca_cert,
-                        cert_key=cert_key,
-                        cert_cert=cert_cert,
-                        timeout=timeout,
-                        user=user,
-                        password=password,
-                        grpc_options=grpc_options,
-                        **kwargs)
