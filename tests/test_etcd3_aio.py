@@ -326,7 +326,7 @@ class TestEtcd3(object):
         watcher_mock.add_callback = add_callback_mock
         etcd.watcher = watcher_mock
 
-        events_iterator, cancel = await etcd.watch('foo')
+        events_iterator, cancel = etcd.watch('foo')
 
         with pytest.raises(etcd3.exceptions.ConnectionFailedError):
             async for _ in events_iterator:
@@ -483,14 +483,14 @@ class TestEtcd3(object):
             else:
                 etcdctl('put', '/doot/' + char, 'i am not in range')
 
-        values = list(await etcd.get_range('/doot/a', '/doot/p'))
+        values = [v async for v in etcd.get_range('/doot/a', '/doot/p')]
         assert len(values) == 15
         for value, _ in values:
             assert value == b'i am in range'
 
     @pytest.mark.asyncio
     async def test_all_not_found_error(self, etcd):
-        result = list(await etcd.get_all())
+        result = [x async for x in etcd.get_all()]
         assert not result
 
     @pytest.mark.asyncio
@@ -498,7 +498,7 @@ class TestEtcd3(object):
         for i in range(5):
             etcdctl('put', '/doot/notrange{}'.format(i), 'i am a not range')
 
-        result = [p async for p in await etcd.get_prefix('/doot/range')]
+        result = [p async for p in etcd.get_prefix('/doot/range')]
         assert not result
 
     @pytest.mark.asyncio
@@ -508,7 +508,7 @@ class TestEtcd3(object):
 
         for i in range(5):
             etcdctl('put', '/doot/notrange{}'.format(i), 'i am in all')
-        values = list(await etcd.get_all())
+        values = [x async for x in etcd.get_all()]
         assert len(values) == 25
         for value, _ in values:
             assert value == b'i am in all'
