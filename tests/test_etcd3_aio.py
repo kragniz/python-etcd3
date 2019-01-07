@@ -277,7 +277,7 @@ class TestEtcd3(object):
             error_raised = False
             compacted_revision = 0
             try:
-                next(events_iterator)
+                await events_iterator.__anext__()
             except Exception as err:
                 error_raised = True
                 assert isinstance(err, etcd3.exceptions.RevisionCompactedError)
@@ -287,7 +287,7 @@ class TestEtcd3(object):
             assert compacted_revision == 2
 
             change_count = 0
-            events_iterator, cancel = etcd.watch(
+            events_iterator, cancel = await etcd.watch(
                 b'/watchcompation', start_revision=compacted_revision)
             async for event in events_iterator:
                 assert event.key == b'/watchcompation'
@@ -307,23 +307,22 @@ class TestEtcd3(object):
         except grpc.RpcError:
             pass
 
-        watch_compacted_revision_test()
+        await watch_compacted_revision_test()
 
         t.join()
 
     @pytest.mark.asyncio
     async def test_watch_exception_during_watch(self, etcd):
-        def pass_exception_to_callback(callback):
-            time.sleep(1)
-            callback(self.MockedException(grpc.StatusCode.UNAVAILABLE))
+        async def pass_exception_to_callback(callback):
+            await asyncio.sleep(1)
+            await callback(self.MockedException(grpc.StatusCode.UNAVAILABLE))
 
-        def add_callback_mock(*args, **kwargs):
+        task = None
+        async def add_callback_mock(*args, **kwargs):
+            nonlocal task
             callback = args[1]
-            t = threading.Thread(name="pass_exception_to_callback",
-                                 target=pass_exception_to_callback,
-                                 args=[callback])
-            t.daemon = True
-            t.start()
+            task = asyncio.get_event_loop().create_task(
+                pass_exception_to_callback(callback))
             return 1
 
         watcher_mock = mock.MagicMock()
@@ -335,6 +334,8 @@ class TestEtcd3(object):
         with pytest.raises(etcd3.exceptions.ConnectionFailedError):
             async for _ in events_iterator:
                 pass
+
+        await task
 
     @pytest.mark.asyncio
     async def test_watch_timeout_on_establishment(self, etcd, event_loop):
@@ -717,9 +718,12 @@ class TestEtcd3(object):
     @pytest.mark.asyncio
     async def test_connection_timeout_exception_on_connection_timeout(self, etcd):
         exception = self.MockedException(grpc.StatusCode.DEADLINE_EXCEEDED)
-        kv_mock = mock.MagicMock()
-        kv_mock.Range.side_effect = exception
-        etcd.kvstub = kv_mock
+
+        class MockKvstub:
+            async def Range(self, *args, **kwargs):
+                raise exception
+
+        etcd.kvstub = MockKvstub()
 
         with pytest.raises(etcd3.exceptions.ConnectionTimeoutError):
             await etcd.get("foo")

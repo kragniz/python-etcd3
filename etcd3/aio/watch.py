@@ -177,7 +177,7 @@ class Watcher(object):
         if rs.compact_revision != 0:
             err = exceptions.RevisionCompactedError(rs.compact_revision)
             await _safe_callback(callback, err)
-            self.cancel(rs.watch_id)
+            await self.cancel(rs.watch_id)
             return
 
         for event in rs.events:

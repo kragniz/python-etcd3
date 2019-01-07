@@ -33,11 +33,17 @@ def _translate_exception(exc):
 
 
 def _handle_errors(f):
-    if inspect.isgeneratorfunction(f):
-        def handler(*args, **kwargs):
+    if inspect.isasyncgenfunction(f):
+        async def handler(*args, **kwargs):
             try:
-                for data in f(*args, **kwargs):
+                async for data in f(*args, **kwargs):
                     yield data
+            except grpc.RpcError as exc:
+                _translate_exception(exc)
+    elif inspect.iscoroutinefunction(f):
+        async def handler(*args, **kwargs):
+            try:
+                return await f(*args, **kwargs)
             except grpc.RpcError as exc:
                 _translate_exception(exc)
     else:
