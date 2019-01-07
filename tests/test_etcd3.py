@@ -1083,7 +1083,7 @@ class TestClient(object):
         )
         assert client.uses_secure_channel is False
 
-    @mock.patch('etcdrpc.AuthStub')
+    @mock.patch('etcd3.etcdrpc.AuthStub')
     def test_user_pwd_auth(self, auth_mock):
         auth_resp_mock = mock.MagicMock()
         auth_resp_mock.token = 'foo'
