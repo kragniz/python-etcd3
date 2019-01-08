@@ -247,7 +247,12 @@ class TestEtcd3(object):
 
     @pytest.mark.asyncio
     async def test_watch_key_with_revision_compacted(self, etcd):
-        etcdctl('put', '/random', '1')  # Some data to compact
+        etcdctl('put', '/watchcompation', '0')  # Some data to compact
+        value, meta = await etcd.get('/watchcompation')
+        revision = meta.mod_revision
+
+        # Compact etcd and test watcher
+        await etcd.compact(revision)
 
         def update_etcd(v):
             etcdctl('put', '/watchcompation', v)
@@ -256,23 +261,16 @@ class TestEtcd3(object):
                 utils.to_bytes(v)
 
         def update_key():
-            # sleep to make watch can get the event
-            time.sleep(3)
-            update_etcd('0')
-            time.sleep(1)
             update_etcd('1')
-            time.sleep(1)
             update_etcd('2')
-            time.sleep(1)
             update_etcd('3')
-            time.sleep(1)
 
         t = threading.Thread(name="update_key", target=update_key)
         t.start()
 
         async def watch_compacted_revision_test():
             events_iterator, cancel = await etcd.watch(
-                b'/watchcompation', start_revision=1)
+                b'/watchcompation', start_revision=(revision - 1))
 
             error_raised = False
             compacted_revision = 0
@@ -284,7 +282,7 @@ class TestEtcd3(object):
                 compacted_revision = err.compacted_revision
 
             assert error_raised is True
-            assert compacted_revision == 2
+            assert compacted_revision == revision
 
             change_count = 0
             events_iterator, cancel = await etcd.watch(
@@ -300,12 +298,6 @@ class TestEtcd3(object):
                 change_count += 1
                 if change_count > 2:
                     await cancel()
-
-        # Compact etcd and test watcher
-        try:
-            await etcd.compact(2)
-        except grpc.RpcError:
-            pass
 
         await watch_compacted_revision_test()
 
@@ -915,13 +907,12 @@ class TestClient(object):
 
     @pytest.mark.asyncio
     async def test_compact(self, etcd):
-        try:
-            await etcd.compact(3)
-            await etcd.compact(3)
-        except grpc.RpcError as ex:
-            pass
-        else:
-            raise RuntimeError
+        await etcd.put("/foo", "x")
+        _, meta = await etcd.get("/foo")
+        revision = meta.mod_revision
+        await etcd.compact(revision)
+        with pytest.raises(grpc.RpcError):
+            await etcd.compact(revision)
 
     def test_channel_with_no_cert(self, event_loop):
         client = etcd3.client(
@@ -963,8 +954,8 @@ class TestClient(object):
         subprocess.call(['etcdctl', 'auth', 'enable'])
 
     def _disable_auth_in_etcd(self):
-        subprocess.call(['etcdctl', 'user', 'remove', 'root'])
-        subprocess.call(['etcdctl', '-u', 'root:pwd', 'auth', 'disable'])
+        subprocess.call(['etcdctl', '--user', 'root:pwd', 'auth', 'disable'])
+        subprocess.call(['etcdctl', 'user', 'delete', 'root'])
 
 
 class TestCompares(object):
