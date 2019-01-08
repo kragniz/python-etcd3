@@ -1,9 +1,8 @@
 import uuid
-import asyncio
 
 import tenacity
 
-from etcd3 import exceptions
+# from etcd3 import exceptions
 
 lock_prefix = '/locks/'
 
@@ -62,14 +61,15 @@ class Lock(object):
         )
 
         def wait(retry_state):
-            if timeout is None:
-                remaining_timeout = None
-            else:
-                remaining_timeout = max(timeout - retry_state.start_time, 0)
+            # if timeout is None:
+            #     remaining_timeout = None
+            # else:
+            #     remaining_timeout = max(timeout - retry_state.start_time, 0)
             # TODO(jd): Wait for a DELETE event to happen: that'd mean the lock
             # has been released, rather than retrying on PUT events too
             # try:
-            #     await self.etcd_client.watch_once(self.key, remaining_timeout)
+            #     await self.etcd_client.watch_once(self.key,
+            #                                       remaining_timeout)
             # except exceptions.WatchTimedOut:
             #     pass
             return 0
