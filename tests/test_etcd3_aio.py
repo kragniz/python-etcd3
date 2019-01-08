@@ -1,9 +1,10 @@
 """
-Tests for `etcd3` module with the asyncio backend
+Tests for `etcd3` module with the asyncio backend.
 
 ----------------------------------
 """
 
+import asyncio
 import base64
 import json
 import os
@@ -12,12 +13,11 @@ import subprocess
 import tempfile
 import threading
 import time
-import asyncio
 
 import grpc
 
 # from hypothesis import given, settings
-from hypothesis.strategies import characters
+# from hypothesis.strategies import characters
 
 import mock
 
@@ -94,7 +94,8 @@ class TestEtcd3(object):
                               loop=event_loop) as client:
                 yield client
         else:
-            async with etcd3.client(backend="asyncio", loop=event_loop) as client:
+            async with etcd3.client(
+                    backend="asyncio", loop=event_loop) as client:
                 yield client
 
         @retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
@@ -181,8 +182,9 @@ class TestEtcd3(object):
     @pytest.mark.asyncio
     async def test_delete_has_prev_kv(self, etcd):
         etcdctl('put', '/doot/delete_this', 'old_value')
-        response = await etcd.delete('/doot/delete_this', prev_kv=True,
-                               return_response=True)
+        response = await etcd.delete('/doot/delete_this',
+                                     prev_kv=True,
+                                     return_response=True)
         assert response.prev_kvs[0].value == b'old_value'
 
     @pytest.mark.asyncio
@@ -305,11 +307,13 @@ class TestEtcd3(object):
 
     @pytest.mark.asyncio
     async def test_watch_exception_during_watch(self, etcd):
+
         async def pass_exception_to_callback(callback):
             await asyncio.sleep(1)
             await callback(self.MockedException(grpc.StatusCode.UNAVAILABLE))
 
         task = None
+
         async def add_callback_mock(*args, **kwargs):
             nonlocal task
             callback = args[1]
@@ -325,7 +329,7 @@ class TestEtcd3(object):
 
         with pytest.raises(etcd3.exceptions.ConnectionFailedError):
             async for _ in events_iterator:
-                pass
+                _
 
         await task
 
@@ -345,7 +349,7 @@ class TestEtcd3(object):
         with pytest.raises(etcd3.exceptions.WatchTimedOut):
             events_iterator, cancel = await foo_etcd.watch('foo')
             async for _ in events_iterator:
-                pass
+                _
 
     @pytest.mark.asyncio
     async def test_watch_prefix(self, etcd):
@@ -371,7 +375,8 @@ class TestEtcd3(object):
         t.start()
 
         change_count = 0
-        events_iterator, cancel = await etcd.watch_prefix('/doot/watch/prefix/')
+        events_iterator, cancel = await etcd.watch_prefix(
+            '/doot/watch/prefix/')
         async for event in events_iterator:
             assert event.key == \
                 utils.to_bytes('/doot/watch/prefix/{}'.format(change_count))
@@ -537,7 +542,8 @@ class TestEtcd3(object):
         assert keys == initial_keys
 
         reverse_keys = ''
-        async for value, meta in etcd.get_prefix('/doot', sort_order='descend'):
+        async for value, meta in etcd.get_prefix('/doot',
+                                                 sort_order='descend'):
             reverse_keys += remove_prefix(meta.key.decode('utf-8'), '/doot/')
 
         assert reverse_keys == ''.join(reversed(initial_keys))
@@ -698,7 +704,8 @@ class TestEtcd3(object):
             await etcd.get("foo")
 
     @pytest.mark.asyncio
-    async def test_connection_failure_exception_on_connection_failure(self, etcd):
+    async def test_connection_failure_exception_on_connection_failure(
+            self, etcd):
         exception = self.MockedException(grpc.StatusCode.UNAVAILABLE)
         kv_mock = mock.MagicMock()
         kv_mock.Range.side_effect = exception
@@ -708,7 +715,8 @@ class TestEtcd3(object):
             await etcd.get("foo")
 
     @pytest.mark.asyncio
-    async def test_connection_timeout_exception_on_connection_timeout(self, etcd):
+    async def test_connection_timeout_exception_on_connection_timeout(
+            self, etcd):
         exception = self.MockedException(grpc.StatusCode.DEADLINE_EXCEEDED)
 
         class MockKvstub:

@@ -1,20 +1,22 @@
+import asyncio
 import functools
 import inspect
-import asyncio
 
-import grpc
 import aiogrpc
 
-from six.moves import queue
+import grpc
 
-import etcd3.etcdrpc as etcdrpc
-import etcd3.exceptions as exceptions
 import etcd3.aio.leases as leases
 import etcd3.aio.locks as locks
 import etcd3.aio.members
+import etcd3.aio.watch as watch
+import etcd3.etcdrpc as etcdrpc
+import etcd3.exceptions as exceptions
 import etcd3.transactions as transactions
 import etcd3.utils as utils
-import etcd3.aio.watch as watch
+
+# from six.moves import queue
+
 
 _EXCEPTIONS_BY_CODE = {
     grpc.StatusCode.INTERNAL: exceptions.InternalServerError,
@@ -32,7 +34,7 @@ def _translate_exception(exc):
     raise exception
 
 
-def _handle_errors(f):
+def _handle_errors(f):  # noqa: C901
     if inspect.isasyncgenfunction(f):
         async def handler(*args, **kwargs):
             try:
@@ -315,7 +317,7 @@ class Etcd3Client(object):
 
     @_handle_errors
     async def get_range(self, range_start, range_end, sort_order=None,
-                  sort_target='key', **kwargs):
+                        sort_target='key', **kwargs):
         """
         Get a range of keys.
 
@@ -553,7 +555,8 @@ class Etcd3Client(object):
                   and ``cancel`` to cancel the watch request
         """
         event_queue = asyncio.Queue()
-        watch_id = await self.add_watch_callback(key, event_queue.put, **kwargs)
+        watch_id = await self.add_watch_callback(key, event_queue.put,
+                                                 **kwargs)
         canceled = asyncio.Event()
 
         async def cancel():
@@ -596,7 +599,8 @@ class Etcd3Client(object):
         """
         event_queue = asyncio.Queue()
 
-        watch_id = await self.add_watch_callback(key, event_queue.put, **kwargs)
+        watch_id = await self.add_watch_callback(key, event_queue.put,
+                                                 **kwargs)
 
         try:
             return await asyncio.wait_for(event_queue.get(), timeout)
@@ -1043,4 +1047,3 @@ class Etcd3Client(object):
 
         async for response in snapshot_response:
             file_obj.write(response.blob)
-
