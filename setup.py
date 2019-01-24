@@ -16,7 +16,7 @@ def load_reqs(filename):
     with open(filename) as reqs_file:
         return [
             re.sub('==', '>=', line) for line in reqs_file.readlines()
-            if not re.match('\s*#', line)
+            if not re.match(r'\s*#', line)
         ]
 
 
