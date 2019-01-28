@@ -235,6 +235,8 @@ class Etcd3Client(object):
             raise ValueError('sort_target must be one of "key", '
                              '"version", "create", "mod" or "value"')
 
+        range_request.serializable = serializable
+
         return range_request
 
     @_handle_errors
@@ -252,10 +254,15 @@ class Etcd3Client(object):
             'hello world'
 
         :param key: key in etcd to get
+        :param serializable: whether to allow serializable reads. This can
+            result in stale reads
         :returns: value of key and metadata
         :rtype: bytes, ``KVMetadata``
         """
         range_request = self._build_get_range_request(key, **kwargs)
+        range_request = self._build_get_range_request(
+            key,
+            serializable=serializable)
         range_response = self.kvstub.Range(
             range_request,
             self.timeout,
