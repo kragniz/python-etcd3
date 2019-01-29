@@ -127,14 +127,6 @@ class TestEtcd3(object):
         assert returned == string.encode('utf-8')
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
-    def test_get_key_serializable(self, etcd, string):
-        etcdctl('put', '/doot/a_key', string)
-        # Just check the keyword doesn't break
-        # Checking the behaviour would need cluster testing
-        returned, _ = etcd.get('/doot/a_key', serializable=True)
-        assert returned == string.encode('utf-8')
-
-    @given(characters(blacklist_categories=['Cs', 'Cc']))
     def test_get_random_key(self, etcd, string):
         etcdctl('put', '/doot/' + string, 'dootdoot')
         returned, _ = etcd.get('/doot/' + string)
