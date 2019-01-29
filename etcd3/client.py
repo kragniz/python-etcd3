@@ -235,8 +235,6 @@ class Etcd3Client(object):
             raise ValueError('sort_target must be one of "key", '
                              '"version", "create", "mod" or "value"')
 
-        range_request.serializable = serializable
-
         return range_request
 
     @_handle_errors
