@@ -252,15 +252,13 @@ class Etcd3Client(object):
             'hello world'
 
         :param key: key in etcd to get
-        :param serializable: whether to allow serializable reads. This can
-            result in stale reads
         :returns: value of key and metadata
         :rtype: bytes, ``KVMetadata``
         """
         range_request = self._build_get_range_request(key, **kwargs)
         range_request = self._build_get_range_request(
             key,
-            serializable=serializable)
+            **kwargs)
         range_response = self.kvstub.Range(
             range_request,
             self.timeout,
