@@ -1,5 +1,5 @@
 PyYAML==3.13
-Sphinx==1.8.2
+Sphinx==1.8.4
 bumpversion==0.5.3
 coverage==4.5.1
 flake8-import-order==0.18
