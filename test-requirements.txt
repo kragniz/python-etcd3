@@ -5,7 +5,7 @@ coverage==4.5.1
 flake8-import-order==0.18
 flake8==3.6.0
 grpcio-tools>=1.2.0
-hypothesis==3.82.1
+hypothesis==4.7.17
 pip==18.1
 pytest==4.0.1
 wheel==0.31.1
