@@ -472,6 +472,14 @@ class TestEtcd3(object):
                 assert event.value == utils.to_bytes(str(count))
                 count += 1
 
+    def test_continuous_watch_timeout(self, etcd):
+        # Test timeout in continuous watch methods
+        for watch in [etcd.watch_response, etcd.watch,
+                      etcd.watch_prefix_response, etcd.watch_prefix]:
+            iterator, _ = watch('foo', timeout=1)
+            with pytest.raises(etcd3.exceptions.WatchTimedOut):
+                next(iterator)
+
     def test_transaction_success(self, etcd):
         etcdctl('put', '/doot/txn', 'dootdoot')
         etcd.transaction(

@@ -572,7 +572,7 @@ class Etcd3Client(object):
             raise exceptions.WatchTimedOut()
 
     @_handle_errors
-    def watch_response(self, key, **kwargs):
+    def watch_response(self, key, timeout=None, **kwargs):
         """
         Watch a key.
 
@@ -583,7 +583,11 @@ class Etcd3Client(object):
             for response in responses_iterator:
                 print(response)
 
+        If the timeout was specified and response didn't arrive, method
+        will raise ``WatchTimedOut`` exception.
+
         :param key: key to watch
+        :param timeout: (optional) timeout in seconds to wait for each response
 
         :returns: tuple of ``responses_iterator`` and ``cancel``.
                   Use ``responses_iterator`` to get the watch responses,
@@ -606,7 +610,12 @@ class Etcd3Client(object):
         @_handle_errors
         def iterator():
             while not canceled.is_set():
-                response = response_queue.get()
+                try:
+                    response = response_queue.get(timeout=timeout)
+                except queue.Empty:
+                    canceled.set()
+                    self.cancel_watch(watch_id)
+                    raise exceptions.WatchTimedOut()
                 if response is None:
                     canceled.set()
                 if isinstance(response, Exception):
