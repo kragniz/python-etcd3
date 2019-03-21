@@ -9,6 +9,7 @@ import base64
 import contextlib
 import json
 import os
+import signal
 import string
 import subprocess
 import tempfile
