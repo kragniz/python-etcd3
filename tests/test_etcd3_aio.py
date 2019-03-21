@@ -510,6 +510,21 @@ class TestEtcd3(object):
             assert value == b'i am a range'
 
     @pytest.mark.asyncio
+    async def test_get_prefix_keys_only(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/range{}'.format(i), 'i am a range')
+
+        for i in range(5):
+            etcdctl('put', '/doot/notrange{}'.format(i), 'i am a not range')
+
+        values = [p async for p in etcd.get_prefix('/doot/range',
+                                                   keys_only=True)]
+        assert len(values) == 20
+        for value, meta in values:
+            assert meta.key.startswith(b"/doot/range")
+            assert not value
+
+    @pytest.mark.asyncio
     async def test_get_range(self, etcd):
         for char in string.ascii_lowercase:
             if char < 'p':
