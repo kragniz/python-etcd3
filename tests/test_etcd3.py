@@ -5,8 +5,10 @@ Tests for `etcd3` module.
 """
 
 import base64
+import contextlib
 import json
 import os
+import signal
 import string
 import subprocess
 import tempfile
@@ -68,6 +70,19 @@ def etcdctl(*args):
 #     return json.loads(output.decode('utf-8'))
 
 
+@contextlib.contextmanager
+def _out_quorum():
+    pids = subprocess.check_output(['pgrep', '-f', '--', '--name pifpaf[12]'])
+    pids = [int(pid.strip()) for pid in pids.splitlines()]
+    try:
+        for pid in pids:
+            os.kill(pid, signal.SIGSTOP)
+        yield
+    finally:
+        for pid in pids:
+            os.kill(pid, signal.SIGCONT)
+
+
 class TestEtcd3(object):
 
     class MockedException(grpc.RpcError):
@@ -116,6 +131,16 @@ class TestEtcd3(object):
         etcdctl('put', '/doot/' + string, 'dootdoot')
         returned, _ = etcd.get('/doot/' + string)
         assert returned == b'dootdoot'
+
+    @given(
+        characters(blacklist_categories=['Cs', 'Cc']),
+        characters(blacklist_categories=['Cs', 'Cc']),
+    )
+    def test_get_key_serializable(self, etcd, key, string):
+        etcdctl('put', '/doot/' + key, string)
+        with _out_quorum():
+            returned, _ = etcd.get('/doot/' + key, serializable=True)
+        assert returned == string.encode('utf-8')
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
     def test_get_have_cluster_revision(self, etcd, string):
@@ -538,12 +563,10 @@ class TestEtcd3(object):
         v, _ = etcd.get(key)
         assert v is None
 
-    def test_member_list_single(self, etcd):
-        # if tests are run against an etcd cluster rather than a single node,
-        # this test will need to be changed
-        assert len(list(etcd.members)) == 1
+    def test_member_list(self, etcd):
+        assert len(list(etcd.members)) == 3
         for member in etcd.members:
-            assert member.name == 'default'
+            assert member.name.startswith('pifpaf')
             for peer_url in member.peer_urls:
                 assert peer_url.startswith('http://')
             for client_url in member.client_urls:
