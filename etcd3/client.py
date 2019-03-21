@@ -209,7 +209,7 @@ class Etcd3Client(object):
                                  sort_order=None,
                                  sort_target='key',
                                  serializable=False,
-                                 keys_only=None,
+                                 keys_only=False,
                                  count_only=None,
                                  min_mod_revision=None,
                                  max_mod_revision=None,
@@ -217,6 +217,7 @@ class Etcd3Client(object):
                                  max_create_revision=None):
         range_request = etcdrpc.RangeRequest()
         range_request.key = utils.to_bytes(key)
+        range_request.keys_only = keys_only
         if range_end is not None:
             range_request.range_end = utils.to_bytes(range_end)
 
@@ -284,11 +285,13 @@ class Etcd3Client(object):
             return kv.value, KVMetadata(kv, range_response.header)
 
     @_handle_errors
-    def get_prefix(self, key_prefix, sort_order=None, sort_target='key'):
+    def get_prefix(self, key_prefix, sort_order=None, sort_target='key',
+                   keys_only=False):
         """
         Get a range of keys with a prefix.
 
         :param key_prefix: first key in range
+        :param keys_only: if True, retrieve only the keys, not the values
 
         :returns: sequence of (value, metadata) tuples
         """
@@ -297,6 +300,7 @@ class Etcd3Client(object):
             range_end=utils.increment_last_byte(utils.to_bytes(key_prefix)),
             sort_order=sort_order,
             sort_target=sort_target,
+            keys_only=keys_only,
         )
 
         range_response = self.kvstub.Range(
@@ -344,10 +348,11 @@ class Etcd3Client(object):
                 yield (kv.value, KVMetadata(kv, range_response.header))
 
     @_handle_errors
-    def get_all(self, sort_order=None, sort_target='key'):
+    def get_all(self, sort_order=None, sort_target='key', keys_only=False):
         """
         Get all keys currently stored in etcd.
 
+        :param keys_only: if True, retrieve only the keys, not the values
         :returns: sequence of (value, metadata) tuples
         """
         range_request = self._build_get_range_request(
@@ -355,6 +360,7 @@ class Etcd3Client(object):
             range_end=b'\0',
             sort_order=sort_order,
             sort_target=sort_target,
+            keys_only=keys_only,
         )
 
         range_response = self.kvstub.Range(
