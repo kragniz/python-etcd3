@@ -226,6 +226,7 @@ class Etcd3Client(object):
                                  max_create_revision=None):
         range_request = etcdrpc.RangeRequest()
         range_request.key = utils.to_bytes(key)
+        range_request.keys_only = keys_only
         if range_end is not None:
             range_request.range_end = utils.to_bytes(range_end)
 
@@ -291,7 +292,8 @@ class Etcd3Client(object):
             return kv.value, KVMetadata(kv, range_response.header)
 
     @_handle_errors
-    async def get_prefix(self, key_prefix, sort_order=None, sort_target='key'):
+    async def get_prefix(self, key_prefix, sort_order=None, sort_target='key',
+                         keys_only=False):
         """
         Get a range of keys with a prefix.
 
@@ -304,6 +306,7 @@ class Etcd3Client(object):
             range_end=utils.increment_last_byte(utils.to_bytes(key_prefix)),
             sort_order=sort_order,
             sort_target=sort_target,
+            keys_only=keys_only,
         )
 
         range_response = await self.kvstub.Range(
@@ -351,7 +354,8 @@ class Etcd3Client(object):
                 yield (kv.value, KVMetadata(kv, range_response.header))
 
     @_handle_errors
-    async def get_all(self, sort_order=None, sort_target='key'):
+    async def get_all(self, sort_order=None, sort_target='key',
+                      keys_only=False):
         """
         Get all keys currently stored in etcd.
 
@@ -362,6 +366,7 @@ class Etcd3Client(object):
             range_end=b'\0',
             sort_order=sort_order,
             sort_target=sort_target,
+            keys_only=keys_only,
         )
 
         range_response = await self.kvstub.Range(
