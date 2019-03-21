@@ -471,6 +471,19 @@ class TestEtcd3(object):
         for value, _ in values:
             assert value == b'i am a range'
 
+    def test_get_prefix_keys_only(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/range{}'.format(i), 'i am a range')
+
+        for i in range(5):
+            etcdctl('put', '/doot/notrange{}'.format(i), 'i am a not range')
+
+        values = list(etcd.get_prefix('/doot/range', keys_only=True))
+        assert len(values) == 20
+        for value, meta in values:
+            assert meta.key.startswith(b"/doot/range")
+            assert not value
+
     def test_get_range(self, etcd):
         for char in string.ascii_lowercase:
             if char < 'p':
@@ -504,6 +517,18 @@ class TestEtcd3(object):
         assert len(values) == 25
         for value, _ in values:
             assert value == b'i am in all'
+
+    def test_get_all_keys_only(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/range{}'.format(i), 'i am in all')
+
+        for i in range(5):
+            etcdctl('put', '/doot/notrange{}'.format(i), 'i am in all')
+        values = list(etcd.get_all(keys_only=True))
+        assert len(values) == 25
+        for value, meta in values:
+            assert meta.key.startswith(b"/doot/")
+            assert not value
 
     def test_sort_order(self, etcd):
         def remove_prefix(string, prefix):
