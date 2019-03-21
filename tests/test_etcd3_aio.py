@@ -6,6 +6,7 @@ Tests for `etcd3` module with the asyncio backend.
 
 import asyncio
 import base64
+import contextlib
 import json
 import os
 import string
@@ -58,6 +59,18 @@ def etcdctl(*args):
     output = subprocess.check_output(args)
     return json.loads(output.decode('utf-8'))
 
+
+@contextlib.contextmanager
+def _out_quorum():
+    pids = subprocess.check_output(['pgrep', '-f', '--', '--name pifpaf[12]'])
+    pids = [int(pid.strip()) for pid in pids.splitlines()]
+    try:
+        for pid in pids:
+            os.kill(pid, signal.SIGSTOP)
+        yield
+    finally:
+        for pid in pids:
+            os.kill(pid, signal.SIGCONT)
 
 # def etcdctl2(*args):
 #     # endpoint = os.environ.get('PYTHON_ETCD_HTTP_URL')
@@ -141,6 +154,16 @@ class TestEtcd3(object):
         out = etcdctl('get', '/doot/put_1')
         assert base64.b64decode(out['kvs'][0]['value']) == \
             string.encode('utf-8')
+
+    # @given(
+    #     characters(blacklist_categories=['Cs', 'Cc']),
+    #     characters(blacklist_categories=['Cs', 'Cc']),
+    # )
+    async def test_get_key_serializable(self, etcd, key="foo", string="xxx"):
+        etcdctl('put', '/doot/' + key, string)
+        with _out_quorum():
+            returned, _ = await etcd.get('/doot/' + key, serializable=True)
+        assert returned == string.encode('utf-8')
 
     # @given(characters(blacklist_categories=['Cs', 'Cc']))
     @pytest.mark.asyncio
@@ -593,12 +616,10 @@ class TestEtcd3(object):
         assert v is None
 
     @pytest.mark.asyncio
-    async def test_member_list_single(self, etcd):
-        # if tests are run against an etcd cluster rather than a single node,
-        # this test will need to be changed
-        assert len([m async for m in etcd.members()]) == 1
+    async def test_member_list(self, etcd):
+        assert len([m async for m in etcd.members()]) == 3
         async for member in etcd.members():
-            assert member.name == 'default'
+            assert member.name.startswith('pifpaf')
             for peer_url in member.peer_urls:
                 assert peer_url.startswith('http://')
             for client_url in member.client_urls:
