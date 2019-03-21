@@ -255,7 +255,7 @@ class Etcd3Client(object):
         return range_request
 
     @_handle_errors
-    async def get(self, key):
+    async def get(self, key, serializable=False):
         """
         Get the value of a key from etcd.
 
@@ -269,10 +269,14 @@ class Etcd3Client(object):
             'hello world'
 
         :param key: key in etcd to get
+        :param serializable: whether to allow serializable reads. This can
+            result in stale reads
         :returns: value of key and metadata
         :rtype: bytes, ``KVMetadata``
         """
-        range_request = self._build_get_range_request(key)
+        range_request = self._build_get_range_request(
+            key,
+            serializable=serializable)
         range_response = await self.kvstub.Range(
             range_request,
             self.timeout,
