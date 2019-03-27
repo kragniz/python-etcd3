@@ -91,20 +91,23 @@ class Watcher(object):
             self._request_queue.put(rq)
             self._new_watch = new_watch
 
-            # Wait for the request to be completed, or timeout.
-            self._new_watch_cond.wait(timeout=self.timeout)
-            self._new_watch = None
+            try:
+                # Wait for the request to be completed, or timeout.
+                self._new_watch_cond.wait(timeout=self.timeout)
 
-            # If the request not completed yet, then raise a timeout exception.
-            if new_watch.id is None and new_watch.err is None:
-                raise exceptions.WatchTimedOut()
+                # If the request not completed yet, then raise a timeout
+                # exception.
+                if new_watch.id is None and new_watch.err is None:
+                    raise exceptions.WatchTimedOut()
 
-            # Raise an exception if the watch request failed.
-            if new_watch.err:
-                raise new_watch.err
+                # Raise an exception if the watch request failed.
+                if new_watch.err:
+                    raise new_watch.err
+            finally:
+                # Wake up threads stuck on add_callback call if any.
+                self._new_watch = None
+                self._new_watch_cond.notify_all()
 
-            # Wake up threads stuck on add_callback call if any.
-            self._new_watch_cond.notify_all()
             return new_watch.id
 
     def cancel(self, watch_id):
