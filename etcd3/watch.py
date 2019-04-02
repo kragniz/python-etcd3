@@ -48,8 +48,9 @@ class Watcher(object):
         self._new_watch_cond = threading.Condition(lock=self._lock)
         self._new_watch = None
 
-    def add_callback(self, key, callback, range_end=None, start_revision=None,
-                     progress_notify=False, filters=None, prev_kv=False):
+    def _create_watch_request(self, key, range_end=None, start_revision=None,
+                              progress_notify=False, filters=None,
+                              prev_kv=False):
         create_watch = etcdrpc.WatchCreateRequest()
         create_watch.key = utils.to_bytes(key)
         if range_end is not None:
@@ -62,7 +63,14 @@ class Watcher(object):
             create_watch.filters = filters
         if prev_kv:
             create_watch.prev_kv = prev_kv
-        rq = etcdrpc.WatchRequest(create_request=create_watch)
+        return etcdrpc.WatchRequest(create_request=create_watch)
+
+    def add_callback(self, key, callback, range_end=None, start_revision=None,
+                     progress_notify=False, filters=None, prev_kv=False):
+        rq = self._create_watch_request(key, range_end=range_end,
+                                        start_revision=start_revision,
+                                        progress_notify=progress_notify,
+                                        filters=filters, prev_kv=prev_kv)
 
         with self._lock:
             # Start the callback thread if it is not yet running.
