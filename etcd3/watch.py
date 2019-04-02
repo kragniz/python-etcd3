@@ -48,8 +48,9 @@ class Watcher(object):
         self._new_watch_cond = threading.Condition(lock=self._lock)
         self._new_watch = None
 
-    def add_callback(self, key, callback, range_end=None, start_revision=None,
-                     progress_notify=False, filters=None, prev_kv=False):
+    def _create_watch_request(self, key, range_end=None, start_revision=None,
+                              progress_notify=False, filters=None,
+                              prev_kv=False):
         create_watch = etcdrpc.WatchCreateRequest()
         create_watch.key = utils.to_bytes(key)
         if range_end is not None:
@@ -62,7 +63,14 @@ class Watcher(object):
             create_watch.filters = filters
         if prev_kv:
             create_watch.prev_kv = prev_kv
-        rq = etcdrpc.WatchRequest(create_request=create_watch)
+        return etcdrpc.WatchRequest(create_request=create_watch)
+
+    def add_callback(self, key, callback, range_end=None, start_revision=None,
+                     progress_notify=False, filters=None, prev_kv=False):
+        rq = self._create_watch_request(key, range_end=range_end,
+                                        start_revision=start_revision,
+                                        progress_notify=progress_notify,
+                                        filters=filters, prev_kv=prev_kv)
 
         with self._lock:
             # Start the callback thread if it is not yet running.
@@ -83,20 +91,23 @@ class Watcher(object):
             self._request_queue.put(rq)
             self._new_watch = new_watch
 
-            # Wait for the request to be completed, or timeout.
-            self._new_watch_cond.wait(timeout=self.timeout)
-            self._new_watch = None
+            try:
+                # Wait for the request to be completed, or timeout.
+                self._new_watch_cond.wait(timeout=self.timeout)
 
-            # If the request not completed yet, then raise a timeout exception.
-            if new_watch.id is None and new_watch.err is None:
-                raise exceptions.WatchTimedOut()
+                # If the request not completed yet, then raise a timeout
+                # exception.
+                if new_watch.id is None and new_watch.err is None:
+                    raise exceptions.WatchTimedOut()
 
-            # Raise an exception if the watch request failed.
-            if new_watch.err:
-                raise new_watch.err
+                # Raise an exception if the watch request failed.
+                if new_watch.err:
+                    raise new_watch.err
+            finally:
+                # Wake up threads stuck on add_callback call if any.
+                self._new_watch = None
+                self._new_watch_cond.notify_all()
 
-            # Wake up threads stuck on add_callback call if any.
-            self._new_watch_cond.notify_all()
             return new_watch.id
 
     def cancel(self, watch_id):

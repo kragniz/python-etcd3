@@ -213,6 +213,19 @@ class TestEtcd3(object):
         v, _ = etcd.get('/foo/2')
         assert v is None
 
+    def test_new_watch_error(self, etcd):
+        # Trigger a failure while waiting on the new watch condition
+        with mock.patch.object(etcd.watcher._new_watch_cond, 'wait',
+                               side_effect=ValueError):
+            with pytest.raises(ValueError):
+                etcd.watch('/foo')
+
+        # Ensure a new watch can be created
+        events, cancel = etcd.watch('/foo')
+        etcdctl('put', '/foo', '42')
+        next(events)
+        cancel()
+
     def test_watch_key(self, etcd):
         def update_etcd(v):
             etcdctl('put', '/doot/watch', v)
