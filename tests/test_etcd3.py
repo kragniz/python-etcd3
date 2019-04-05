@@ -425,6 +425,53 @@ class TestEtcd3(object):
         except etcd3.exceptions.WatchTimedOut:
             pass
 
+    def test_watch_responses(self, etcd):
+        # Test watch_response & watch_once_response
+        revision = etcd.put('/doot/watch', '0').header.revision
+        etcd.put('/doot/watch', '1')
+        responses_iterator, cancel = \
+            etcd.watch_response('/doot/watch', start_revision=revision)
+
+        response_1 = next(responses_iterator)
+        cancel()
+        response_2 = etcd.watch_once_response('/doot/watch',
+                                              start_revision=revision)
+
+        for response in [response_1, response_2]:
+            count = 0
+            # check that the response contains the etcd revision
+            assert response.header.revision > 0
+            assert len(response.events) == 2
+            for event in response.events:
+                assert event.key == b'/doot/watch'
+                assert event.value == utils.to_bytes(str(count))
+                count += 1
+
+        # Test watch_prefix_response & watch_prefix_once_response
+        success_ops = [etcd.transactions.put('/doot/watch/prefix/0', '0'),
+                       etcd.transactions.put('/doot/watch/prefix/1', '1')]
+        revision = etcd.transaction([], success_ops,
+                                    [])[1][0].response_put.header.revision
+
+        responses_iterator, cancel = \
+            etcd.watch_prefix_response('/doot/watch/prefix/',
+                                       start_revision=revision)
+
+        response_1 = next(responses_iterator)
+        cancel()
+        response_2 = etcd.watch_prefix_once_response('/doot/watch/prefix/',
+                                                     start_revision=revision)
+
+        for response in [response_1, response_2]:
+            count = 0
+            assert response.header.revision == revision
+            assert len(response.events) == 2
+            for event in response.events:
+                assert event.key == \
+                    utils.to_bytes('/doot/watch/prefix/{}'.format(count))
+                assert event.value == utils.to_bytes(str(count))
+                count += 1
+
     def test_transaction_success(self, etcd):
         etcdctl('put', '/doot/txn', 'dootdoot')
         etcd.transaction(
