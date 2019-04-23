@@ -425,6 +425,31 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
+    def put_if_not_exists(self, key, value, lease=None):
+        """
+        Atomically puts a value only if the key previously had no value.
+
+        This is the etcdv3 equivalent to setting a key with the etcdv2
+        parameter prevExist=false.
+
+        :param key: key in etcd to put
+        :param value: value to be written to key
+        :type value: bytes
+        :param lease: Lease to associate with this key.
+        :type lease: either :class:`.Lease`, or int (ID of lease)
+        :returns: state of transaction, ``True`` if the put was successful,
+                  ``False`` otherwise
+        :rtype: bool
+        """
+        status, _ = self.transaction(
+            compare=[self.transactions.create(key) == '0'],
+            success=[self.transactions.put(key, value, lease=lease)],
+            failure=[],
+        )
+
+        return status
+
+    @_handle_errors
     def replace(self, key, initial_value, new_value):
         """
         Atomically replace the value of a key with a new value.

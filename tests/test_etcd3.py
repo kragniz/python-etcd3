@@ -166,6 +166,16 @@ class TestEtcd3(object):
         response = etcd.put('/doot/put_1', string, prev_kv=True)
         assert response.prev_kv.value == b'old_value'
 
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
+    def test_put_if_not_exists(self, etcd, string):
+        txn_status = etcd.put_if_not_exists('/doot/put_1', string)
+        assert txn_status is True
+
+        txn_status = etcd.put_if_not_exists('/doot/put_1', string)
+        assert txn_status is False
+
+        etcdctl('del', '/doot/put_1')
+
     def test_delete_key(self, etcd):
         etcdctl('put', '/doot/delete_this', 'delete pls')
 
