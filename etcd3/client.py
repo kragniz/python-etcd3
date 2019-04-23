@@ -540,6 +540,27 @@ class Etcd3Client(object):
             raise exceptions.WatchTimedOut()
 
     @_handle_errors
+    def add_watch_prefix_callback(self, *args, **kwargs):
+        """
+        Watch a key or range of keys and call a callback on every event.
+
+        If timeout was declared during the client initialization and
+        the watch cannot be created during that time the method raises
+        a ``WatchTimedOut`` exception.
+
+        :param key: key to watch
+        :param callback: callback function
+
+        :returns: watch_id. Later it could be used for cancelling watch.
+        """
+        kwargs['range_end'] = \
+            utils.increment_last_byte(utils.to_bytes(args[0]))
+        try:
+            return self.watcher.add_callback(*args, **kwargs)
+        except queue.Empty:
+            raise exceptions.WatchTimedOut()
+
+    @_handle_errors
     def watch(self, key, **kwargs):
         """
         Watch a key.
