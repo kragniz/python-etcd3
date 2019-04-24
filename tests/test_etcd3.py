@@ -578,6 +578,37 @@ class TestEtcd3(object):
 
         assert reverse_keys == ''.join(reversed(initial_keys))
 
+    def test_get_response(self, etcd):
+        etcdctl('put', '/foo/key1', 'value1')
+        etcdctl('put', '/foo/key2', 'value2')
+        response = etcd.get_response('/foo/key1')
+        assert response.header.revision > 0
+        assert response.count == 1
+        assert response.kvs[0].key == b'/foo/key1'
+        assert response.kvs[0].value == b'value1'
+        response = etcd.get_prefix_response('/foo/', sort_order='ascend')
+        assert response.header.revision > 0
+        assert response.count == 2
+        assert response.kvs[0].key == b'/foo/key1'
+        assert response.kvs[0].value == b'value1'
+        assert response.kvs[1].key == b'/foo/key2'
+        assert response.kvs[1].value == b'value2'
+        # Test that the response header is accessible even when the
+        # requested key or range of keys does not exist
+        etcdctl('del', '--prefix', '/foo/')
+        response = etcd.get_response('/foo/key1')
+        assert response.count == 0
+        assert response.header.revision > 0
+        response = etcd.get_prefix_response('/foo/')
+        assert response.count == 0
+        assert response.header.revision > 0
+        response = etcd.get_range_response('/foo/key1', '/foo/key3')
+        assert response.count == 0
+        assert response.header.revision > 0
+        response = etcd.get_all_response()
+        assert response.count == 0
+        assert response.header.revision > 0
+
     def test_lease_grant(self, etcd):
         lease = etcd.lease(1)
 
