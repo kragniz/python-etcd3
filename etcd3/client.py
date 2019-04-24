@@ -249,7 +249,21 @@ class Etcd3Client(object):
         return range_request
 
     @_handle_errors
-    def get(self, key, serializable=False):
+    def get_response(self, key, serializable=False):
+        """Get the value of a key from etcd."""
+        range_request = self._build_get_range_request(
+            key,
+            serializable=serializable
+        )
+
+        return self.kvstub.Range(
+            range_request,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    def get(self, key, **kwargs):
         """
         Get the value of a key from etcd.
 
@@ -268,16 +282,7 @@ class Etcd3Client(object):
         :returns: value of key and metadata
         :rtype: bytes, ``KVMetadata``
         """
-        range_request = self._build_get_range_request(
-            key,
-            serializable=serializable)
-        range_response = self.kvstub.Range(
-            range_request,
-            self.timeout,
-            credentials=self.call_credentials,
-            metadata=self.metadata
-        )
-
+        range_response = self.get_response(key, **kwargs)
         if range_response.count < 1:
             return None, None
         else:
@@ -285,16 +290,9 @@ class Etcd3Client(object):
             return kv.value, KVMetadata(kv, range_response.header)
 
     @_handle_errors
-    def get_prefix(self, key_prefix, sort_order=None, sort_target='key',
-                   keys_only=False):
-        """
-        Get a range of keys with a prefix.
-
-        :param key_prefix: first key in range
-        :param keys_only: if True, retrieve only the keys, not the values
-
-        :returns: sequence of (value, metadata) tuples
-        """
+    def get_prefix_response(self, key_prefix, sort_order=None,
+                            sort_target='key', keys_only=False):
+        """Get a range of keys with a prefix."""
         range_request = self._build_get_range_request(
             key=key_prefix,
             range_end=utils.increment_last_byte(utils.to_bytes(key_prefix)),
@@ -303,29 +301,30 @@ class Etcd3Client(object):
             keys_only=keys_only,
         )
 
-        range_response = self.kvstub.Range(
+        return self.kvstub.Range(
             range_request,
             self.timeout,
             credentials=self.call_credentials,
             metadata=self.metadata
         )
 
-        if range_response.count < 1:
-            return
-        else:
-            for kv in range_response.kvs:
-                yield (kv.value, KVMetadata(kv, range_response.header))
-
-    @_handle_errors
-    def get_range(self, range_start, range_end, sort_order=None,
-                  sort_target='key', **kwargs):
+    def get_prefix(self, key_prefix, **kwargs):
         """
-        Get a range of keys.
+        Get a range of keys with a prefix.
 
-        :param range_start: first key in range
-        :param range_end: last key in range
+        :param key_prefix: first key in range
+        :param keys_only: if True, retrieve only the keys, not the values
+
         :returns: sequence of (value, metadata) tuples
         """
+        range_response = self.get_prefix_response(key_prefix, **kwargs)
+        for kv in range_response.kvs:
+            yield (kv.value, KVMetadata(kv, range_response.header))
+
+    @_handle_errors
+    def get_range_response(self, range_start, range_end, sort_order=None,
+                           sort_target='key', **kwargs):
+        """Get a range of keys."""
         range_request = self._build_get_range_request(
             key=range_start,
             range_end=range_end,
@@ -334,27 +333,30 @@ class Etcd3Client(object):
             **kwargs
         )
 
-        range_response = self.kvstub.Range(
+        return self.kvstub.Range(
             range_request,
             self.timeout,
             credentials=self.call_credentials,
             metadata=self.metadata
         )
 
-        if range_response.count < 1:
-            return
-        else:
-            for kv in range_response.kvs:
-                yield (kv.value, KVMetadata(kv, range_response.header))
-
-    @_handle_errors
-    def get_all(self, sort_order=None, sort_target='key', keys_only=False):
+    def get_range(self, range_start, range_end, **kwargs):
         """
-        Get all keys currently stored in etcd.
+        Get a range of keys.
 
-        :param keys_only: if True, retrieve only the keys, not the values
+        :param range_start: first key in range
+        :param range_end: last key in range
         :returns: sequence of (value, metadata) tuples
         """
+        range_response = self.get_range_response(range_start, range_end,
+                                                 **kwargs)
+        for kv in range_response.kvs:
+            yield (kv.value, KVMetadata(kv, range_response.header))
+
+    @_handle_errors
+    def get_all_response(self, sort_order=None, sort_target='key',
+                         keys_only=False):
+        """Get all keys currently stored in etcd."""
         range_request = self._build_get_range_request(
             key=b'\0',
             range_end=b'\0',
@@ -363,18 +365,23 @@ class Etcd3Client(object):
             keys_only=keys_only,
         )
 
-        range_response = self.kvstub.Range(
+        return self.kvstub.Range(
             range_request,
             self.timeout,
             credentials=self.call_credentials,
             metadata=self.metadata
         )
 
-        if range_response.count < 1:
-            return
-        else:
-            for kv in range_response.kvs:
-                yield (kv.value, KVMetadata(kv, range_response.header))
+    def get_all(self, **kwargs):
+        """
+        Get all keys currently stored in etcd.
+
+        :param keys_only: if True, retrieve only the keys, not the values
+        :returns: sequence of (value, metadata) tuples
+        """
+        range_response = self.get_all_response(**kwargs)
+        for kv in range_response.kvs:
+            yield (kv.value, KVMetadata(kv, range_response.header))
 
     def _build_put_request(self, key, value, lease=None, prev_kv=False):
         put_request = etcdrpc.PutRequest()
