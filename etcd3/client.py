@@ -605,7 +605,12 @@ class Etcd3Client(object):
         @_handle_errors
         def iterator():
             while not canceled.is_set():
-                event = event_queue.get()
+                while True:
+                    try:
+                        event = event_queue.get(timeout=0.5)
+                        break
+                    except queue.Empty:
+                        pass
                 if event is None:
                     canceled.set()
                 if isinstance(event, Exception):
