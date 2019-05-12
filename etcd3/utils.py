@@ -28,3 +28,10 @@ def lease_to_id(lease):
         except TypeError:
             pass
     return lease_id
+
+
+def response_to_event_iterator(response_iterator):
+    """Convert a watch response iterator to an event iterator."""
+    for response in response_iterator:
+        for event in response.events:
+            yield event

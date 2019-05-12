@@ -555,7 +555,7 @@ class Etcd3Client(object):
     @_handle_errors
     def add_watch_callback(self, *args, **kwargs):
         """
-        Watch a key or range of keys and call a callback on every event.
+        Watch a key or range of keys and call a callback on every response.
 
         If timeout was declared during the client initialization and
         the watch cannot be created during that time the method raises
@@ -572,6 +572,51 @@ class Etcd3Client(object):
             raise exceptions.WatchTimedOut()
 
     @_handle_errors
+    def watch_response(self, key, **kwargs):
+        """
+        Watch a key.
+
+        Example usage:
+
+        .. code-block:: python
+            responses_iterator, cancel = etcd.watch_response('/doot/key')
+            for response in responses_iterator:
+                print(response)
+
+        :param key: key to watch
+
+        :returns: tuple of ``responses_iterator`` and ``cancel``.
+                  Use ``responses_iterator`` to get the watch responses,
+                  each of which contains a header and a list of events.
+                  Use ``cancel`` to cancel the watch request.
+        """
+        response_queue = queue.Queue()
+
+        def callback(response):
+            response_queue.put(response)
+
+        watch_id = self.add_watch_callback(key, callback, **kwargs)
+        canceled = threading.Event()
+
+        def cancel():
+            canceled.set()
+            response_queue.put(None)
+            self.cancel_watch(watch_id)
+
+        @_handle_errors
+        def iterator():
+            while not canceled.is_set():
+                response = response_queue.get()
+                if response is None:
+                    canceled.set()
+                if isinstance(response, Exception):
+                    canceled.set()
+                    raise response
+                if not canceled.is_set():
+                    yield response
+
+        return iterator(), cancel
+
     def watch(self, key, **kwargs):
         """
         Watch a key.
@@ -587,74 +632,93 @@ class Etcd3Client(object):
 
         :returns: tuple of ``events_iterator`` and ``cancel``.
                   Use ``events_iterator`` to get the events of key changes
-                  and ``cancel`` to cancel the watch request
+                  and ``cancel`` to cancel the watch request.
         """
-        event_queue = queue.Queue()
+        response_iterator, cancel = self.watch_response(key, **kwargs)
+        return utils.response_to_event_iterator(response_iterator), cancel
 
-        def callback(event):
-            event_queue.put(event)
+    def watch_prefix_response(self, key_prefix, **kwargs):
+        """
+        Watch a range of keys with a prefix.
 
-        watch_id = self.add_watch_callback(key, callback, **kwargs)
-        canceled = threading.Event()
+        :param key_prefix: prefix to watch
 
-        def cancel():
-            canceled.set()
-            event_queue.put(None)
-            self.cancel_watch(watch_id)
+        :returns: tuple of ``responses_iterator`` and ``cancel``.
+        """
+        kwargs['range_end'] = \
+            utils.increment_last_byte(utils.to_bytes(key_prefix))
+        return self.watch_response(key_prefix, **kwargs)
 
-        @_handle_errors
-        def iterator():
-            while not canceled.is_set():
-                event = event_queue.get()
-                if event is None:
-                    canceled.set()
-                if isinstance(event, Exception):
-                    canceled.set()
-                    raise event
-                if not canceled.is_set():
-                    yield event
-
-        return iterator(), cancel
-
-    @_handle_errors
     def watch_prefix(self, key_prefix, **kwargs):
-        """Watches a range of keys with a prefix."""
+        """
+        Watch a range of keys with a prefix.
+
+        :param key_prefix: prefix to watch
+
+        :returns: tuple of ``events_iterator`` and ``cancel``.
+        """
         kwargs['range_end'] = \
             utils.increment_last_byte(utils.to_bytes(key_prefix))
         return self.watch(key_prefix, **kwargs)
 
     @_handle_errors
-    def watch_once(self, key, timeout=None, **kwargs):
+    def watch_once_response(self, key, timeout=None, **kwargs):
         """
-        Watch a key and stops after the first event.
+        Watch a key and stop after the first response.
 
-        If the timeout was specified and event didn't arrived method
+        If the timeout was specified and response didn't arrive method
         will raise ``WatchTimedOut`` exception.
 
         :param key: key to watch
         :param timeout: (optional) timeout in seconds.
-        :returns: ``Event``
-        """
-        event_queue = queue.Queue()
 
-        def callback(event):
-            event_queue.put(event)
+        :returns: ``WatchResponse``
+        """
+        response_queue = queue.Queue()
+
+        def callback(response):
+            response_queue.put(response)
 
         watch_id = self.add_watch_callback(key, callback, **kwargs)
 
         try:
-            return event_queue.get(timeout=timeout)
+            return response_queue.get(timeout=timeout)
         except queue.Empty:
             raise exceptions.WatchTimedOut()
         finally:
             self.cancel_watch(watch_id)
 
-    @_handle_errors
+    def watch_once(self, key, timeout=None, **kwargs):
+        """
+        Watch a key and stop after the first event.
+
+        If the timeout was specified and event didn't arrive method
+        will raise ``WatchTimedOut`` exception.
+
+        :param key: key to watch
+        :param timeout: (optional) timeout in seconds.
+
+        :returns: ``Event``
+        """
+        response = self.watch_once_response(key, timeout=timeout, **kwargs)
+        return response.events[0]
+
+    def watch_prefix_once_response(self, key_prefix, timeout=None, **kwargs):
+        """
+        Watch a range of keys with a prefix and stop after the first response.
+
+        If the timeout was specified and response didn't arrive method
+        will raise ``WatchTimedOut`` exception.
+        """
+        kwargs['range_end'] = \
+            utils.increment_last_byte(utils.to_bytes(key_prefix))
+        return self.watch_once_response(key_prefix, timeout=timeout, **kwargs)
+
     def watch_prefix_once(self, key_prefix, timeout=None, **kwargs):
         """
-        Watches a range of keys with a prefix and stops after the first event.
+        Watch a range of keys with a prefix and stop after the first event.
 
-        If the timeout was specified and event didn't arrived method
+        If the timeout was specified and event didn't arrive method
         will raise ``WatchTimedOut`` exception.
         """
         kwargs['range_end'] = \
