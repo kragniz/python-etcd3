@@ -411,6 +411,39 @@ class TestEtcd3(object):
 
         t.join()
 
+    def test_watch_prefix_callback(self, etcd):
+        def update_etcd(v):
+            etcdctl('put', '/doot/watch/prefix/callback/' + v, v)
+            out = etcdctl('get', '/doot/watch/prefix/callback/' + v)
+            assert base64.b64decode(out['kvs'][0]['value']) == \
+                utils.to_bytes(v)
+
+        def update_key():
+            # sleep to make watch can get the event
+            time.sleep(3)
+            update_etcd('0')
+            time.sleep(1)
+            update_etcd('1')
+            time.sleep(1)
+
+        events = []
+        def callback(event):
+            events.extend(event.events)
+
+        t = threading.Thread(name="update_key_prefix", target=update_key)
+        t.start()
+
+        watch_id = etcd.add_watch_prefix_callback('/doot/watch/prefix/callback/', callback)
+        t.join()
+        etcd.cancel_watch(watch_id)
+
+        assert len(events) == 2
+        assert events[0].key.decode() == '/doot/watch/prefix/callback/0'
+        assert events[0].value.decode() == '0'
+        assert events[1].key.decode() == '/doot/watch/prefix/callback/1'
+        assert events[1].value.decode() == '1'
+
+
     def test_sequential_watch_prefix_once(self, etcd):
         try:
             etcd.watch_prefix_once('/doot/', 1)
