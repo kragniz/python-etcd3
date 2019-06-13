@@ -427,13 +427,16 @@ class TestEtcd3(object):
             time.sleep(1)
 
         events = []
+
         def callback(event):
             events.extend(event.events)
 
         t = threading.Thread(name="update_key_prefix", target=update_key)
         t.start()
 
-        watch_id = etcd.add_watch_prefix_callback('/doot/watch/prefix/callback/', callback)
+        watch_id = etcd.add_watch_prefix_callback(
+            '/doot/watch/prefix/callback/', callback)
+
         t.join()
         etcd.cancel_watch(watch_id)
 
@@ -442,7 +445,6 @@ class TestEtcd3(object):
         assert events[0].value.decode() == '0'
         assert events[1].key.decode() == '/doot/watch/prefix/callback/1'
         assert events[1].value.decode() == '1'
-
 
     def test_sequential_watch_prefix_once(self, etcd):
         try:
