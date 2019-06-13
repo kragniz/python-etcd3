@@ -90,3 +90,12 @@ Basic usage:
 
     # cancel watch
     etcd.cancel_watch(watch_id)
+
+    # recieve watch events for a prefix via callback function
+    def watch_callback(event):
+        print(event)
+
+    watch_id = etcd.add_watch_prefix_callback("/doot/watch/prefix/", watch_callback)
+
+    # cancel watch
+    etcd.cancel_watch(watch_id)
