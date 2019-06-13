@@ -588,10 +588,7 @@ class Etcd3Client(object):
         kwargs['range_end'] = \
             utils.increment_last_byte(utils.to_bytes(key_prefix))
 
-        try:
-            return self.watcher.add_callback(key_prefix, callback, **kwargs)
-        except queue.Empty:
-            raise exceptions.WatchTimedOut()
+        return self.add_watch_callback(key_prefix, callback, **kwargs)
 
     @_handle_errors
     def watch_response(self, key, **kwargs):
