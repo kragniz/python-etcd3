@@ -795,10 +795,10 @@ class Etcd3Client(object):
             metadata=self.metadata)
 
     @_handle_errors
-    async def get_lease_info(self, lease_id):
+    async def get_lease_info(self, lease_id, *, keys=True):
         # only available in etcd v3.1.0 and later
         ttl_request = etcdrpc.LeaseTimeToLiveRequest(ID=lease_id,
-                                                     keys=True)
+                                                     keys=keys)
         return await self.leasestub.LeaseTimeToLive(
             ttl_request,
             self.timeout,
