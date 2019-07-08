@@ -12,8 +12,8 @@ class Lease(object):
 
         self.etcd_client = etcd_client
 
-    async def _get_lease_info(self):
-        return await self.etcd_client.get_lease_info(self.id)
+    async def _get_lease_info(self, *, keys=True):
+        return await self.etcd_client.get_lease_info(self.id, keys=keys)
 
     async def revoke(self):
         """Revoke this lease."""
@@ -25,11 +25,11 @@ class Lease(object):
 
     # @property
     async def remaining_ttl(self):
-        return (await self._get_lease_info()).TTL
+        return (await self._get_lease_info(keys=False)).TTL
 
     # @property
     async def granted_ttl(self):
-        return (await self._get_lease_info()).grantedTTL
+        return (await self._get_lease_info(keys=False)).grantedTTL
 
     # @property
     async def keys(self):
