@@ -4,6 +4,9 @@ import tenacity
 
 from etcd3 import exceptions
 
+DEFAULT_TIMEOUT = object()
+
+class LockTimeout(Exception): pass
 
 class Lock(object):
     """
@@ -29,14 +32,17 @@ class Lock(object):
     :param ttl: length of time for the lock to live for in seconds. The lock
                 will be released after this time elapses, unless refreshed
     :type ttl: int
+    :param timeout: length of time to wait for this lock by default
+    :type timeout: int
     """
 
     lock_prefix = '/locks/'
 
-    def __init__(self, name, ttl=60,
+    def __init__(self, name, ttl=60, timeout=10,
                  etcd_client=None):
         self.name = name
         self.ttl = ttl
+        self.default_timeout = timeout
         if etcd_client is not None:
             self.etcd_client = etcd_client
 
@@ -46,7 +52,7 @@ class Lock(object):
         # need to compare
         self.uuid = uuid.uuid1().bytes
 
-    def acquire(self, timeout=10):
+    def acquire(self, timeout=DEFAULT_TIMEOUT, raise_on_timeout=False):
         """Acquire the lock.
 
         :params timeout: Maximum time to wait before returning. `None` means
@@ -55,6 +61,9 @@ class Lock(object):
         :returns: True if the lock has been acquired, False otherwise.
 
         """
+        if timeout is DEFAULT_TIMEOUT:
+            timeout = self.default_timeout
+
         stop = (
             tenacity.stop_never
             if timeout is None else tenacity.stop_after_delay(timeout)
@@ -101,7 +110,9 @@ class Lock(object):
 
         try:
             return _acquire()
-        except tenacity.RetryError:
+        except tenacity.RetryError as e:
+            if raise_on_timeout:
+                raise LockTimeout(e)
             return False
 
     def release(self):
@@ -133,7 +144,7 @@ class Lock(object):
         return uuid == self.uuid
 
     def __enter__(self):
-        self.acquire()
+        self.acquire(raise_on_timeout=True)
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):
