@@ -44,6 +44,7 @@ Basic usage:
 
     # locks
     lock = etcd.lock('thing')
+    lock.acquire()
     # do something
     lock.release()
 
