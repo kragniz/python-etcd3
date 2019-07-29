@@ -1,7 +1,7 @@
 PyYAML==5.1
 Sphinx==1.8.2
 bumpversion==0.5.3
-coverage==4.5.1
+coverage==4.5.4
 flake8-import-order==0.18
 flake8==3.6.0
 grpcio-tools>=1.2.0
