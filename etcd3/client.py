@@ -58,7 +58,7 @@ class BlockingRequest:
                 time.sleep(0.001)
             self.blocked = False
 
-    next = __next__ # Python 2 compatibility
+    next = __next__  # Python 2 compatibility
 
 
 def _translate_exception(exc):
