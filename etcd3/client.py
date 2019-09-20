@@ -52,11 +52,13 @@ class BlockingRequest:
         try:
             raise StopIteration
         except StopIteration:
-            raise StopIteration from None
+            raise StopIteration
         finally:
             while not self.proceed:
                 time.sleep(0.001)
             self.blocked = False
+
+    next = __next__ # Python 2 compatibility
 
 
 def _translate_exception(exc):
@@ -950,7 +952,9 @@ class Etcd3Client(object):
             request_stream.read_done()
             while request_stream.is_blocked():
                 time.sleep(0.001)
-        yield from responses
+
+        for response in responses:
+            yield response
 
     @_handle_errors
     def get_lease_info(self, lease_id):
