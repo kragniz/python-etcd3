@@ -1,6 +1,7 @@
 import functools
 import inspect
 import threading
+import time
 
 import grpc
 import grpc._channel
@@ -22,6 +23,42 @@ _EXCEPTIONS_BY_CODE = {
     grpc.StatusCode.DEADLINE_EXCEEDED: exceptions.ConnectionTimeoutError,
     grpc.StatusCode.FAILED_PRECONDITION: exceptions.PreconditionFailedError,
 }
+
+
+# this is used for gRPC proxy compatibility so that we do not
+# mark as finished writing until we've received a response
+# For more details see: https://github.com/davissp14/etcdv3-ruby/pull/117
+class BlockingRequest:
+    def __init__(self, request):
+        self.request = request
+        self.proceed = False
+        self.blocked = False
+        self.returned = False
+
+    def read_done(self):
+        self.proceed = True
+
+    def is_blocked(self):
+        return self.blocked
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if not self.returned:
+            self.returned = True
+            return self.request
+        self.blocked = True
+        try:
+            raise StopIteration
+        except StopIteration:
+            raise StopIteration
+        finally:
+            while not self.proceed:
+                time.sleep(0.001)
+            self.blocked = False
+
+    next = __next__  # Python 2 compatibility
 
 
 def _translate_exception(exc):
@@ -898,13 +935,25 @@ class Etcd3Client(object):
 
     @_handle_errors
     def refresh_lease(self, lease_id):
-        keep_alive_request = etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
-        request_stream = [keep_alive_request]
-        for response in self.leasestub.LeaseKeepAlive(
-                iter(request_stream),
-                self.timeout,
-                credentials=self.call_credentials,
-                metadata=self.metadata):
+        request_stream = BlockingRequest(
+            etcdrpc.LeaseKeepAliveRequest(ID=lease_id))
+        responses = []
+        try:
+            for response in self.leasestub.LeaseKeepAlive(
+                    request_stream,
+                    self.timeout,
+                    credentials=self.call_credentials,
+                    metadata=self.metadata):
+                responses.append(response)
+                break
+        except BaseException:
+            raise
+        finally:
+            request_stream.read_done()
+            while request_stream.is_blocked():
+                time.sleep(0.001)
+
+        for response in responses:
             yield response
 
     @_handle_errors
