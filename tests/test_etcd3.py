@@ -602,6 +602,20 @@ class TestEtcd3(object):
             assert meta.key.startswith(b"/doot/range")
             assert not value
 
+    def test_get_prefix_serializable(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/range{}'.format(i), 'i am a range')
+
+        with _out_quorum():
+            values = list(etcd.get_prefix(
+                '/doot/range', keys_only=True, serializable=True))
+
+        assert len(values) == 20
+
+    def test_get_prefix_error_handling(self, etcd):
+        with pytest.raises(TypeError, match="Don't use "):
+            etcd.get_prefix('a_prefix', range_end='end')
+
     def test_get_range(self, etcd):
         for char in string.ascii_lowercase:
             if char < 'p':
