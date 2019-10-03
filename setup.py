@@ -20,8 +20,8 @@ def load_reqs(filename):
         ]
 
 
-requirements = load_reqs('requirements.txt')
-test_requirements = load_reqs('test-requirements.txt')
+requirements = load_reqs('requirements/base.txt')
+test_requirements = load_reqs('requirements/test.txt')
 
 setup(
     name='etcd3',
