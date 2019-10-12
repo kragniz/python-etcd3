@@ -290,15 +290,15 @@ class Etcd3Client(object):
             return kv.value, KVMetadata(kv, range_response.header)
 
     @_handle_errors
-    def get_prefix_response(self, key_prefix, sort_order=None,
-                            sort_target='key', keys_only=False):
+    def get_prefix_response(self, key_prefix, **kwargs):
         """Get a range of keys with a prefix."""
+        if any(kwarg in kwargs for kwarg in ("key", "range_end")):
+            raise TypeError("Don't use key or range_end with prefix")
+
         range_request = self._build_get_range_request(
             key=key_prefix,
             range_end=utils.increment_last_byte(utils.to_bytes(key_prefix)),
-            sort_order=sort_order,
-            sort_target=sort_target,
-            keys_only=keys_only,
+            **kwargs
         )
 
         return self.kvstub.Range(
@@ -318,8 +318,10 @@ class Etcd3Client(object):
         :returns: sequence of (value, metadata) tuples
         """
         range_response = self.get_prefix_response(key_prefix, **kwargs)
-        for kv in range_response.kvs:
-            yield (kv.value, KVMetadata(kv, range_response.header))
+        return (
+            (kv.value, KVMetadata(kv, range_response.header))
+            for kv in range_response.kvs
+        )
 
     @_handle_errors
     def get_range_response(self, range_start, range_end, sort_order=None,
