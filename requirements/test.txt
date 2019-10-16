@@ -65,7 +65,7 @@ tox==3.5.3
 traceback2==1.4.0         # via testtools, unittest2
 unittest2==1.1.0          # via testtools
 urllib3==1.25.6           # via requests
-virtualenv==16.7.5        # via tox
+virtualenv==16.7.6        # via tox
 wcwidth==0.1.7            # via pytest
 xattr==0.9.6              # via pifpaf
 zipp==0.6.0               # via importlib-metadata
