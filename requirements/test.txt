@@ -49,7 +49,7 @@ pycparser==2.19           # via cffi
 pydocstyle==3.0.0
 pyflakes==2.1.1           # via flake8
 pygments==2.4.2           # via sphinx
-pyparsing==2.4.2          # via packaging
+pyparsing==2.4.3          # via packaging
 pytest-cov==2.7.1
 pytest==4.6.5
 python-mimeparse==1.6.0   # via testtools
