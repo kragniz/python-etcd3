@@ -54,7 +54,7 @@ pytest-cov==2.7.1
 pytest==4.6.5
 python-mimeparse==1.6.0   # via testtools
 pytz==2019.2              # via babel
-pyyaml==5.1
+pyyaml==5.2
 requests==2.22.0          # via sphinx
 snowballstemmer==2.0.0    # via pydocstyle, sphinx
 sphinx==1.8.2
