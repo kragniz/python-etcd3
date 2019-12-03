@@ -6,7 +6,7 @@
 #    pip-compile-multi
 #
 grpcio==1.24.0
-protobuf==3.6.1
+protobuf==3.11.1
 six==1.12.0               # via grpcio, protobuf, tenacity
 tenacity==5.0.2
 
