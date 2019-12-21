@@ -11,11 +11,13 @@ class InternalServerError(Etcd3Exception):
 
 
 class ConnectionFailedError(Etcd3Exception):
-    pass
+    def __str__(self):
+        return "etcd connection failed"
 
 
 class ConnectionTimeoutError(Etcd3Exception):
-    pass
+    def __str__(self):
+        return "etcd connection timeout"
 
 
 class PreconditionFailedError(Etcd3Exception):
