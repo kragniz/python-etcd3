@@ -30,7 +30,7 @@ flake8==3.7.8
 grpcio-tools==1.24.0
 hypothesis==4.56.3
 idna==2.8                 # via requests
-imagesize==1.1.0          # via sphinx
+imagesize==1.2.0          # via sphinx
 importlib-metadata==0.23  # via pluggy, pytest
 jinja2==2.10.1            # via pifpaf, sphinx
 linecache2==1.0.0         # via traceback2
