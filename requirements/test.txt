@@ -43,7 +43,7 @@ pbr==5.4.3                # via fixtures, mock, pifpaf, testtools
 pifpaf==2.2.2
 pluggy==0.13.0            # via pytest, tox
 psutil==5.6.3             # via pifpaf
-py==1.8.0                 # via pytest, tox
+py==1.8.1                 # via pytest, tox
 pycodestyle==2.5.0        # via flake8, flake8-import-order
 pycparser==2.19           # via cffi
 pydocstyle==3.0.0
