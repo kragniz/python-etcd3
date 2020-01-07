@@ -31,7 +31,7 @@ class Lock(object):
     :type ttl: int
     """
 
-    lock_prefix = '/locks/'
+    lock_prefix = '/fk/locks/'
 
     def __init__(self, name, ttl=60,
                  etcd_client=None):
