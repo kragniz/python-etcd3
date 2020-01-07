@@ -33,13 +33,13 @@ class Lock(object):
 
     lock_prefix = '/locks/'
 
-    def __init__(self, name, ttl=60, etcd_client=None, custom_prefix=''):
+    def __init__(self, name, ttl=60, etcd_client=None, lock_prefix='/locks/'):
         self.name = name
         self.ttl = ttl
         if etcd_client is not None:
             self.etcd_client = etcd_client
 
-        self.key = custom_prefix + self.lock_prefix + self.name
+        self.key = lock_prefix + self.name
         self.lease = None
         # store uuid as bytes, since it avoids having to decode each time we
         # need to compare
