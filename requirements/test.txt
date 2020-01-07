@@ -16,7 +16,7 @@ certifi==2019.9.11        # via requests
 cffi==1.12.3              # via xattr
 chardet==3.0.4            # via requests
 click==7.0                # via pifpaf
-coverage==5.0.1
+coverage==5.0.2
 daiquiri==1.6.0           # via pifpaf
 docutils==0.15.2          # via sphinx
 entrypoints==0.3          # via flake8
