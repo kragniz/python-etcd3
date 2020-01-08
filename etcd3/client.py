@@ -922,7 +922,7 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
-    def lock(self, name, ttl=60, lock_prefix='/locks/'):
+    def lock(self, name, ttl=None, lock_prefix=None):
         """
         Create a new lock.
 
@@ -933,11 +933,11 @@ class Etcd3Client(object):
                     refreshed
         :type ttl: int
         :param lock_prefix: pre-name of the lock
-        :type lock_prefix: string
+        :type lock_prefix: string or bytes
         :returns: new lock
         :rtype: :class:`.Lock`
         """
-        return locks.Lock(name, ttl=ttl, etcd_client=self, lock_prefix=lock_prefix)
+        return locks.Lock(name, ttl=ttl, lock_prefix=lock_prefix, etcd_client=self)
 
     @_handle_errors
     def add_member(self, urls):
