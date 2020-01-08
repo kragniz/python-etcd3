@@ -14,10 +14,11 @@ with open('HISTORY.rst') as history_file:
 
 def load_reqs(filename):
     with open(filename) as reqs_file:
-        return [
+        reqs = [
             re.sub('==', '>=', line) for line in reqs_file.readlines()
             if not re.match(r'(\s*#|-r)', line)
         ]
+        return [x for x in reqs if x != '\n']
 
 
 requirements = load_reqs('requirements/base.txt')
