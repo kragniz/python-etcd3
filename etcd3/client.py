@@ -922,7 +922,7 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
-    def lock(self, name, ttl=60):
+    def lock(self, name, ttl=60, lock_prefix='/locks/'):
         """
         Create a new lock.
 
@@ -932,10 +932,12 @@ class Etcd3Client(object):
                     lock will be released after this time elapses, unless
                     refreshed
         :type ttl: int
+        :param lock_prefix: pre-name of the lock
+        :type lock_prefix: string
         :returns: new lock
         :rtype: :class:`.Lock`
         """
-        return locks.Lock(name, ttl=ttl, etcd_client=self)
+        return locks.Lock(name, ttl=ttl, etcd_client=self, lock_prefix=lock_prefix)
 
     @_handle_errors
     def add_member(self, urls):
