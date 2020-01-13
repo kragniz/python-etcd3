@@ -18,7 +18,7 @@ chardet==3.0.4            # via requests
 click==7.0                # via pifpaf
 coverage==5.0.1
 daiquiri==1.6.0           # via pifpaf
-docutils==0.15.2          # via sphinx
+docutils==0.16          # via sphinx
 entrypoints==0.3          # via flake8
 extras==1.0.0             # via testtools
 filelock==3.0.12          # via tox
