@@ -38,7 +38,7 @@ markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via flake8
 mock==2.0.0
 more-itertools==5.0.0
-packaging==19.2           # via pytest, sphinx
+packaging==20.1           # via pytest, sphinx
 pbr==5.4.3                # via fixtures, mock, pifpaf, testtools
 pifpaf==2.2.2
 pluggy==0.13.0            # via pytest, tox
