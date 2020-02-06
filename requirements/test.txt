@@ -36,7 +36,7 @@ jinja2==2.11.1            # via pifpaf, sphinx
 linecache2==1.0.0         # via traceback2
 markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via flake8
-mock==2.0.0
+mock==4.0.1
 more-itertools==5.0.0
 packaging==20.1           # via pytest, sphinx
 pbr==5.4.3                # via fixtures, mock, pifpaf, testtools
