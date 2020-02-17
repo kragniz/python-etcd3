@@ -68,7 +68,7 @@ urllib3==1.25.8           # via requests
 virtualenv==20.0.4        # via tox
 wcwidth==0.1.7            # via pytest
 xattr==0.9.6              # via pifpaf
-zipp==1.0.0               # via importlib-metadata
+zipp==3.0.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools==41.2.0        # via flake8-import-order, protobuf, sphinx, tox
