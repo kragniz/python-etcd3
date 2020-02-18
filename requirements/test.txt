@@ -57,7 +57,7 @@ pytz==2019.2              # via babel
 pyyaml==5.1
 requests==2.22.0          # via sphinx
 snowballstemmer==2.0.0    # via pydocstyle, sphinx
-sphinx==1.8.2
+sphinx==2.4.2
 sphinxcontrib-websupport==1.1.2  # via sphinx
 testtools==2.3.0          # via fixtures
 toml==0.10.0              # via tox
