@@ -48,7 +48,7 @@ pycodestyle==2.5.0        # via flake8, flake8-import-order
 pycparser==2.20           # via cffi
 pydocstyle==3.0.0
 pyflakes==2.1.1           # via flake8
-pygments==2.4.2           # via sphinx
+pygments==2.6.1           # via sphinx
 pyparsing==2.4.6          # via packaging
 pytest-cov==2.7.1
 pytest==4.6.5
