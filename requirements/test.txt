@@ -59,7 +59,7 @@ requests==2.22.0          # via sphinx
 snowballstemmer==2.0.0    # via pydocstyle, sphinx
 sphinx==1.8.2
 sphinxcontrib-websupport==1.1.2  # via sphinx
-testtools==2.3.0          # via fixtures
+testtools==2.4.0          # via fixtures
 toml==0.10.0              # via tox
 tox==3.14.5
 traceback2==1.4.0         # via testtools, unittest2
