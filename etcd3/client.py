@@ -170,15 +170,13 @@ class Etcd3Client(object):
 
     def close(self):
         """Call the GRPC channel close semantics."""
-        self.channel.close()
+        if hasattr(self, 'channel'):
+            self.channel.close()
 
     def __enter__(self):
         return self
 
     def __exit__(self, *args):
-        self.close()
-
-    def __del__(self):
         self.close()
 
     def _get_secure_creds(self, ca_cert, cert_key=None, cert_cert=None):
