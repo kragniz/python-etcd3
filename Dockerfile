@@ -13,7 +13,8 @@ RUN pip install -U tox
 RUN mkdir python-etcd3
 WORKDIR python-etcd3
 # Rebuild this layer .tox when tox.ini or requirements changes
-COPY tox.ini requirements.txt test-requirements.txt ./
+COPY tox.ini ./
+COPY requirements/base.txt requirements/test.txt ./requirements/
 
 RUN tox -epy35 --notest
 
