@@ -847,15 +847,15 @@ class TestEtcd3(object):
         lock1 = etcd.lock('lock-10', ttl=10)
         lock2 = etcd.lock('lock-10', ttl=10)
 
-        original_watch_once = etcd.watch_once
-        watch_once_called = [0]
+        original_watch = etcd.watch
+        watch_called = [0]
 
         def release_lock_before_watch(*args, **kwargs):
-            watch_once_called[0] += 1
+            watch_called[0] += 1
             # Simulates the case where key is expired before watch is called.
             # See https://github.com/kragniz/python-etcd3/issues/1107
             lock1.release()
-            return original_watch_once(*args, **kwargs)
+            return original_watch(*args, **kwargs)
 
         original_transaction = etcd.transaction
         transaction_called = [0]
@@ -865,14 +865,17 @@ class TestEtcd3(object):
             return original_transaction(*args, **kwargs)
 
         assert lock1.acquire() is True
-        with mock.patch.object(etcd3.Etcd3Client, 'watch_once',
+        with mock.patch.object(etcd3.Etcd3Client, 'watch',
                                wraps=release_lock_before_watch):
             with mock.patch.object(etcd3.Etcd3Client, 'transaction',
                                    wraps=transaction_wrapper):
                 assert lock2.acquire(timeout=5) is True
 
-        assert watch_once_called[0] == 1
-        assert transaction_called[0] == 2
+        # watch must be called only for lock2 once
+        assert watch_called[0] == 1
+
+        # transaction must be called once for lock1, twice for lock2
+        assert transaction_called[0] == 3
 
     def test_internal_exception_on_internal_error(self, etcd):
         exception = self.MockedException(grpc.StatusCode.INTERNAL)

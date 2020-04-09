@@ -1,8 +1,8 @@
+import threading
+import time
 import uuid
 
-import tenacity
-
-from etcd3 import exceptions
+from etcd3 import events
 
 
 class Lock(object):
@@ -55,54 +55,61 @@ class Lock(object):
         :returns: True if the lock has been acquired, False otherwise.
 
         """
-        stop = (
-            tenacity.stop_never
-            if timeout is None else tenacity.stop_after_delay(timeout)
-        )
+        if timeout is not None:
+            deadline = time.time() + timeout
 
-        def wait(previous_attempt_number, delay_since_first_attempt):
-            if timeout is None:
-                remaining_timeout = None
-            else:
-                remaining_timeout = max(timeout - delay_since_first_attempt, 0)
-            # TODO(jd): Wait for a DELETE event to happen: that'd mean the lock
-            # has been released, rather than retrying on PUT events too
-            try:
-                self.etcd_client.watch_once(self.key, remaining_timeout)
-            except exceptions.WatchTimedOut:
-                pass
-            return 0
-
-        @tenacity.retry(retry=tenacity.retry_never,
-                        stop=stop,
-                        wait=wait)
-        def _acquire():
-            # TODO: save the created revision so we can check it later to make
-            # sure we still have the lock
-
-            self.lease = self.etcd_client.lease(self.ttl)
-
-            success, _ = self.etcd_client.transaction(
-                compare=[
-                    self.etcd_client.transactions.create(self.key) == 0
-                ],
-                success=[
-                    self.etcd_client.transactions.put(self.key, self.uuid,
-                                                      lease=self.lease)
-                ],
-                failure=[
-                    self.etcd_client.transactions.get(self.key)
-                ]
-            )
-            if success is True:
+        while True:
+            if self._try_acquire():
                 return True
-            self.lease = None
-            raise tenacity.TryAgain
 
-        try:
-            return _acquire()
-        except tenacity.RetryError:
-            return False
+            if timeout is not None:
+                remaining_timeout = max(deadline - time.time(), 0)
+                if remaining_timeout == 0:
+                    return False
+            else:
+                remaining_timeout = None
+
+            self._wait_delete_event(remaining_timeout)
+
+    def _try_acquire(self):
+        self.lease = self.etcd_client.lease(self.ttl)
+
+        success, metadata = self.etcd_client.transaction(
+            compare=[
+                self.etcd_client.transactions.create(self.key) == 0
+            ],
+            success=[
+                self.etcd_client.transactions.put(self.key, self.uuid,
+                                                  lease=self.lease)
+            ],
+            failure=[
+                self.etcd_client.transactions.get(self.key)
+            ]
+        )
+        if success is True:
+            self.revision = metadata[0].response_put.header.revision
+            return True
+        self.revision = metadata[0][0][1].mod_revision
+        self.lease = None
+        return False
+
+    def _wait_delete_event(self, timeout):
+        event_iter, cancel = self.etcd_client.watch(
+            self.key, start_revision=self.revision + 1)
+
+        if timeout is not None:
+            timer = threading.Timer(timeout, cancel)
+            timer.start()
+        else:
+            timer = None
+
+        for event in event_iter:
+            if isinstance(event, events.DeleteEvent):
+                if timer is not None:
+                    timer.cancel()
+
+                cancel()
+                break
 
     def release(self):
         """Release the lock."""
