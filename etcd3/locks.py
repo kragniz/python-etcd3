@@ -2,7 +2,7 @@ import threading
 import time
 import uuid
 
-from etcd3 import events
+from etcd3 import events, exceptions
 
 
 class Lock(object):
@@ -94,8 +94,11 @@ class Lock(object):
         return False
 
     def _wait_delete_event(self, timeout):
-        event_iter, cancel = self.etcd_client.watch(
-            self.key, start_revision=self.revision + 1)
+        try:
+            event_iter, cancel = self.etcd_client.watch(
+                self.key, start_revision=self.revision + 1)
+        except exceptions.WatchTimedOut:
+            return
 
         if timeout is not None:
             timer = threading.Timer(timeout, cancel)
