@@ -17,7 +17,7 @@ certifi==2020.4.5.1       # via requests
 cffi==1.14.0              # via xattr
 chardet==3.0.4            # via requests
 click==7.1.1              # via pifpaf
-configparser==4.0.2       # via entrypoints, flake8, importlib-metadata, pydocstyle
+configparser==5.0.0       # via entrypoints, flake8, importlib-metadata, pydocstyle
 contextlib2==0.6.0.post1  # via importlib-metadata, importlib-resources, virtualenv, zipp
 coverage==5.0.4           # via -r test.in, pytest-cov
 daiquiri==2.1.1           # via pifpaf
