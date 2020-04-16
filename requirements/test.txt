@@ -80,7 +80,7 @@ traceback2==1.4.0         # via testtools, unittest2
 typing==3.7.4.1           # via flake8, importlib-resources, sphinx
 unittest2==1.1.0          # via testtools
 urllib3==1.25.8           # via requests
-virtualenv==20.0.17       # via tox
+virtualenv==20.0.18       # via tox
 wcwidth==0.1.9            # via pytest
 xattr==0.9.7              # via pifpaf
 zipp==1.2.0               # via importlib-metadata, importlib-resources
