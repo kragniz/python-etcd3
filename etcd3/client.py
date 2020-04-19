@@ -59,7 +59,9 @@ class Transactions(object):
 
         self.put = transactions.Put
         self.get = transactions.Get
+        self.get_prefix = transactions.GetPrefix
         self.delete = transactions.Delete
+        self.delete_prefix = transactions.DeletePrefix
         self.txn = transactions.Txn
 
 
@@ -295,7 +297,7 @@ class Etcd3Client(object):
 
         range_request = self._build_get_range_request(
             key=key_prefix,
-            range_end=utils.prefix_range_end(utils.to_bytes(key_prefix)),
+            range_end=utils.prefix_range_end(key_prefix),
             **kwargs
         )
 
@@ -518,7 +520,7 @@ class Etcd3Client(object):
         """Delete a range of keys with a prefix in etcd."""
         delete_request = self._build_delete_request(
             prefix,
-            range_end=utils.prefix_range_end(utils.to_bytes(prefix))
+            range_end=utils.prefix_range_end(prefix)
         )
         return self.kvstub.DeleteRange(
             delete_request,
@@ -586,7 +588,7 @@ class Etcd3Client(object):
         :returns: watch_id. Later it could be used for cancelling watch.
         """
         kwargs['range_end'] = \
-            utils.prefix_range_end(utils.to_bytes(key_prefix))
+            utils.prefix_range_end(key_prefix)
 
         return self.add_watch_callback(key_prefix, callback, **kwargs)
 
@@ -665,7 +667,7 @@ class Etcd3Client(object):
         :returns: tuple of ``responses_iterator`` and ``cancel``.
         """
         kwargs['range_end'] = \
-            utils.prefix_range_end(utils.to_bytes(key_prefix))
+            utils.prefix_range_end(key_prefix)
         return self.watch_response(key_prefix, **kwargs)
 
     def watch_prefix(self, key_prefix, **kwargs):
@@ -677,7 +679,7 @@ class Etcd3Client(object):
         :returns: tuple of ``events_iterator`` and ``cancel``.
         """
         kwargs['range_end'] = \
-            utils.prefix_range_end(utils.to_bytes(key_prefix))
+            utils.prefix_range_end(key_prefix)
         return self.watch(key_prefix, **kwargs)
 
     @_handle_errors
@@ -730,7 +732,7 @@ class Etcd3Client(object):
         will raise ``WatchTimedOut`` exception.
         """
         kwargs['range_end'] = \
-            utils.prefix_range_end(utils.to_bytes(key_prefix))
+            utils.prefix_range_end(key_prefix)
         return self.watch_once_response(key_prefix, timeout=timeout, **kwargs)
 
     def watch_prefix_once(self, key_prefix, timeout=None, **kwargs):
@@ -741,7 +743,7 @@ class Etcd3Client(object):
         will raise ``WatchTimedOut`` exception.
         """
         kwargs['range_end'] = \
-            utils.prefix_range_end(utils.to_bytes(key_prefix))
+            utils.prefix_range_end(key_prefix)
         return self.watch_once(key_prefix, timeout=timeout, **kwargs)
 
     @_handle_errors
