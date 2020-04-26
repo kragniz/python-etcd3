@@ -70,7 +70,7 @@ scandir==1.10.0           # via pathlib2
 singledispatch==3.4.0.3   # via importlib-resources
 snowballstemmer==2.0.0    # via pydocstyle, sphinx
 sortedcontainers==2.1.0   # via hypothesis
-sphinx==1.8.2             # via -r test.in
+sphinx==3.0.3             # via -r test.in
 sphinxcontrib-websupport==1.1.2  # via sphinx
 tenacity==5.0.2           # via -r test.in
 testtools==2.4.0          # via fixtures
