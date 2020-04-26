@@ -38,7 +38,7 @@ hypothesis==4.57.1        # via -r test.in
 idna==2.9                 # via requests
 imagesize==1.2.0          # via sphinx
 importlib-metadata==1.6.0  # via importlib-resources, pluggy, pytest, virtualenv
-importlib-resources==1.4.0  # via virtualenv
+importlib-resources==1.5.0  # via virtualenv
 jinja2==2.11.1            # via pifpaf, sphinx
 linecache2==1.0.0         # via traceback2
 markupsafe==1.1.1         # via jinja2
