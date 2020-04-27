@@ -894,6 +894,7 @@ class TestEtcd3(object):
 
         with pytest.raises(etcd3.exceptions.ConnectionFailedError):
             etcd.get("foo")
+        assert etcd.endpoint_in_use.is_failed()
 
     def test_connection_timeout_exception_on_connection_timeout(self, etcd):
         exception = self.MockedException(grpc.StatusCode.DEADLINE_EXCEEDED)
@@ -912,6 +913,7 @@ class TestEtcd3(object):
 
         with pytest.raises(grpc.RpcError):
             etcd.get("foo")
+        assert etcd.endpoint_in_use.is_failed()
 
     def test_status_member(self, etcd):
         status = etcd.status()
