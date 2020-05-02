@@ -290,6 +290,7 @@ class TestEtcd3(object):
                 utils.to_bytes(v)
 
         def update_key():
+            time.sleep(0.25)
             update_etcd('1')
             update_etcd('2')
             update_etcd('3')
@@ -329,7 +330,8 @@ class TestEtcd3(object):
                 if change_count > 2:
                     cancel()
 
-        time.sleep(0.25)
+            assert change_count == 3
+
         watch_compacted_revision_test()
 
         t.join()
