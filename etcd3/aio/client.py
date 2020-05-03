@@ -303,7 +303,7 @@ class Etcd3Client(object):
         """
         range_request = self._build_get_range_request(
             key=key_prefix,
-            range_end=utils.increment_last_byte(utils.to_bytes(key_prefix)),
+            range_end=utils.prefix_range_end(utils.to_bytes(key_prefix)),
             sort_order=sort_order,
             sort_target=sort_target,
             keys_only=keys_only,
@@ -492,7 +492,7 @@ class Etcd3Client(object):
         """Delete a range of keys with a prefix in etcd."""
         delete_request = self._build_delete_request(
             prefix,
-            range_end=utils.increment_last_byte(utils.to_bytes(prefix))
+            range_end=utils.prefix_range_end(utils.to_bytes(prefix))
         )
         return await self.kvstub.DeleteRange(
             delete_request,
@@ -591,7 +591,7 @@ class Etcd3Client(object):
     async def watch_prefix(self, key_prefix, **kwargs):
         """Watches a range of keys with a prefix."""
         kwargs['range_end'] = \
-            utils.increment_last_byte(utils.to_bytes(key_prefix))
+            utils.prefix_range_end(utils.to_bytes(key_prefix))
         return await self.watch(key_prefix, **kwargs)
 
     @_handle_errors
@@ -627,7 +627,7 @@ class Etcd3Client(object):
         will raise ``WatchTimedOut`` exception.
         """
         kwargs['range_end'] = \
-            utils.increment_last_byte(utils.to_bytes(key_prefix))
+            utils.prefix_range_end(utils.to_bytes(key_prefix))
         return await self.watch_once(key_prefix, timeout=timeout, **kwargs)
 
     @_handle_errors

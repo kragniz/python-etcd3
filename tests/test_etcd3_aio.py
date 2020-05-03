@@ -855,8 +855,8 @@ class TestAlarms(object):
 
 
 class TestUtils(object):
-    def test_increment_last_byte(self):
-        assert etcd3.utils.increment_last_byte(b'foo') == b'fop'
+    def test_prefix_range_end(self):
+        assert etcd3.utils.prefix_range_end(b'foo') == b'fop'
 
     def test_to_bytes(self):
         assert isinstance(etcd3.utils.to_bytes(b'doot'), bytes) is True
