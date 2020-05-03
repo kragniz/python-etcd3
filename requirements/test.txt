@@ -66,7 +66,7 @@ sphinxcontrib-websupport==1.2.1  # via sphinx
 tenacity==5.0.2           # via -r test.in
 testtools==2.4.0          # via fixtures
 toml==0.10.0              # via tox
-tox==3.5.3                # via -r test.in
+tox==3.15.0                # via -r test.in
 traceback2==1.4.0         # via testtools, unittest2
 unittest2==1.1.0          # via testtools
 urllib3==1.25.9           # via requests
