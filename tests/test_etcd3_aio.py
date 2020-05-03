@@ -358,7 +358,7 @@ class TestEtcd3(object):
         await task
 
     @pytest.mark.asyncio
-    async def test_watch_timeout_on_establishment(self, etcd, event_loop):
+    async def test_watch_timeout_on_establishment(self, event_loop):
         foo_etcd = etcd3.client(timeout=3, loop=event_loop, backend="asyncio")
 
         async def slow_response():

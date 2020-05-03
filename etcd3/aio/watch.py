@@ -13,7 +13,7 @@ _log = logging.getLogger(__name__)
 
 
 def create_task(coro):
-    asyncio.get_event_loop().create_task(coro)
+    return asyncio.get_event_loop().create_task(coro)
 
 
 class Watch(object):
@@ -49,9 +49,9 @@ class Watcher(object):
         self._new_watch_cond = asyncio.Condition(lock=self._lock)
         self._new_watch = None
 
-    async def add_callback(self, key, callback, range_end=None,  # noqa: C901
-                           start_revision=None, progress_notify=False,
-                           filters=None, prev_kv=False):
+    def _create_watch_request(self, key, range_end=None, start_revision=None,
+                              progress_notify=False, filters=None,
+                              prev_kv=False):
         create_watch = etcdrpc.WatchCreateRequest()
         create_watch.key = utils.to_bytes(key)
         if range_end is not None:
@@ -64,7 +64,15 @@ class Watcher(object):
             create_watch.filters = filters
         if prev_kv:
             create_watch.prev_kv = prev_kv
-        rq = etcdrpc.WatchRequest(create_request=create_watch)
+        return etcdrpc.WatchRequest(create_request=create_watch)
+
+    async def add_callback(self, key, callback, range_end=None,  # noqa: C901
+                           start_revision=None, progress_notify=False,
+                           filters=None, prev_kv=False):
+        rq = self._create_watch_request(key, range_end=range_end,
+                                        start_revision=start_revision,
+                                        progress_notify=progress_notify,
+                                        filters=filters, prev_kv=prev_kv)
 
         async with self._lock:
             # Start the callback thread if it is not yet running.
@@ -83,22 +91,20 @@ class Watcher(object):
 
             # Wait for the request to be completed, or timeout.
             try:
-                await asyncio.wait_for(self._new_watch_cond.wait(),
-                                       self.timeout)
-            except asyncio.TimeoutError:
-                await self._lock.acquire()
-            self._new_watch = None
+                await asyncio.wait_for(self._new_watch_cond.wait(), self.timeout)
 
-            # If the request not completed yet, then raise a timeout exception.
-            if new_watch.id is None and new_watch.err is None:
-                raise exceptions.WatchTimedOut()
+                # If the request not completed yet, then raise a timeout exception.
+                if new_watch.id is None and new_watch.err is None:
+                    raise exceptions.WatchTimedOut()
 
-            # Raise an exception if the watch request failed.
-            if new_watch.err:
-                raise new_watch.err
+                # Raise an exception if the watch request failed.
+                if new_watch.err:
+                    raise new_watch.err
+            finally:
+                # Wake up threads stuck on add_callback call if any.
+                self._new_watch = None
+                self._new_watch_cond.notify_all()
 
-            # Wake up threads stuck on add_callback call if any.
-            self._new_watch_cond.notify_all()
             return new_watch.id
 
     async def cancel(self, watch_id):
