@@ -16,10 +16,8 @@ bumpversion==0.5.3        # via -r test.in
 certifi==2020.4.5.1       # via requests
 cffi==1.14.0              # via xattr
 chardet==3.0.4            # via requests
-click==7.1.1              # via pifpaf
-configparser==4.0.2       # via entrypoints, flake8, importlib-metadata, pydocstyle
-contextlib2==0.6.0.post1  # via importlib-metadata, importlib-resources, virtualenv, zipp
-coverage==5.0.4           # via -r test.in, pytest-cov
+click==7.1.2              # via pifpaf
+coverage==5.1             # via -r test.in, pytest-cov
 daiquiri==2.1.1           # via pifpaf
 distlib==0.3.0            # via virtualenv
 docutils==0.16            # via sphinx
@@ -31,23 +29,18 @@ flake8-docstrings==1.3.0  # via -r test.in
 flake8-import-order==0.18.1  # via -r test.in
 flake8-polyfill==1.0.2    # via flake8-docstrings
 flake8==3.7.9             # via -r test.in, flake8-docstrings, flake8-polyfill
-funcsigs==1.0.2           # via mock, pytest
-functools32==3.2.3.post2  # via flake8
 grpcio-tools==1.28.1      # via -r test.in
-hypothesis==4.57.1        # via -r test.in
+hypothesis==5.10.4        # via -r test.in
 idna==2.9                 # via requests
 imagesize==1.2.0          # via sphinx
-importlib-metadata==1.6.0  # via importlib-resources, pluggy, pytest, virtualenv
-importlib-resources==1.4.0  # via virtualenv
-jinja2==2.11.1            # via pifpaf, sphinx
+importlib-metadata==1.6.0  # via pytest
+jinja2==2.11.2            # via pifpaf, sphinx
 linecache2==1.0.0         # via traceback2
 markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via flake8
 mock==2.0.0               # via -r test.in
-monotonic==1.5            # via tenacity
 more-itertools==5.0.0     # via -r test.in, pytest
 packaging==20.3           # via pytest, sphinx
-pathlib2==2.3.5           # via importlib-metadata, importlib-resources, pytest, virtualenv
 pbr==5.4.5                # via fixtures, mock, pifpaf, testtools
 pifpaf==2.4.0             # via -r test.in
 pluggy==0.13.1            # via pytest, tox
@@ -57,7 +50,7 @@ pycodestyle==2.5.0        # via flake8, flake8-import-order
 pycparser==2.20           # via cffi
 pydocstyle==3.0.0         # via -r test.in, flake8-docstrings
 pyflakes==2.1.1           # via flake8
-pygments==2.5.2           # via sphinx
+pygments==2.6.1           # via sphinx
 pyparsing==2.4.7          # via packaging
 pytest-cov==2.8.1         # via -r test.in
 pytest==4.6.5             # via -r test.in, pytest-cov
@@ -66,24 +59,21 @@ python-mimeparse==1.6.0   # via testtools
 pytz==2019.3              # via babel
 pyyaml==5.1               # via -r test.in
 requests==2.23.0          # via sphinx
-scandir==1.10.0           # via pathlib2
-singledispatch==3.4.0.3   # via importlib-resources
 snowballstemmer==2.0.0    # via pydocstyle, sphinx
 sortedcontainers==2.1.0   # via hypothesis
 sphinx==1.8.2             # via -r test.in
-sphinxcontrib-websupport==1.1.2  # via sphinx
+sphinxcontrib-websupport==1.2.1  # via sphinx
 tenacity==5.0.2           # via -r test.in
 testtools==2.4.0          # via fixtures
 toml==0.10.0              # via tox
 tox==3.5.3                # via -r test.in
 traceback2==1.4.0         # via testtools, unittest2
-typing==3.7.4.1           # via flake8, importlib-resources, sphinx
 unittest2==1.1.0          # via testtools
-urllib3==1.25.8           # via requests
-virtualenv==20.0.17       # via tox
+urllib3==1.25.9           # via requests
+virtualenv==20.0.18       # via tox
 wcwidth==0.1.9            # via pytest
 xattr==0.9.7              # via pifpaf
-zipp==1.2.0               # via importlib-metadata, importlib-resources
+zipp==3.1.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

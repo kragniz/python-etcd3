@@ -555,7 +555,7 @@ class TestEtcd3(object):
     def test_transaction_range_conditions(self, etcd):
         etcdctl('put', '/doot/key1', 'dootdoot')
         etcdctl('put', '/doot/key2', 'notdootdoot')
-        range_end = utils.increment_last_byte(utils.to_bytes('/doot/'))
+        range_end = utils.prefix_range_end(utils.to_bytes('/doot/'))
         compare = [etcd.transactions.value('/doot/', range_end) == 'dootdoot']
         status, _ = etcd.transaction(compare=compare, success=[], failure=[])
         assert not status
@@ -980,8 +980,11 @@ class TestAlarms(object):
 
 
 class TestUtils(object):
-    def test_increment_last_byte(self):
-        assert etcd3.utils.increment_last_byte(b'foo') == b'fop'
+    def test_prefix_range_end(self):
+        assert etcd3.utils.prefix_range_end(b'foo') == b'fop'
+        assert etcd3.utils.prefix_range_end(b'ab\xff') == b'ac\xff'
+        assert (etcd3.utils.prefix_range_end(b'a\xff\xff\xff\xff\xff')
+                == b'b\xff\xff\xff\xff\xff')
 
     def test_to_bytes(self):
         assert isinstance(etcd3.utils.to_bytes(b'doot'), bytes) is True
