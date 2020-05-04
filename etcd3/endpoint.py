@@ -6,16 +6,16 @@ import grpc
 class Endpoint(object):
     """Represents an etcd cluster endpoint."""
 
-    def __init__(self, host="localhost", port=2379, secure=False, creds=None, time_retry=300.0,
+    def __init__(self, host="localhost", port=2379, secure=False, credentials=None, time_retry=300.0,
                  opts=None):
         self.host = host
         self.netloc = "{host}:{port}".format(host=host, port=port)
         self.secure = secure
         self.protocol = 'https' if secure else 'http'
-        if self.secure and creds is None:
+        if self.secure and credentials is None:
             raise ValueError(
                 'Please set TLS credentials for secure connections')
-        self.credentials = creds
+        self.credentials = credentials
         self.time_retry = 300.0
         self.in_use = False
         self.last_failed = 0
