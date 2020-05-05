@@ -18,6 +18,8 @@ class ClientFacade:
                 return self.client.put(key, value)
                 break
             except exceptions.Etcd3Exception:
+                self.client.endpoint_in_use.fail()
+                self.client._init_channel()
                 print("Connection failed trying different endpoint")
 
     def get(self, key):
@@ -26,6 +28,8 @@ class ClientFacade:
                 return self.client.get(key)
                 break
             except Etcd3Exception:
+                self.client.endpoint_in_use.fail()
+                self.client._init_channel()
                 print("Connection failed trying different endpoint")
 
 
@@ -36,7 +40,6 @@ def main():
     endpoints = {"first": first_endpoint, "second": second_endpoint, "third": third_endpoint}
     client_facade = ClientFacade(failover=True, endpoints=endpoints)
     client_facade.put("Key", "Value")
-
 
 if __name__ == '__main__':
     main()

@@ -26,6 +26,32 @@ _EXCEPTIONS_BY_CODE = {
 }
 
 
+def _translate_exception(exc):
+    code = exc.code()
+    exception = _EXCEPTIONS_BY_CODE.get(code)
+    if exception is None:
+        raise
+    raise exception
+
+
+def _handle_errors(f):
+    if inspect.isgeneratorfunction(f):
+        def handler(*args, **kwargs):
+            try:
+                for data in f(*args, **kwargs):
+                    yield data
+            except grpc.RpcError as exc:
+                _translate_exception(exc)
+    else:
+        def handler(*args, **kwargs):
+            try:
+                return f(*args, **kwargs)
+            except grpc.RpcError as exc:
+                _translate_exception(exc)
+
+    return functools.wraps(f)(handler)
+
+
 class Transactions(object):
     def __init__(self):
         self.value = transactions.Value
@@ -183,37 +209,6 @@ class Etcd3Client(object):
         if self._ep_in_use is None:
             return None
         return self.endpoints[self._ep_in_use]
-
-    def _handle_errors(self, f):
-        if inspect.isgeneratorfunction(f):
-            def handler(*args, **kwargs):
-                try:
-                    for data in f(*args, **kwargs):
-                        yield data
-                except grpc.RpcError as exc:
-                    self._manage_grpc_errors(exc)
-        else:
-            def handler(*args, **kwargs):
-                try:
-                    return f(*args, **kwargs)
-                except grpc.RpcError as exc:
-                    self._manage_grpc_errors(exc)
-
-        return functools.wraps(f)(handler)
-
-    def _manage_grpc_errors(self, exc):
-        code = exc.code()
-        if code in _EXCEPTIONS_BY_CODE:
-            # This sets the current node to failed.
-            # If others are available, they will be used on
-            # subsequent requests.
-            self.endpoint_in_use.fail()
-            # Reinit grpc stubs to switch to an non failed endpoint
-            self._init_channel()
-        exception = _EXCEPTIONS_BY_CODE.get(code)
-        if exception is None:
-            raise
-        raise exception()
 
     def close(self):
         """Call the GRPC channel close semantics."""
