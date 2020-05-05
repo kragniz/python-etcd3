@@ -242,16 +242,20 @@ class Etcd3Client(object):
             raise ValueError('sort_target must be one of "key", '
                              '"version", "create", "mod" or "value"')
 
+        if revision is not None:
+            range_request.revision = revision
+
         range_request.serializable = serializable
 
         return range_request
 
     @_handle_errors
-    def get_response(self, key, serializable=False):
+    def get_response(self, key, serializable=False, **kwargs):
         """Get the value of a key from etcd."""
         range_request = self._build_get_range_request(
             key,
-            serializable=serializable
+            serializable=serializable,
+            **kwargs
         )
 
         return self.kvstub.Range(
@@ -277,6 +281,7 @@ class Etcd3Client(object):
         :param key: key in etcd to get
         :param serializable: whether to allow serializable reads. This can
             result in stale reads
+        :param revision: key value revision
         :returns: value of key and metadata
         :rtype: bytes, ``KVMetadata``
         """
@@ -312,7 +317,7 @@ class Etcd3Client(object):
 
         :param key_prefix: first key in range
         :param keys_only: if True, retrieve only the keys, not the values
-
+        :param revision: key value revision
         :returns: sequence of (value, metadata) tuples
         """
         range_response = self.get_prefix_response(key_prefix, **kwargs)
