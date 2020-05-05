@@ -4,6 +4,8 @@ from etcd3.endpoint import Endpoint
 """TODO: Proper Doc:
 Rethrow exception: InactiveRpcError no majority of nodes
                    NoServerAvailableException if all endpoints have failed """
+
+
 class ClientFacade:
     def __init__(self, host='localhost', port=2379, endpoints=None,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
@@ -40,6 +42,7 @@ def main():
     endpoints = {"first": first_endpoint, "second": second_endpoint, "third": third_endpoint}
     client_facade = ClientFacade(failover=True, endpoints=endpoints)
     client_facade.put("Key", "Value")
+
 
 if __name__ == '__main__':
     main()
