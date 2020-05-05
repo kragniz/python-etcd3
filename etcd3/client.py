@@ -1,5 +1,4 @@
 import functools
-import inspect
 import random
 import threading
 
@@ -184,7 +183,7 @@ class Etcd3Client(object):
             return None
         return self.endpoints[self._ep_in_use]
 
-    def _handle_errors(payload):
+    def handle_errors(payload):
         @functools.wraps(payload)
         def handler(self, *args, **kwargs):
             try:
@@ -286,7 +285,7 @@ class Etcd3Client(object):
 
         return range_request
 
-    @_handle_errors
+    @handle_errors
     def get_response(self, key, serializable=False):
         """Get the value of a key from etcd."""
         range_request = self._build_get_range_request(
@@ -327,7 +326,7 @@ class Etcd3Client(object):
             kv = range_response.kvs.pop()
             return kv.value, KVMetadata(kv, range_response.header)
 
-    @_handle_errors
+    @handle_errors
     def get_prefix_response(self, key_prefix, **kwargs):
         """Get a range of keys with a prefix."""
         if any(kwarg in kwargs for kwarg in ("key", "range_end")):
@@ -361,7 +360,7 @@ class Etcd3Client(object):
             for kv in range_response.kvs
         )
 
-    @_handle_errors
+    @handle_errors
     def get_range_response(self, range_start, range_end, sort_order=None,
                            sort_target='key', **kwargs):
         """Get a range of keys."""
@@ -393,7 +392,7 @@ class Etcd3Client(object):
         for kv in range_response.kvs:
             yield (kv.value, KVMetadata(kv, range_response.header))
 
-    @_handle_errors
+    @handle_errors
     def get_all_response(self, sort_order=None, sort_target='key',
                          keys_only=False):
         """Get all keys currently stored in etcd."""
@@ -432,7 +431,7 @@ class Etcd3Client(object):
 
         return put_request
 
-    @_handle_errors
+    @handle_errors
     def put(self, key, value, lease=None, prev_kv=False):
         """
         Save a value to etcd.
@@ -464,7 +463,7 @@ class Etcd3Client(object):
             metadata=self.metadata
         )
 
-    @_handle_errors
+    @handle_errors
     def put_if_not_exists(self, key, value, lease=None):
         """
         Atomically puts a value only if the key previously had no value.
@@ -489,7 +488,7 @@ class Etcd3Client(object):
 
         return status
 
-    @_handle_errors
+    @handle_errors
     def replace(self, key, initial_value, new_value):
         """
         Atomically replace the value of a key with a new value.
@@ -527,7 +526,7 @@ class Etcd3Client(object):
 
         return delete_request
 
-    @_handle_errors
+    @handle_errors
     def delete(self, key, prev_kv=False, return_response=False):
         """
         Delete a single key in etcd.
@@ -553,7 +552,7 @@ class Etcd3Client(object):
             return delete_response
         return delete_response.deleted >= 1
 
-    @_handle_errors
+    @handle_errors
     def delete_prefix(self, prefix):
         """Delete a range of keys with a prefix in etcd."""
         delete_request = self._build_delete_request(
@@ -567,7 +566,7 @@ class Etcd3Client(object):
             metadata=self.metadata
         )
 
-    @_handle_errors
+    @handle_errors
     def status(self):
         """Get the status of the responding member."""
         status_request = etcdrpc.StatusRequest()
@@ -592,7 +591,7 @@ class Etcd3Client(object):
                       status_response.raftIndex,
                       status_response.raftTerm)
 
-    @_handle_errors
+    @handle_errors
     def add_watch_callback(self, *args, **kwargs):
         """
         Watch a key or range of keys and call a callback on every response.
@@ -611,7 +610,7 @@ class Etcd3Client(object):
         except queue.Empty:
             raise exceptions.WatchTimedOut()
 
-    @_handle_errors
+    @handle_errors
     def add_watch_prefix_callback(self, key_prefix, callback, **kwargs):
         """
         Watch a prefix and call a callback on every response.
@@ -630,7 +629,7 @@ class Etcd3Client(object):
 
         return self.add_watch_callback(key_prefix, callback, **kwargs)
 
-    @_handle_errors
+    @handle_errors
     def watch_response(self, key, **kwargs):
         """
         Watch a key.
@@ -662,7 +661,7 @@ class Etcd3Client(object):
             response_queue.put(None)
             self.cancel_watch(watch_id)
 
-        @_handle_errors
+        @self.handle_errors
         def iterator():
             while not canceled.is_set():
                 response = response_queue.get()
@@ -720,7 +719,7 @@ class Etcd3Client(object):
             utils.prefix_range_end(utils.to_bytes(key_prefix))
         return self.watch(key_prefix, **kwargs)
 
-    @_handle_errors
+    @handle_errors
     def watch_once_response(self, key, timeout=None, **kwargs):
         """
         Watch a key and stop after the first response.
@@ -784,7 +783,7 @@ class Etcd3Client(object):
             utils.prefix_range_end(utils.to_bytes(key_prefix))
         return self.watch_once(key_prefix, timeout=timeout, **kwargs)
 
-    @_handle_errors
+    @handle_errors
     def cancel_watch(self, watch_id):
         """
         Stop watching a key or range of keys.
@@ -834,7 +833,7 @@ class Etcd3Client(object):
                     'Unknown request class {}'.format(op.__class__))
         return request_ops
 
-    @_handle_errors
+    @handle_errors
     def transaction(self, compare, success=None, failure=None):
         """
         Perform a transaction.
@@ -895,7 +894,7 @@ class Etcd3Client(object):
 
         return txn_response.succeeded, responses
 
-    @_handle_errors
+    @handle_errors
     def lease(self, ttl, lease_id=None):
         """
         Create a new lease.
@@ -921,7 +920,7 @@ class Etcd3Client(object):
                             ttl=lease_grant_response.TTL,
                             etcd_client=self)
 
-    @_handle_errors
+    @handle_errors
     def revoke_lease(self, lease_id):
         """
         Revoke a lease.
@@ -936,7 +935,7 @@ class Etcd3Client(object):
             metadata=self.metadata
         )
 
-    @_handle_errors
+    @handle_errors
     def refresh_lease(self, lease_id):
         keep_alive_request = etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
         request_stream = [keep_alive_request]
@@ -947,7 +946,7 @@ class Etcd3Client(object):
                 metadata=self.metadata):
             yield response
 
-    @_handle_errors
+    @handle_errors
     def get_lease_info(self, lease_id):
         # only available in etcd v3.1.0 and later
         ttl_request = etcdrpc.LeaseTimeToLiveRequest(ID=lease_id,
@@ -959,7 +958,7 @@ class Etcd3Client(object):
             metadata=self.metadata
         )
 
-    @_handle_errors
+    @handle_errors
     def lock(self, name, ttl=60):
         """
         Create a new lock.
@@ -975,7 +974,7 @@ class Etcd3Client(object):
         """
         return locks.Lock(name, ttl=ttl, etcd_client=self)
 
-    @_handle_errors
+    @handle_errors
     def add_member(self, urls):
         """
         Add a member into the cluster.
@@ -999,7 +998,7 @@ class Etcd3Client(object):
                                     member.clientURLs,
                                     etcd_client=self)
 
-    @_handle_errors
+    @handle_errors
     def remove_member(self, member_id):
         """
         Remove an existing member from the cluster.
@@ -1014,7 +1013,7 @@ class Etcd3Client(object):
             metadata=self.metadata
         )
 
-    @_handle_errors
+    @handle_errors
     def update_member(self, member_id, peer_urls):
         """
         Update the configuration of an existing member in the cluster.
@@ -1055,7 +1054,7 @@ class Etcd3Client(object):
                                        member.clientURLs,
                                        etcd_client=self)
 
-    @_handle_errors
+    @handle_errors
     def compact(self, revision, physical=False):
         """
         Compact the event history in etcd up to a given revision.
@@ -1078,7 +1077,7 @@ class Etcd3Client(object):
             metadata=self.metadata
         )
 
-    @_handle_errors
+    @handle_errors
     def defragment(self):
         """Defragment a member's backend database to recover storage space."""
         defrag_request = etcdrpc.DefragmentRequest()
@@ -1089,7 +1088,7 @@ class Etcd3Client(object):
             metadata=self.metadata
         )
 
-    @_handle_errors
+    @handle_errors
     def hash(self):
         """
         Return the hash of the local KV state.
@@ -1123,7 +1122,7 @@ class Etcd3Client(object):
 
         return alarm_request
 
-    @_handle_errors
+    @handle_errors
     def create_alarm(self, member_id=0):
         """Create an alarm.
 
@@ -1148,7 +1147,7 @@ class Etcd3Client(object):
         return [Alarm(alarm.alarm, alarm.memberID)
                 for alarm in alarm_response.alarms]
 
-    @_handle_errors
+    @handle_errors
     def list_alarms(self, member_id=0, alarm_type='none'):
         """List the activated alarms.
 
@@ -1171,7 +1170,7 @@ class Etcd3Client(object):
         for alarm in alarm_response.alarms:
             yield Alarm(alarm.alarm, alarm.memberID)
 
-    @_handle_errors
+    @handle_errors
     def disarm_alarm(self, member_id=0):
         """Cancel an alarm.
 
@@ -1193,7 +1192,7 @@ class Etcd3Client(object):
         return [Alarm(alarm.alarm, alarm.memberID)
                 for alarm in alarm_response.alarms]
 
-    @_handle_errors
+    @handle_errors
     def snapshot(self, file_obj):
         """Take a snapshot of the database.
 
