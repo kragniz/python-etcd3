@@ -1,7 +1,9 @@
 from etcd3 import client, exceptions
 from etcd3.endpoint import Endpoint
 
-
+"""TODO: Proper Doc:
+Rethrow exception: InactiveRpcError no majority of nodes
+                   NoServerAvailableException if all endpoints have failed """
 class ClientFacade:
     def __init__(self, host='localhost', port=2379, endpoints=None,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
@@ -13,7 +15,7 @@ class ClientFacade:
     def put(self, key, value, lease=None, prev_kv=False):
         while True:
             try:
-                self.client.put(key, value)
+                return self.client.put(key, value)
                 break
             except exceptions.Etcd3Exception:
                 print("Connection failed trying different endpoint")
