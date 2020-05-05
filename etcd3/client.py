@@ -664,7 +664,7 @@ class Etcd3Client(object):
             response_queue.put(None)
             self.cancel_watch(watch_id)
 
-        @self._handle_errors
+        @_handle_errors
         def iterator():
             while not canceled.is_set():
                 response = response_queue.get()
