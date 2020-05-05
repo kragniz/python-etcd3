@@ -102,10 +102,10 @@ class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
 class Etcd3Client(object):
     def __init__(self, host='localhost', port=2379,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
-                 user=None, password=None, grpc_options=None):
+                 user=None, password=None, grpc_options=None, endpoints=None, failover=False):
 
-        self._url = '{host}:{port}'.format(host=host, port=port)
         self.metadata = None
+        self.failover = failover
 
         cert_params = [c is not None for c in (cert_cert, cert_key)]
         if ca_cert is not None:
@@ -116,8 +116,7 @@ class Etcd3Client(object):
                     cert_cert
                 )
                 self.uses_secure_channel = True
-                self.channel = grpc.secure_channel(self._url, credentials,
-                                                   options=grpc_options)
+
             elif any(cert_params):
                 # some of the cert parameters are set
                 raise ValueError(
@@ -126,12 +125,8 @@ class Etcd3Client(object):
             else:
                 credentials = self._get_secure_creds(ca_cert, None, None)
                 self.uses_secure_channel = True
-                self.channel = grpc.secure_channel(self._url, credentials,
-                                                   options=grpc_options)
         else:
             self.uses_secure_channel = False
-            self.channel = grpc.insecure_channel(self._url,
-                                                 options=grpc_options)
 
         self.timeout = timeout
         self.call_credentials = None
@@ -1173,7 +1168,7 @@ class Etcd3Client(object):
 
 def client(host='localhost', port=2379,
            ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
-           user=None, password=None, grpc_options=None):
+           user=None, password=None, grpc_options=None, endpoints=None, failover=False):
     """Return an instance of an Etcd3Client."""
     return Etcd3Client(host=host,
                        port=port,
@@ -1183,4 +1178,6 @@ def client(host='localhost', port=2379,
                        timeout=timeout,
                        user=user,
                        password=password,
-                       grpc_options=grpc_options)
+                       grpc_options=grpc_options,
+                       endpoints=endpoints,
+                       failover=failover)
