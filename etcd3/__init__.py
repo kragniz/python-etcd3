@@ -22,4 +22,5 @@ __all__ = (
     'Lease',
     'Lock',
     'Member',
+    'exceptions'
 )

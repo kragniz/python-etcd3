@@ -182,13 +182,14 @@ class Etcd3Client(object):
 
     @property
     def retrieve_endpoint(self):
+
         """
         Get an available channel on the first node that's not failed.
         Raises an exception if no node is available
         """
         try:
             return self.endpoint_in_use.use()
-        except ValueError as e:
+        except ValueError:
             if not self.failover:
                 raise exceptions.NoServerAvailableError()
             else:
