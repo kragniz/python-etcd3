@@ -1,5 +1,6 @@
 import functools
 import inspect
+import random
 import threading
 
 import grpc
@@ -15,6 +16,7 @@ import etcd3.members
 import etcd3.transactions as transactions
 import etcd3.utils as utils
 import etcd3.watch as watch
+from etcd3.endpoint import Endpoint
 
 _EXCEPTIONS_BY_CODE = {
     grpc.StatusCode.INTERNAL: exceptions.InternalServerError,
@@ -126,7 +128,18 @@ class Etcd3Client(object):
                 credentials = self._get_secure_creds(ca_cert, None, None)
                 self.uses_secure_channel = True
         else:
+            credentials = None
             self.uses_secure_channel = False
+
+        if endpoints is None:
+            ep = Endpoint(host, port, secure=self.uses_secure_channel,
+                          credentials=credentials, opts=grpc_options)
+            self.endpoints = {ep.netloc: ep}
+        else:
+            # If the endpoints are passed externally, just use those.
+            self.endpoints = endpoints
+
+        self._ep_in_use = random.choice(list(self.endpoints.keys()))
 
         self.timeout = timeout
         self.call_credentials = None
@@ -162,6 +175,37 @@ class Etcd3Client(object):
         self.leasestub = etcdrpc.LeaseStub(self.channel)
         self.maintenancestub = etcdrpc.MaintenanceStub(self.channel)
         self.transactions = Transactions()
+
+    @property
+    def channel(self):
+        """
+        Get an available channel on the first node that's not failed.
+        Raises an exception if no node is available
+        """
+        try:
+            return self.endpoint_in_use.use()
+        except ValueError as e:
+            if not self.failover:
+                raise
+            else:
+                pass
+        # We're failing over. We get the first non-failed channel
+        # we encounter, and use it by calling this function again,
+        # recursively
+        for label, endpoint in self.endpoints.items():
+            if endpoint.is_failed():
+                continue
+            self._ep_in_use = label
+            return self.channel
+        # TODO: Proper Exception
+        raise ValueError
+
+    @property
+    def endpoint_in_use(self):
+        """Get the current endpoint in use."""
+        if self._ep_in_use is None:
+            return None
+        return self.endpoints[self._ep_in_use]
 
     def close(self):
         """Call the GRPC channel close semantics."""
