@@ -26,32 +26,6 @@ _EXCEPTIONS_BY_CODE = {
 }
 
 
-def _translate_exception(exc):
-    code = exc.code()
-    exception = _EXCEPTIONS_BY_CODE.get(code)
-    if exception is None:
-        raise
-    raise exception
-
-
-def _handle_errors(f):
-    if inspect.isgeneratorfunction(f):
-        def handler(*args, **kwargs):
-            try:
-                for data in f(*args, **kwargs):
-                    yield data
-            except grpc.RpcError as exc:
-                _translate_exception(exc)
-    else:
-        def handler(*args, **kwargs):
-            try:
-                return f(*args, **kwargs)
-            except grpc.RpcError as exc:
-                _translate_exception(exc)
-
-    return functools.wraps(f)(handler)
-
-
 class Transactions(object):
     def __init__(self):
         self.value = transactions.Value
@@ -147,7 +121,7 @@ class Etcd3Client(object):
         cred_params = [c is not None for c in (user, password)]
 
         if all(cred_params):
-            self.auth_stub = etcdrpc.AuthStub(self.channel)
+            self.auth_stub = etcdrpc.AuthStub(self.retrieve_endpoint)
             auth_request = etcdrpc.AuthenticateRequest(
                 name=user,
                 password=password
@@ -164,20 +138,23 @@ class Etcd3Client(object):
                 'must be specified.'
             )
 
-        self.kvstub = etcdrpc.KVStub(self.channel)
+        self._init_channel()
+
+    def _init_channel(self):
+        self.kvstub = etcdrpc.KVStub(self.retrieve_endpoint)
         self.watcher = watch.Watcher(
-            etcdrpc.WatchStub(self.channel),
+            etcdrpc.WatchStub(self.retrieve_endpoint),
             timeout=self.timeout,
             call_credentials=self.call_credentials,
             metadata=self.metadata
         )
-        self.clusterstub = etcdrpc.ClusterStub(self.channel)
-        self.leasestub = etcdrpc.LeaseStub(self.channel)
-        self.maintenancestub = etcdrpc.MaintenanceStub(self.channel)
+        self.clusterstub = etcdrpc.ClusterStub(self.retrieve_endpoint)
+        self.leasestub = etcdrpc.LeaseStub(self.retrieve_endpoint)
+        self.maintenancestub = etcdrpc.MaintenanceStub(self.retrieve_endpoint)
         self.transactions = Transactions()
 
     @property
-    def channel(self):
+    def retrieve_endpoint(self):
         """
         Get an available channel on the first node that's not failed.
         Raises an exception if no node is available
@@ -186,7 +163,7 @@ class Etcd3Client(object):
             return self.endpoint_in_use.use()
         except ValueError as e:
             if not self.failover:
-                raise
+                raise exceptions.NoServerAvailableError()
             else:
                 pass
         # We're failing over. We get the first non-failed channel
@@ -196,9 +173,9 @@ class Etcd3Client(object):
             if endpoint.is_failed():
                 continue
             self._ep_in_use = label
-            return self.channel
-        # TODO: Proper Exception
-        raise ValueError
+            self._init_channel
+            return self.retrieve_endpoint
+        raise exceptions.NoServerAvailableError()
 
     @property
     def endpoint_in_use(self):
@@ -207,10 +184,34 @@ class Etcd3Client(object):
             return None
         return self.endpoints[self._ep_in_use]
 
+    def _handle_errors(payload):
+        @functools.wraps(payload)
+        def handler(self, *args, **kwargs):
+            try:
+                return payload(self, *args, **kwargs)
+            except grpc.RpcError as exc:
+                self._manage_grpc_errors(exc)
+
+        return handler
+
+    def _manage_grpc_errors(self, exc):
+        code = exc.code()
+        if code in _EXCEPTIONS_BY_CODE:
+            # This sets the current node to failed.
+            # If others are available, they will be used on
+            # subsequent requests.
+            self.endpoint_in_use.fail()
+            # Reinit grpc stubs to switch to an non failed endpoint
+            self._init_channel()
+        exception = _EXCEPTIONS_BY_CODE.get(code)
+        if exception is None:
+            raise
+        raise exception()
+
     def close(self):
         """Call the GRPC channel close semantics."""
         if hasattr(self, 'channel'):
-            self.channel.close()
+            self.retrieve_endpoint.close()
 
     def __enter__(self):
         return self
