@@ -203,7 +203,7 @@ class Etcd3Client(object):
     def _build_get_range_request(self, key,
                                  range_end=None,
                                  limit=None,
-                                 revision=None,
+                                 revision=0,
                                  sort_order=None,
                                  sort_target='key',
                                  serializable=False,
@@ -242,9 +242,7 @@ class Etcd3Client(object):
             raise ValueError('sort_target must be one of "key", '
                              '"version", "create", "mod" or "value"')
 
-        if revision is not None:
-            range_request.revision = revision
-
+        range_request.revision = revision
         range_request.serializable = serializable
 
         return range_request

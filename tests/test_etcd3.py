@@ -959,6 +959,7 @@ class TestEtcd3(object):
         assert new_returned.decode('utf-8') == new_data
         assert new_revision == kv.mod_revision
 
+
 class TestAlarms(object):
     @pytest.fixture
     def etcd(self):
