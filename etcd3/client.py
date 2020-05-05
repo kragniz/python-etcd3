@@ -180,6 +180,10 @@ class Etcd3Client(object):
         self.maintenancestub = etcdrpc.MaintenanceStub(self.retrieve_endpoint)
         self.transactions = Transactions()
 
+    def switchEndpoint(self):
+        self.endpoint_in_use.fail()
+        self._init_channel()
+
     @property
     def retrieve_endpoint(self):
         """
