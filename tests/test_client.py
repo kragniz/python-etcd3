@@ -25,3 +25,4 @@ class TestInitEndpoints(TestClient):
         self.assertTrue(first_endpoint in self.client.endpoints.values())
         self.assertTrue(second_endpoint in self.client.endpoints.values())
         self.assertTrue(third_endpoint in self.client.endpoints.values())
+
