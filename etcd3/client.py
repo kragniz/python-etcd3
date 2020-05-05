@@ -1,4 +1,5 @@
 import functools
+import inspect
 import random
 import threading
 
@@ -183,15 +184,22 @@ class Etcd3Client(object):
             return None
         return self.endpoints[self._ep_in_use]
 
-    def handle_errors(payload):
-        @functools.wraps(payload)
-        def handler(self, *args, **kwargs):
-            try:
-                return payload(self, *args, **kwargs)
-            except grpc.RpcError as exc:
-                self._manage_grpc_errors(exc)
+    def _handle_errors(self, f):
+        if inspect.isgeneratorfunction(f):
+            def handler(*args, **kwargs):
+                try:
+                    for data in f(*args, **kwargs):
+                        yield data
+                except grpc.RpcError as exc:
+                    self._manage_grpc_errors(exc)
+        else:
+            def handler(*args, **kwargs):
+                try:
+                    return f(*args, **kwargs)
+                except grpc.RpcError as exc:
+                    self._manage_grpc_errors(exc)
 
-        return handler
+        return functools.wraps(f)(handler)
 
     def _manage_grpc_errors(self, exc):
         code = exc.code()
