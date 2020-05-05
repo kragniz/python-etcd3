@@ -24,6 +24,11 @@ class PreconditionFailedError(Etcd3Exception):
     pass
 
 
+class NoServerAvailableError(Exception):
+    def __str__(self):
+        return "no etcd node available"
+
+
 class RevisionCompactedError(Etcd3Exception):
     def __init__(self, compacted_revision):
         self.compacted_revision = compacted_revision
