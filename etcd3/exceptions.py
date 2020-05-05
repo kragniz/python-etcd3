@@ -24,7 +24,7 @@ class PreconditionFailedError(Etcd3Exception):
     pass
 
 
-class NoServerAvailableError(Etcd3Exception):
+class NoServerAvailableError(Exception):
     def __str__(self):
         return "no etcd node available"
 
