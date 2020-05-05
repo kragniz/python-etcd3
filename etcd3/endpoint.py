@@ -6,7 +6,8 @@ import grpc
 class Endpoint(object):
     """Represents an etcd cluster endpoint."""
 
-    def __init__(self, host="localhost", port=2379, secure=False, credentials=None, time_retry=300.0,
+    def __init__(self, host="localhost", port=2379, secure=False,
+                 credentials=None, time_retry=300.0,
                  opts=None):
         self.host = host
         self.netloc = "{host}:{port}".format(host=host, port=port)

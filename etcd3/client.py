@@ -104,7 +104,8 @@ class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
 class Etcd3Client(object):
     def __init__(self, host='localhost', port=2379,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
-                 user=None, password=None, grpc_options=None, endpoints=None, failover=False):
+                 user=None, password=None, grpc_options=None, endpoints=None,
+                 failover=False):
 
         self.metadata = None
         self.failover = failover
@@ -1215,7 +1216,8 @@ class Etcd3Client(object):
 
 def client(host='localhost', port=2379,
            ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
-           user=None, password=None, grpc_options=None, endpoints=None, failover=False):
+           user=None, password=None, grpc_options=None, endpoints=None,
+           failover=False):
     """Return an instance of an Etcd3Client."""
     return Etcd3Client(host=host,
                        port=port,

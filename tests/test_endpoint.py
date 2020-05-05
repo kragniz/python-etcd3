@@ -13,7 +13,8 @@ class TestInit(TestEndpoint):
         self.assertEqual(self.endpoint.host, "localhost")
 
     def test_initial_netloc(self):
-        self.assertEqual(self.endpoint.netloc, "localhost:2379".format(host="localhost", port=2379))
+        self.assertEqual(self.endpoint.netloc,
+                         "localhost:2379".format(host="localhost", port=2379))
 
     def test_initial_credentials(self):
         self.assertEqual(self.endpoint.credentials, None)

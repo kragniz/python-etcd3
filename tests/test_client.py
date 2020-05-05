@@ -19,7 +19,8 @@ class TestInitEndpoints(TestClient):
         first_endpoint = Endpoint("localhost", 2379, None, None, None)
         second_endpoint = Endpoint("localhost", 2378, None, None, None)
         third_endpoint = Endpoint("localhost", 2377, None, None, None)
-        endpoints = {"first": first_endpoint, "second": second_endpoint, "third": third_endpoint}
+        endpoints = {"first": first_endpoint, "second": second_endpoint,
+                     "third": third_endpoint}
         self.client = client(endpoints=endpoints)
 
         self.assertTrue(first_endpoint in self.client.endpoints.values())
