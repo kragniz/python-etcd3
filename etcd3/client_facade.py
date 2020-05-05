@@ -13,7 +13,7 @@ class ClientFacade:
     def put(self, key, value, lease=None, prev_kv=False):
         while True:
             try:
-                print(self.client.put(key, value))
+                self.client.put(key, value)
                 break
             except exceptions.Etcd3Exception:
                 print("Connection failed trying different endpoint")
