@@ -21,6 +21,5 @@ __all__ = (
     'client',
     'Lease',
     'Lock',
-    'Member',
-    'exceptions'
+    'Member'
 )
