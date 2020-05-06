@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.5
 
 ARG HTTP_PROXY
 ARG http_proxy
@@ -16,9 +16,9 @@ WORKDIR python-etcd3
 COPY tox.ini ./
 COPY requirements/base.txt requirements/test.txt ./requirements/
 
-RUN tox -epy37 --notest
+RUN tox -epy35 --notest
 
 COPY . ./
 
 ENV ETCDCTL_API 3
-CMD ["tox", "-epy37"]
+CMD ["tox", "-epy35"]
