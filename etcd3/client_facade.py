@@ -2,8 +2,10 @@ from etcd3 import client, exceptions
 from etcd3.endpoint import Endpoint
 
 """TODO: Proper Doc:
-Rethrow exception: UnhealtyClusterError: Majority of nodes could not be reached.
-                   NoServerAvailableException: None of the endpoints could be reached"""
+Rethrow exception: UnhealtyClusterError: Majority of nodes could not
+ be reached.
+                   NoServerAvailableException: None of the endpoints 
+                   could be reached"""
 
 
 class ClientFacade:
