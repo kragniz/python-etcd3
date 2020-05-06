@@ -1,3 +1,13 @@
+class NoServerAvailableError(Exception):
+    def __str__(self):
+        return "no etcd node available"
+
+
+class UnhealthyClusterError(Exception):
+    def __str__(self):
+        return "majority of nodes could not be reached"
+
+
 class Etcd3Exception(Exception):
     pass
 
@@ -22,11 +32,6 @@ class ConnectionTimeoutError(Etcd3Exception):
 
 class PreconditionFailedError(Etcd3Exception):
     pass
-
-
-class NoServerAvailableError(Exception):
-    def __str__(self):
-        return "no etcd node available"
 
 
 class RevisionCompactedError(Etcd3Exception):

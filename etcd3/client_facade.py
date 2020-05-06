@@ -2,8 +2,8 @@ from etcd3 import client, exceptions
 from etcd3.endpoint import Endpoint
 
 """TODO: Proper Doc:
-Rethrow exception: InactiveRpcError no majority of nodes
-                   NoServerAvailableException if all endpoints have failed """
+Rethrow exception: UnhealtyClusterError: Majority of nodes could not be reached.
+                   NoServerAvailableException: None of the endpoints could be reached"""
 
 
 class ClientFacade:
@@ -42,7 +42,7 @@ def main():
     endpoints = {"first": first_endpoint, "second": second_endpoint,
                  "third": third_endpoint}
     client_facade = ClientFacade(failover=True, endpoints=endpoints)
-    client_facade.put("Key", "Value")
+    print(client_facade.put("Key", "Value"))
 
 
 if __name__ == '__main__':
