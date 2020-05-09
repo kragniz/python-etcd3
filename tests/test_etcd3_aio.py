@@ -985,10 +985,10 @@ class TestClient(object):
         self._disable_auth_in_etcd()
 
     def test_user_or_pwd_auth_raises_exception(self, event_loop):
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match='both user and password'):
             etcd3.client(user='usr', backend="asyncio", loop=event_loop)
 
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match='both user and password'):
             etcd3.client(password='pwd', backend="asyncio", loop=event_loop)
 
     def _enable_auth_in_etcd(self):
