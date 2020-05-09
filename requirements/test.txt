@@ -30,7 +30,7 @@ flake8-import-order==0.18.1  # via -r test.in
 flake8-polyfill==1.0.2    # via flake8-docstrings
 flake8==3.7.9             # via -r test.in, flake8-docstrings, flake8-polyfill
 grpcio-tools==1.28.1      # via -r test.in
-hypothesis==5.10.4        # via -r test.in
+hypothesis==5.11.0        # via -r test.in
 idna==2.9                 # via requests
 imagesize==1.2.0          # via sphinx
 importlib-metadata==1.6.0  # via pytest
@@ -71,7 +71,7 @@ tox==3.5.3                # via -r test.in
 traceback2==1.4.0         # via testtools, unittest2
 unittest2==1.1.0          # via testtools
 urllib3==1.25.9           # via requests
-virtualenv==20.0.18       # via tox
+virtualenv==20.0.20       # via tox
 wcwidth==0.1.9            # via pytest
 xattr==0.9.7              # via pifpaf
 zipp==3.1.0               # via importlib-metadata

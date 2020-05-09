@@ -2,8 +2,8 @@ import asyncio
 import functools
 import inspect
 
+from aiofiles import open
 import aiogrpc
-
 import grpc
 
 import etcd3.aio.leases as leases
@@ -61,17 +61,15 @@ def _handle_errors(f):  # noqa: C901
 def _ensure_channel(f):
     if inspect.isasyncgenfunction(f):
         async def handler(*args, **kwargs):
-            args[0]._setup_channel()
+            await args[0]._setup_channel()
             async for data in f(*args, **kwargs):
                 yield data
     elif inspect.iscoroutinefunction(f):
         async def handler(*args, **kwargs):
-            args[0]._setup_channel()
+            await args[0]._setup_channel()
             return await f(*args, **kwargs)
     else:
-        def handler(*args, **kwargs):
-            args[0]._setup_channel()
-            return f(*args, **kwargs)
+        raise TypeError
 
     return functools.wraps(f)(handler)
 
@@ -158,14 +156,14 @@ class Etcd3Client(object):
         self.grpc_options = grpc_options
         self.loop = loop
 
-    def _setup_channel(self):
+    async def _setup_channel(self):
         if hasattr(self, 'channel'):
             return
 
         cert_params = [c is not None for c in (self.cert_cert, self.cert_key)]
         if self.ca_cert is not None:
             if all(cert_params):
-                credentials = self._get_secure_creds(
+                credentials = await self._get_secure_creds(
                     self.ca_cert,
                     self.cert_key,
                     self.cert_cert
@@ -175,7 +173,7 @@ class Etcd3Client(object):
                                                       options=self.grpc_options,
                                                       loop=self.loop)
             else:
-                credentials = self._get_secure_creds(self.ca_cert, None, None)
+                credentials = await self._get_secure_creds(self.ca_cert, None, None)
                 self.uses_secure_channel = True
                 self.channel = aiogrpc.secure_channel(self._url, credentials,
                                                       options=self.grpc_options,
@@ -185,6 +183,7 @@ class Etcd3Client(object):
             self.channel = aiogrpc.insecure_channel(self._url,
                                                     options=self.grpc_options,
                                                     loop=self.loop)
+
         cred_params = [c is not None for c in (self.user, self.password)]
         if all(cred_params):
             self.auth_stub = etcdrpc.AuthStub(self.channel)
@@ -193,7 +192,7 @@ class Etcd3Client(object):
                 password=self.password
             )
 
-            resp = self.auth_stub.Authenticate(auth_request, self.timeout)
+            resp = await self.auth_stub.Authenticate(auth_request, self.timeout)
             self.metadata = (('token', resp.token),)
             self.call_credentials = grpc.metadata_call_credentials(
                 EtcdTokenCallCredentials(resp.token))
@@ -215,26 +214,26 @@ class Etcd3Client(object):
             await self.channel.close()
 
     async def __aenter__(self):
-        self._setup_channel()
+        await self._setup_channel()
         return self
 
     async def __aexit__(self, *args):
         await self.close()
 
-    def _get_secure_creds(self, ca_cert, cert_key=None, cert_cert=None):
+    async def _get_secure_creds(self, ca_cert, cert_key=None, cert_cert=None):
         cert_key_file = None
         cert_cert_file = None
 
-        with open(ca_cert, 'rb') as f:
-            ca_cert_file = f.read()
+        async with open(ca_cert, 'rb') as f:
+            ca_cert_file = await f.read()
 
         if cert_key is not None:
-            with open(cert_key, 'rb') as f:
-                cert_key_file = f.read()
+            async with open(cert_key, 'rb') as f:
+                cert_key_file = await f.read()
 
         if cert_cert is not None:
-            with open(cert_cert, 'rb') as f:
-                cert_cert_file = f.read()
+            async with open(cert_cert, 'rb') as f:
+                cert_cert_file = await f.read()
 
         return grpc.ssl_channel_credentials(
             ca_cert_file,
@@ -834,9 +833,12 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
-    @_ensure_channel
     def refresh_lease(self, lease_id):
+        client = self
+
         async def request_stream():
+            nonlocal client
+            await client._setup_channel()
             yield etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
 
         return self.leasestub.LeaseKeepAlive(
@@ -859,7 +861,6 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
-    @_ensure_channel
     def lock(self, name, ttl=60):
         """
         Create a new lock.

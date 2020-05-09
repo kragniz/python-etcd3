@@ -7,6 +7,7 @@ Tests for `etcd3` module with the asyncio backend.
 import asyncio
 import base64
 import contextlib
+import functools
 import json
 import os
 import signal
@@ -15,6 +16,7 @@ import subprocess
 import tempfile
 import threading
 import time
+import inspect
 
 import grpc
 
@@ -911,7 +913,8 @@ class TestClient(object):
         with pytest.raises(ValueError):
             etcd._build_get_range_request(key, sort_order='feelsbadman')
 
-    def test_secure_channel(self, event_loop):
+    @pytest.mark.asyncio
+    async def test_secure_channel(self, event_loop):
         client = etcd3.client(
             ca_cert="tests/ca.crt",
             cert_key="tests/client.key",
@@ -919,11 +922,12 @@ class TestClient(object):
             backend="asyncio",
             loop=event_loop
         )
-        client._setup_channel()
+        await client._setup_channel()
 
         assert client.uses_secure_channel is True
 
-    def test_secure_channel_ca_cert_only(self, event_loop):
+    @pytest.mark.asyncio
+    async def test_secure_channel_ca_cert_only(self, event_loop):
         client = etcd3.client(
             ca_cert="tests/ca.crt",
             cert_key=None,
@@ -931,7 +935,8 @@ class TestClient(object):
             backend="asyncio",
             loop=event_loop
         )
-        client._setup_channel()
+        await client._setup_channel()
+
         assert client.uses_secure_channel is True
 
     def test_secure_channel_ca_cert_and_key_raise_exception(self, event_loop):
@@ -960,7 +965,8 @@ class TestClient(object):
         with pytest.raises(grpc.RpcError):
             await etcd.compact(revision)
 
-    def test_channel_with_no_cert(self, event_loop):
+    @pytest.mark.asyncio
+    async def test_channel_with_no_cert(self, event_loop):
         client = etcd3.client(
             ca_cert=None,
             cert_key=None,
@@ -968,27 +974,28 @@ class TestClient(object):
             backend="asyncio",
             loop=event_loop
         )
-        client._setup_channel()
+        await client._setup_channel()
+
         assert client.uses_secure_channel is False
 
     @mock.patch('etcd3.etcdrpc.AuthStub')
-    def test_user_pwd_auth(self, auth_mock, event_loop):
-        auth_resp_mock = mock.MagicMock()
-        auth_resp_mock.token = 'foo'
-        auth_mock.Authenticate = auth_resp_mock
-        self._enable_auth_in_etcd()
+    @pytest.mark.asyncio
+    async def test_user_pwd_auth(self, auth_mock, event_loop):
+        with self._enabled_auth_in_etcd():
+            auth_resp_mock = mock.MagicMock()
+            auth_resp_mock.token = 'foo'
+            auth_mock.Authenticate = auth_resp_mock
 
-        # Create a client using username and password auth
-        client = etcd3.client(
-            user='root',
-            password='pwd',
-            backend="asyncio",
-            loop=event_loop
-        )
-        client._setup_channel()
+            # Create a client using username and password auth
+            client = etcd3.client(
+                user='root',
+                password='pwd',
+                backend="asyncio",
+                loop=event_loop
+            )
+            await client._setup_channel()
 
-        assert client.call_credentials is not None
-        self._disable_auth_in_etcd()
+            assert client.call_credentials is not None
 
     def test_user_or_pwd_auth_raises_exception(self, event_loop):
         with pytest.raises(Exception, match='both user and password'):
@@ -997,13 +1004,17 @@ class TestClient(object):
         with pytest.raises(Exception, match='both user and password'):
             etcd3.client(password='pwd', backend="asyncio", loop=event_loop)
 
-    def _enable_auth_in_etcd(self):
+    @staticmethod
+    @contextlib.contextmanager
+    def _enabled_auth_in_etcd():
         subprocess.call(['etcdctl', '-w', 'json', 'user', 'add', 'root:pwd'])
         subprocess.call(['etcdctl', 'auth', 'enable'])
-
-    def _disable_auth_in_etcd(self):
-        subprocess.call(['etcdctl', '--user', 'root:pwd', 'auth', 'disable'])
-        subprocess.call(['etcdctl', 'user', 'delete', 'root'])
+        try:
+            yield
+        finally:
+            subprocess.call(['etcdctl', '-w', 'json', '--user', 'root:pwd', 'auth', 'disable'])
+            subprocess.call(['etcdctl', 'user', 'delete', 'root'])
+            subprocess.call(['etcdctl', 'role', 'delete', 'root'])
 
 
 class TestCompares(object):
