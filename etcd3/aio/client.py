@@ -58,6 +58,24 @@ def _handle_errors(f):  # noqa: C901
     return functools.wraps(f)(handler)
 
 
+def _ensure_channel(f):
+    if inspect.isasyncgenfunction(f):
+        async def handler(*args, **kwargs):
+            args[0]._setup_channel()
+            async for data in f(*args, **kwargs):
+                yield data
+    elif inspect.iscoroutinefunction(f):
+        async def handler(*args, **kwargs):
+            args[0]._setup_channel()
+            return await f(*args, **kwargs)
+    else:
+        def handler(*args, **kwargs):
+            args[0]._setup_channel()
+            return f(*args, **kwargs)
+
+    return functools.wraps(f)(handler)
+
+
 class Transactions(object):
     def __init__(self):
         self.value = transactions.Value
@@ -140,9 +158,10 @@ class Etcd3Client(object):
         self.grpc_options = grpc_options
         self.loop = loop
 
-        self._setup_channel()
-
     def _setup_channel(self):
+        if hasattr(self, 'channel'):
+            return
+
         cert_params = [c is not None for c in (self.cert_cert, self.cert_key)]
         if self.ca_cert is not None:
             if all(cert_params):
@@ -192,9 +211,11 @@ class Etcd3Client(object):
 
     async def close(self):
         """Call the GRPC channel close semantics."""
-        await self.channel.close()
+        if hasattr(self, 'channel'):
+            await self.channel.close()
 
     async def __aenter__(self):
+        self._setup_channel()
         return self
 
     async def __aexit__(self, *args):
@@ -266,6 +287,8 @@ class Etcd3Client(object):
         return range_request
 
     @_handle_errors
+    @_ensure_channel
+    @_ensure_channel
     async def get(self, key, serializable=False):
         """
         Get the value of a key from etcd.
@@ -302,6 +325,8 @@ class Etcd3Client(object):
             return kv.value, KVMetadata(kv, range_response.header)
 
     @_handle_errors
+    @_ensure_channel
+    @_ensure_channel
     async def get_prefix(self, key_prefix, sort_order=None, sort_target='key',
                          keys_only=False):
         """
@@ -333,6 +358,7 @@ class Etcd3Client(object):
                 yield (kv.value, KVMetadata(kv, range_response.header))
 
     @_handle_errors
+    @_ensure_channel
     async def get_range(self, range_start, range_end, sort_order=None,
                         sort_target='key', **kwargs):
         """
@@ -364,6 +390,7 @@ class Etcd3Client(object):
                 yield (kv.value, KVMetadata(kv, range_response.header))
 
     @_handle_errors
+    @_ensure_channel
     async def get_all(self, sort_order=None, sort_target='key',
                       keys_only=False):
         """
@@ -402,6 +429,7 @@ class Etcd3Client(object):
         return put_request
 
     @_handle_errors
+    @_ensure_channel
     async def put(self, key, value, lease=None, prev_kv=False):
         """
         Save a value to etcd.
@@ -434,6 +462,7 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
+    @_ensure_channel
     async def replace(self, key, initial_value, new_value):
         """
         Atomically replace the value of a key with a new value.
@@ -472,6 +501,7 @@ class Etcd3Client(object):
         return delete_request
 
     @_handle_errors
+    @_ensure_channel
     async def delete(self, key, prev_kv=False, return_response=False):
         """
         Delete a single key in etcd.
@@ -498,6 +528,7 @@ class Etcd3Client(object):
         return delete_response.deleted >= 1
 
     @_handle_errors
+    @_ensure_channel
     async def delete_prefix(self, prefix):
         """Delete a range of keys with a prefix in etcd."""
         delete_request = self._build_delete_request(
@@ -512,6 +543,7 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
+    @_ensure_channel
     async def status(self):
         """Get the status of the responding member."""
         status_request = etcdrpc.StatusRequest()
@@ -537,6 +569,7 @@ class Etcd3Client(object):
                       status_response.raftTerm)
 
     @_handle_errors
+    @_ensure_channel
     async def add_watch_callback(self, *args, **kwargs):
         """
         Watch a key or range of keys and call a callback on every event.
@@ -556,6 +589,7 @@ class Etcd3Client(object):
             raise exceptions.WatchTimedOut()
 
     @_handle_errors
+    @_ensure_channel
     async def watch(self, key, **kwargs):
         """
         Watch a key.
@@ -598,6 +632,7 @@ class Etcd3Client(object):
         return iterator(), cancel
 
     @_handle_errors
+    @_ensure_channel
     async def watch_prefix(self, key_prefix, **kwargs):
         """Watches a range of keys with a prefix."""
         kwargs['range_end'] = \
@@ -605,6 +640,7 @@ class Etcd3Client(object):
         return await self.watch(key_prefix, **kwargs)
 
     @_handle_errors
+    @_ensure_channel
     async def watch_once(self, key, timeout=None, **kwargs):
         """
         Watch a key and stops after the first event.
@@ -629,6 +665,7 @@ class Etcd3Client(object):
             await self.cancel_watch(watch_id)
 
     @_handle_errors
+    @_ensure_channel
     async def watch_prefix_once(self, key_prefix, timeout=None, **kwargs):
         """
         Watches a range of keys with a prefix and stops after the first event.
@@ -641,6 +678,7 @@ class Etcd3Client(object):
         return await self.watch_once(key_prefix, timeout=timeout, **kwargs)
 
     @_handle_errors
+    @_ensure_channel
     async def cancel_watch(self, watch_id):
         """
         Stop watching a key or range of keys.
@@ -691,6 +729,7 @@ class Etcd3Client(object):
         return request_ops
 
     @_handle_errors
+    @_ensure_channel
     async def transaction(self, compare, success=None, failure=None):
         """
         Perform a transaction.
@@ -752,6 +791,7 @@ class Etcd3Client(object):
         return txn_response.succeeded, responses
 
     @_handle_errors
+    @_ensure_channel
     async def lease(self, ttl, lease_id=None):
         """
         Create a new lease.
@@ -778,6 +818,7 @@ class Etcd3Client(object):
                             etcd_client=self)
 
     @_handle_errors
+    @_ensure_channel
     async def revoke_lease(self, lease_id):
         """
         Revoke a lease.
@@ -793,8 +834,8 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
+    @_ensure_channel
     def refresh_lease(self, lease_id):
-
         async def request_stream():
             yield etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
 
@@ -805,6 +846,7 @@ class Etcd3Client(object):
             metadata=self.metadata)
 
     @_handle_errors
+    @_ensure_channel
     async def get_lease_info(self, lease_id, *, keys=True):
         # only available in etcd v3.1.0 and later
         ttl_request = etcdrpc.LeaseTimeToLiveRequest(ID=lease_id,
@@ -817,6 +859,7 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
+    @_ensure_channel
     def lock(self, name, ttl=60):
         """
         Create a new lock.
@@ -833,6 +876,7 @@ class Etcd3Client(object):
         return locks.Lock(name, ttl=ttl, etcd_client=self)
 
     @_handle_errors
+    @_ensure_channel
     async def add_member(self, urls):
         """
         Add a member into the cluster.
@@ -857,6 +901,7 @@ class Etcd3Client(object):
                                     etcd_client=self)
 
     @_handle_errors
+    @_ensure_channel
     async def remove_member(self, member_id):
         """
         Remove an existing member from the cluster.
@@ -872,6 +917,7 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
+    @_ensure_channel
     async def update_member(self, member_id, peer_urls):
         """
         Update the configuration of an existing member in the cluster.
@@ -890,6 +936,7 @@ class Etcd3Client(object):
         )
 
     # @property
+    @_ensure_channel
     async def members(self):
         """
         List of all members associated with the cluster.
@@ -913,6 +960,7 @@ class Etcd3Client(object):
                                        etcd_client=self)
 
     @_handle_errors
+    @_ensure_channel
     async def compact(self, revision, physical=False):
         """
         Compact the event history in etcd up to a given revision.
@@ -936,6 +984,7 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
+    @_ensure_channel
     async def defragment(self):
         """Defragment a member's backend database to recover storage space."""
         defrag_request = etcdrpc.DefragmentRequest()
@@ -947,6 +996,7 @@ class Etcd3Client(object):
         )
 
     @_handle_errors
+    @_ensure_channel
     async def hash(self):
         """
         Return the hash of the local KV state.
@@ -981,6 +1031,7 @@ class Etcd3Client(object):
         return alarm_request
 
     @_handle_errors
+    @_ensure_channel
     async def create_alarm(self, member_id=0):
         """Create an alarm.
 
@@ -1006,6 +1057,7 @@ class Etcd3Client(object):
                 for alarm in alarm_response.alarms]
 
     @_handle_errors
+    @_ensure_channel
     async def list_alarms(self, member_id=0, alarm_type='none'):
         """List the activated alarms.
 
@@ -1029,6 +1081,7 @@ class Etcd3Client(object):
             yield Alarm(alarm.alarm, alarm.memberID)
 
     @_handle_errors
+    @_ensure_channel
     async def disarm_alarm(self, member_id=0):
         """Cancel an alarm.
 
@@ -1051,6 +1104,7 @@ class Etcd3Client(object):
                 for alarm in alarm_response.alarms]
 
     @_handle_errors
+    @_ensure_channel
     async def snapshot(self, file_obj):
         """Take a snapshot of the database.
 

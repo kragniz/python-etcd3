@@ -73,6 +73,7 @@ def _out_quorum():
         for pid in pids:
             os.kill(pid, signal.SIGCONT)
 
+
 # def etcdctl2(*args):
 #     # endpoint = os.environ.get('PYTHON_ETCD_HTTP_URL')
 #     # if endpoint:
@@ -87,7 +88,6 @@ def _out_quorum():
 
 
 class TestEtcd3(object):
-
     class MockedException(grpc.RpcError):
         def __init__(self, code):
             self._code = code
@@ -154,7 +154,7 @@ class TestEtcd3(object):
         await etcd.put('/doot/put_1', string)
         out = etcdctl('get', '/doot/put_1')
         assert base64.b64decode(out['kvs'][0]['value']) == \
-            string.encode('utf-8')
+               string.encode('utf-8')
 
     # @given(
     #     characters(blacklist_categories=['Cs', 'Cc']),
@@ -237,7 +237,7 @@ class TestEtcd3(object):
             etcdctl('put', '/doot/watch', v)
             out = etcdctl('get', '/doot/watch')
             assert base64.b64decode(out['kvs'][0]['value']) == \
-                utils.to_bytes(v)
+                   utils.to_bytes(v)
 
         def update_key():
             # sleep to make watch can get the event
@@ -258,8 +258,7 @@ class TestEtcd3(object):
         events_iterator, cancel = await etcd.watch(b'/doot/watch')
         async for event in events_iterator:
             assert event.key == b'/doot/watch'
-            assert event.value == \
-                utils.to_bytes(str(change_count))
+            assert event.value == utils.to_bytes(str(change_count))
 
             # if cancel worked, we should not receive event 3
             assert event.value != utils.to_bytes('3')
@@ -284,7 +283,7 @@ class TestEtcd3(object):
             etcdctl('put', '/watchcompation', v)
             out = etcdctl('get', '/watchcompation')
             assert base64.b64decode(out['kvs'][0]['value']) == \
-                utils.to_bytes(v)
+                   utils.to_bytes(v)
 
         def update_key():
             update_etcd('1')
@@ -316,7 +315,7 @@ class TestEtcd3(object):
             async for event in events_iterator:
                 assert event.key == b'/watchcompation'
                 assert event.value == \
-                    utils.to_bytes(str(change_count))
+                       utils.to_bytes(str(change_count))
 
                 # if cancel worked, we should not receive event 3
                 assert event.value != utils.to_bytes('3')
@@ -331,6 +330,7 @@ class TestEtcd3(object):
 
     @pytest.mark.asyncio
     async def test_watch_exception_during_watch(self, etcd):
+        etcd._setup_channel()
 
         async def pass_exception_to_callback(callback):
             await asyncio.sleep(1)
@@ -359,18 +359,17 @@ class TestEtcd3(object):
 
     @pytest.mark.asyncio
     async def test_watch_timeout_on_establishment(self, event_loop):
-        foo_etcd = etcd3.client(timeout=3, loop=event_loop, backend="asyncio")
+        async with etcd3.client(timeout=3, loop=event_loop, backend="asyncio") as foo_etcd:
+            async def slow_watch_mock(*args, **kwargs):
+                await asyncio.sleep(4)
+                yield "foo"
 
-        async def slow_watch_mock(*args, **kwargs):
-            await asyncio.sleep(4)
-            yield "foo"
+            foo_etcd.watcher._watch_stub.Watch = slow_watch_mock  # noqa
 
-        foo_etcd.watcher._watch_stub.Watch = slow_watch_mock  # noqa
-
-        with pytest.raises(etcd3.exceptions.WatchTimedOut):
-            events_iterator, cancel = await foo_etcd.watch('foo')
-            async for _ in events_iterator:
-                pass
+            with pytest.raises(etcd3.exceptions.WatchTimedOut):
+                events_iterator, cancel = await foo_etcd.watch('foo')
+                async for _ in events_iterator:
+                    pass
 
     @pytest.mark.asyncio
     async def test_watch_prefix(self, etcd):
@@ -378,7 +377,7 @@ class TestEtcd3(object):
             etcdctl('put', '/doot/watch/prefix/' + v, v)
             out = etcdctl('get', '/doot/watch/prefix/' + v)
             assert base64.b64decode(out['kvs'][0]['value']) == \
-                utils.to_bytes(v)
+                   utils.to_bytes(v)
 
         def update_key():
             # sleep to make watch can get the event
@@ -400,9 +399,9 @@ class TestEtcd3(object):
             '/doot/watch/prefix/')
         async for event in events_iterator:
             assert event.key == \
-                utils.to_bytes('/doot/watch/prefix/{}'.format(change_count))
+                   utils.to_bytes('/doot/watch/prefix/{}'.format(change_count))
             assert event.value == \
-                utils.to_bytes(str(change_count))
+                   utils.to_bytes(str(change_count))
 
             # if cancel worked, we should not receive event 3
             assert event.value != utils.to_bytes('3')
@@ -729,6 +728,7 @@ class TestEtcd3(object):
 
     @pytest.mark.asyncio
     async def test_internal_exception_on_internal_error(self, etcd):
+        etcd._setup_channel()
         exception = self.MockedException(grpc.StatusCode.INTERNAL)
         kv_mock = mock.MagicMock()
         kv_mock.Range.side_effect = exception
@@ -740,6 +740,7 @@ class TestEtcd3(object):
     @pytest.mark.asyncio
     async def test_connection_failure_exception_on_connection_failure(
             self, etcd):
+        etcd._setup_channel()
         exception = self.MockedException(grpc.StatusCode.UNAVAILABLE)
         kv_mock = mock.MagicMock()
         kv_mock.Range.side_effect = exception
@@ -918,6 +919,8 @@ class TestClient(object):
             backend="asyncio",
             loop=event_loop
         )
+        client._setup_channel()
+
         assert client.uses_secure_channel is True
 
     def test_secure_channel_ca_cert_only(self, event_loop):
@@ -928,6 +931,7 @@ class TestClient(object):
             backend="asyncio",
             loop=event_loop
         )
+        client._setup_channel()
         assert client.uses_secure_channel is True
 
     def test_secure_channel_ca_cert_and_key_raise_exception(self, event_loop):
@@ -964,6 +968,7 @@ class TestClient(object):
             backend="asyncio",
             loop=event_loop
         )
+        client._setup_channel()
         assert client.uses_secure_channel is False
 
     @mock.patch('etcd3.etcdrpc.AuthStub')
@@ -980,6 +985,7 @@ class TestClient(object):
             backend="asyncio",
             loop=event_loop
         )
+        client._setup_channel()
 
         assert client.call_credentials is not None
         self._disable_auth_in_etcd()
@@ -1018,7 +1024,7 @@ class TestCompares(object):
         version_compare = tx.version(key) > 92
         assert version_compare.op == etcdrpc.Compare.GREATER
         assert version_compare.build_message().target == \
-            etcdrpc.Compare.VERSION
+               etcdrpc.Compare.VERSION
 
     def test_compare_value(self):
         key = 'key'
