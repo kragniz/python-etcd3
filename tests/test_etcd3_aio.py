@@ -361,19 +361,16 @@ class TestEtcd3(object):
     async def test_watch_timeout_on_establishment(self, event_loop):
         foo_etcd = etcd3.client(timeout=3, loop=event_loop, backend="asyncio")
 
-        async def slow_response():
+        async def slow_watch_mock(*args, **kwargs):
             await asyncio.sleep(4)
             yield "foo"
-
-        def slow_watch_mock(*args, **kwargs):
-            return slow_response
 
         foo_etcd.watcher._watch_stub.Watch = slow_watch_mock  # noqa
 
         with pytest.raises(etcd3.exceptions.WatchTimedOut):
             events_iterator, cancel = await foo_etcd.watch('foo')
             async for _ in events_iterator:
-                _
+                pass
 
     @pytest.mark.asyncio
     async def test_watch_prefix(self, etcd):

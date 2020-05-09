@@ -89,11 +89,15 @@ class Watcher(object):
             await self._request_queue.put(rq)
             self._new_watch = new_watch
 
-            # Wait for the request to be completed, or timeout.
             try:
-                await asyncio.wait_for(self._new_watch_cond.wait(), self.timeout)
+                # Wait for the request to be completed, or timeout.
+                try:
+                    await asyncio.wait_for(self._new_watch_cond.wait(), self.timeout)
+                except asyncio.TimeoutError:
+                    raise exceptions.WatchTimedOut()
 
-                # If the request not completed yet, then raise a timeout exception.
+                # If the request not completed yet, then raise a timeout
+                # exception.
                 if new_watch.id is None and new_watch.err is None:
                     raise exceptions.WatchTimedOut()
 
