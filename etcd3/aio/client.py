@@ -115,58 +115,69 @@ class Etcd3Client(object):
 
         self._url = '{host}:{port}'.format(host=host, port=port)
         self.metadata = None
+        self.timeout = timeout
+        self.call_credentials = None
+        self.transactions = Transactions()
 
-        cert_params = [c is not None for c in (cert_cert, cert_key)]
-        if ca_cert is not None:
+        cert_params = (cert_cert, cert_key)
+        if any(cert_params) and None in cert_params:
+            raise ValueError(
+                'to use a secure channel ca_cert is required by itself, '
+                'or cert_cert and cert_key must both be specified.')
+
+        cred_params = (user, password)
+        if any(cred_params) and None in cred_params:
+            raise Exception(
+                'if using authentication credentials both user and password '
+                'must be specified.'
+            )
+
+        self.ca_cert = ca_cert
+        self.cert_key = cert_key
+        self.cert_cert = cert_cert
+        self.user = user
+        self.password = password
+        self.grpc_options = grpc_options
+        self.loop = loop
+
+        self._setup_channel()
+
+    def _setup_channel(self):
+        cert_params = [c is not None for c in (self.cert_cert, self.cert_key)]
+        if self.ca_cert is not None:
             if all(cert_params):
                 credentials = self._get_secure_creds(
-                    ca_cert,
-                    cert_key,
-                    cert_cert
+                    self.ca_cert,
+                    self.cert_key,
+                    self.cert_cert
                 )
                 self.uses_secure_channel = True
                 self.channel = aiogrpc.secure_channel(self._url, credentials,
-                                                      options=grpc_options,
-                                                      loop=loop)
-            elif any(cert_params):
-                # some of the cert parameters are set
-                raise ValueError(
-                    'to use a secure channel ca_cert is required by itself, '
-                    'or cert_cert and cert_key must both be specified.')
+                                                      options=self.grpc_options,
+                                                      loop=self.loop)
             else:
-                credentials = self._get_secure_creds(ca_cert, None, None)
+                credentials = self._get_secure_creds(self.ca_cert, None, None)
                 self.uses_secure_channel = True
                 self.channel = aiogrpc.secure_channel(self._url, credentials,
-                                                      options=grpc_options,
-                                                      loop=loop)
+                                                      options=self.grpc_options,
+                                                      loop=self.loop)
         else:
             self.uses_secure_channel = False
             self.channel = aiogrpc.insecure_channel(self._url,
-                                                    options=grpc_options,
-                                                    loop=loop)
-
-        self.timeout = timeout
-        self.call_credentials = None
-
-        cred_params = [c is not None for c in (user, password)]
-
+                                                    options=self.grpc_options,
+                                                    loop=self.loop)
+        cred_params = [c is not None for c in (self.user, self.password)]
         if all(cred_params):
             self.auth_stub = etcdrpc.AuthStub(self.channel)
             auth_request = etcdrpc.AuthenticateRequest(
-                name=user,
-                password=password
+                name=self.user,
+                password=self.password
             )
 
             resp = self.auth_stub.Authenticate(auth_request, self.timeout)
             self.metadata = (('token', resp.token),)
             self.call_credentials = grpc.metadata_call_credentials(
                 EtcdTokenCallCredentials(resp.token))
-
-        elif any(cred_params):
-            raise Exception(
-                'if using authentication credentials both user and password '
-                'must be specified.'
-            )
 
         self.kvstub = etcdrpc.KVStub(self.channel)
         self.watcher = watch.Watcher(
@@ -178,7 +189,6 @@ class Etcd3Client(object):
         self.clusterstub = etcdrpc.ClusterStub(self.channel)
         self.leasestub = etcdrpc.LeaseStub(self.channel)
         self.maintenancestub = etcdrpc.MaintenanceStub(self.channel)
-        self.transactions = Transactions()
 
     async def close(self):
         """Call the GRPC channel close semantics."""
