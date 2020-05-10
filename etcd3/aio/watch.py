@@ -12,10 +12,6 @@ import etcd3.utils as utils
 _log = logging.getLogger(__name__)
 
 
-def create_task(coro):
-    return asyncio.get_event_loop().create_task(coro)
-
-
 class Watch(object):
 
     def __init__(self, watch_id, iterator=None, etcd_client=None):
@@ -77,7 +73,7 @@ class Watcher(object):
         async with self._lock:
             # Start the callback thread if it is not yet running.
             if not self._callback_thread:
-                self._callback_thread = create_task(self._run())
+                self._callback_thread = asyncio.get_event_loop().create_task(self._run())
 
             # Only one create watch request can be pending at a time, so if
             # there one already, then wait for it to complete first.
