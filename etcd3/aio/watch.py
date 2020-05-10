@@ -3,7 +3,7 @@ import logging
 
 import grpc
 
-import etcd3.etcdrpc as etcdrpc
+import etcd3.aio.etcdrpc as etcdrpc
 import etcd3.events as events
 import etcd3.exceptions as exceptions
 from etcd3.watch import create_watch_request
@@ -98,14 +98,12 @@ class Watcher(object):
             await self._cancel_no_lock(watch_id)
 
     async def _run(self):
-        while True:
-            response_iter = self._watch_stub.Watch(
-                _new_request_iter(self._request_queue),
-                credentials=self._credentials,
-                metadata=self._metadata)
+        while request := await self._request_queue.get():
             try:
-                async for rs in response_iter:
-                    await self._handle_response(rs)
+                rs = await self._watch_stub.Watch(
+                    messages=[request],
+                    metadata=self._metadata,
+                    timeout=1)
 
             except grpc.RpcError as err:
                 async with self._lock:
@@ -124,6 +122,8 @@ class Watcher(object):
 
                 for callback in callbacks.values():
                     await _safe_callback(callback, err)
+            else:
+                await self._handle_response(rs)
 
     async def _handle_response(self, rs):
         async with self._lock:

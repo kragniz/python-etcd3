@@ -1,16 +1,18 @@
 import asyncio
 import functools
 import inspect
+import warnings
 
 from aiofiles import open
 import aiogrpc
+from grpclib.client import Channel
 import grpc
 
 import etcd3.aio.leases as leases
 import etcd3.aio.locks as locks
 import etcd3.aio.members
 import etcd3.aio.watch as watch
-import etcd3.etcdrpc as etcdrpc
+import etcd3.aio.etcdrpc as etcdrpc
 import etcd3.exceptions as exceptions
 import etcd3.utils as utils
 from etcd3.base_client import BaseClient, EtcdTokenCallCredentials, _translate_exception, \
@@ -63,10 +65,14 @@ class Etcd3Client(BaseClient):
                  user=None, password=None, grpc_options=None,
                  loop=None):
 
-        self._url = '{host}:{port}'.format(host=host, port=port)
+        self.host = host
+        self.port = port
         self.timeout = timeout
         self.call_credentials = None
         self.transactions = Transactions()
+
+        if grpc_options:
+            warnings.warn("grpc_options can't be used with asyncio backend")
 
         cert_params = (cert_cert, cert_key)
         if any(cert_params) and None in cert_params:
@@ -86,7 +92,6 @@ class Etcd3Client(BaseClient):
         self.cert_cert = cert_cert
         self.user = user
         self.password = password
-        self.grpc_options = grpc_options
         self.loop = loop
 
         self._init_channel_attrs()
@@ -118,20 +123,20 @@ class Etcd3Client(BaseClient):
                     self.cert_cert
                 )
                 self.uses_secure_channel = True
-                self.channel = aiogrpc.secure_channel(self._url, credentials,
-                                                      options=self.grpc_options,
-                                                      loop=self.loop)
+                # self.channel = aiogrpc.secure_channel(self._url, credentials,
+                #                                       loop=self.loop)
+                self.channel = Channel(host=self.host, port=self.port, loop=self.loop)
             else:
                 credentials = await self._get_secure_creds(self.ca_cert, None, None)
                 self.uses_secure_channel = True
-                self.channel = aiogrpc.secure_channel(self._url, credentials,
-                                                      options=self.grpc_options,
-                                                      loop=self.loop)
+                # self.channel = aiogrpc.secure_channel(self._url, credentials,
+                #                                       options=self.grpc_options,
+                #                                       loop=self.loop)
+                self.channel = Channel(host=self.host, port=self.port, loop=self.loop)
+
         else:
             self.uses_secure_channel = False
-            self.channel = aiogrpc.insecure_channel(self._url,
-                                                    options=self.grpc_options,
-                                                    loop=self.loop)
+            self.channel = Channel(host=self.host, port=self.port, loop=self.loop)
 
         cred_params = [c is not None for c in (self.user, self.password)]
         if all(cred_params):
@@ -160,7 +165,7 @@ class Etcd3Client(BaseClient):
     async def close(self):
         """Call the GRPC channel close semantics."""
         if self.channel:
-            await self.channel.close()
+            self.channel.close()
             self._init_channel_attrs()
 
     async def __aenter__(self):
@@ -218,8 +223,7 @@ class Etcd3Client(BaseClient):
             serializable=serializable)
         range_response = await self.kvstub.Range(
             range_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -351,8 +355,7 @@ class Etcd3Client(BaseClient):
                                               prev_kv=prev_kv)
         return await self.kvstub.Put(
             put_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -402,8 +405,7 @@ class Etcd3Client(BaseClient):
         delete_request = self._build_delete_request(key, prev_kv=prev_kv)
         delete_response = await self.kvstub.DeleteRange(
             delete_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
         if return_response:
@@ -420,8 +422,7 @@ class Etcd3Client(BaseClient):
         )
         return await self.kvstub.DeleteRange(
             delete_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -432,8 +433,7 @@ class Etcd3Client(BaseClient):
         status_request = etcdrpc.StatusRequest()
         status_response = await self.maintenancestub.Status(
             status_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -610,8 +610,7 @@ class Etcd3Client(BaseClient):
                                                  failure=failure_ops)
         txn_response = await self.kvstub.Txn(
             transaction_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -651,8 +650,7 @@ class Etcd3Client(BaseClient):
         lease_grant_request = etcdrpc.LeaseGrantRequest(TTL=ttl, ID=lease_id)
         lease_grant_response = await self.leasestub.LeaseGrant(
             lease_grant_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
         return leases.Lease(lease_id=lease_grant_response.ID,
@@ -670,8 +668,7 @@ class Etcd3Client(BaseClient):
         lease_revoke_request = etcdrpc.LeaseRevokeRequest(ID=lease_id)
         await self.leasestub.LeaseRevoke(
             lease_revoke_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -686,8 +683,7 @@ class Etcd3Client(BaseClient):
 
         return self.leasestub.LeaseKeepAlive(
             request_stream(),
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata)
 
     @_handle_errors
@@ -698,8 +694,7 @@ class Etcd3Client(BaseClient):
                                                      keys=keys)
         return await self.leasestub.LeaseTimeToLive(
             ttl_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -732,8 +727,7 @@ class Etcd3Client(BaseClient):
 
         member_add_response = await self.clusterstub.MemberAdd(
             member_add_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -755,8 +749,7 @@ class Etcd3Client(BaseClient):
         member_rm_request = etcdrpc.MemberRemoveRequest(ID=member_id)
         await self.clusterstub.MemberRemove(
             member_rm_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -774,8 +767,7 @@ class Etcd3Client(BaseClient):
                                                             peerURLs=peer_urls)
         await self.clusterstub.MemberUpdate(
             member_update_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -790,8 +782,7 @@ class Etcd3Client(BaseClient):
         member_list_request = etcdrpc.MemberListRequest()
         member_list_response = await self.clusterstub.MemberList(
             member_list_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -821,8 +812,7 @@ class Etcd3Client(BaseClient):
                                                     physical=physical)
         await self.kvstub.Compact(
             compact_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -833,8 +823,7 @@ class Etcd3Client(BaseClient):
         defrag_request = etcdrpc.DefragmentRequest()
         await self.maintenancestub.Defragment(
             defrag_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -868,8 +857,7 @@ class Etcd3Client(BaseClient):
                                                   'no space')
         alarm_response = await self.maintenancestub.Alarm(
             alarm_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -892,8 +880,7 @@ class Etcd3Client(BaseClient):
                                                   alarm_type)
         alarm_response = await self.maintenancestub.Alarm(
             alarm_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -915,8 +902,7 @@ class Etcd3Client(BaseClient):
                                                   'no space')
         alarm_response = await self.maintenancestub.Alarm(
             alarm_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -933,8 +919,7 @@ class Etcd3Client(BaseClient):
         snapshot_request = etcdrpc.SnapshotRequest()
         snapshot_response = self.maintenancestub.Snapshot(
             snapshot_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
