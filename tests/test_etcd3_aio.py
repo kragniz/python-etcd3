@@ -332,7 +332,7 @@ class TestEtcd3(object):
 
     @pytest.mark.asyncio
     async def test_watch_exception_during_watch(self, etcd):
-        etcd._setup_channel()
+        etcd.open()
 
         async def pass_exception_to_callback(callback):
             await asyncio.sleep(1)
@@ -730,7 +730,7 @@ class TestEtcd3(object):
 
     @pytest.mark.asyncio
     async def test_internal_exception_on_internal_error(self, etcd):
-        etcd._setup_channel()
+        etcd.open()
         exception = self.MockedException(grpc.StatusCode.INTERNAL)
         kv_mock = mock.MagicMock()
         kv_mock.Range.side_effect = exception
@@ -742,7 +742,7 @@ class TestEtcd3(object):
     @pytest.mark.asyncio
     async def test_connection_failure_exception_on_connection_failure(
             self, etcd):
-        etcd._setup_channel()
+        etcd.open()
         exception = self.MockedException(grpc.StatusCode.UNAVAILABLE)
         kv_mock = mock.MagicMock()
         kv_mock.Range.side_effect = exception
@@ -922,7 +922,7 @@ class TestClient(object):
             backend="asyncio",
             loop=event_loop
         )
-        await client._setup_channel()
+        await client.open()
 
         assert client.uses_secure_channel is True
 
@@ -935,7 +935,7 @@ class TestClient(object):
             backend="asyncio",
             loop=event_loop
         )
-        await client._setup_channel()
+        await client.open()
 
         assert client.uses_secure_channel is True
 
@@ -974,7 +974,7 @@ class TestClient(object):
             backend="asyncio",
             loop=event_loop
         )
-        await client._setup_channel()
+        await client.open()
 
         assert client.uses_secure_channel is False
 
@@ -993,7 +993,7 @@ class TestClient(object):
                 backend="asyncio",
                 loop=event_loop
             )
-            await client._setup_channel()
+            await client.open()
 
             assert client.call_credentials is not None
 

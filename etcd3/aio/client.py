@@ -12,26 +12,9 @@ import etcd3.aio.members
 import etcd3.aio.watch as watch
 import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions as exceptions
-import etcd3.transactions as transactions
 import etcd3.utils as utils
-
-# from six.moves import queue
-
-
-_EXCEPTIONS_BY_CODE = {
-    grpc.StatusCode.INTERNAL: exceptions.InternalServerError,
-    grpc.StatusCode.UNAVAILABLE: exceptions.ConnectionFailedError,
-    grpc.StatusCode.DEADLINE_EXCEEDED: exceptions.ConnectionTimeoutError,
-    grpc.StatusCode.FAILED_PRECONDITION: exceptions.PreconditionFailedError,
-}
-
-
-def _translate_exception(exc):
-    code = exc.code()
-    exception = _EXCEPTIONS_BY_CODE.get(code)
-    if exception is None:
-        raise
-    raise exception
+from etcd3.base_client import BaseClient, EtcdTokenCallCredentials, _translate_exception, \
+    Transactions, KVMetadata, Status, Alarm
 
 
 def _handle_errors(f):  # noqa: C901
@@ -61,12 +44,12 @@ def _handle_errors(f):  # noqa: C901
 def _ensure_channel(f):
     if inspect.isasyncgenfunction(f):
         async def handler(*args, **kwargs):
-            await args[0]._setup_channel()
+            await args[0].open()
             async for data in f(*args, **kwargs):
                 yield data
     elif inspect.iscoroutinefunction(f):
         async def handler(*args, **kwargs):
-            await args[0]._setup_channel()
+            await args[0].open()
             return await f(*args, **kwargs)
     else:
         raise TypeError
@@ -74,63 +57,13 @@ def _ensure_channel(f):
     return functools.wraps(f)(handler)
 
 
-class Transactions(object):
-    def __init__(self):
-        self.value = transactions.Value
-        self.version = transactions.Version
-        self.create = transactions.Create
-        self.mod = transactions.Mod
-
-        self.put = transactions.Put
-        self.get = transactions.Get
-        self.delete = transactions.Delete
-        self.txn = transactions.Txn
-
-
-class KVMetadata(object):
-    def __init__(self, keyvalue, header):
-        self.key = keyvalue.key
-        self.create_revision = keyvalue.create_revision
-        self.mod_revision = keyvalue.mod_revision
-        self.version = keyvalue.version
-        self.lease_id = keyvalue.lease
-        self.response_header = header
-
-
-class Status(object):
-    def __init__(self, version, db_size, leader, raft_index, raft_term):
-        self.version = version
-        self.db_size = db_size
-        self.leader = leader
-        self.raft_index = raft_index
-        self.raft_term = raft_term
-
-
-class Alarm(object):
-    def __init__(self, alarm_type, member_id):
-        self.alarm_type = alarm_type
-        self.member_id = member_id
-
-
-class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
-    """Metadata wrapper for raw access token credentials."""
-
-    def __init__(self, access_token):
-        self._access_token = access_token
-
-    def __call__(self, context, callback):
-        metadata = (('token', self._access_token),)
-        callback(metadata, None)
-
-
-class Etcd3Client(object):
+class Etcd3Client(BaseClient):
     def __init__(self, host='localhost', port=2379,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
                  user=None, password=None, grpc_options=None,
                  loop=None):
 
         self._url = '{host}:{port}'.format(host=host, port=port)
-        self.metadata = None
         self.timeout = timeout
         self.call_credentials = None
         self.transactions = Transactions()
@@ -156,8 +89,24 @@ class Etcd3Client(object):
         self.grpc_options = grpc_options
         self.loop = loop
 
-    async def _setup_channel(self):
-        if hasattr(self, 'channel'):
+        self._init_channel_attrs()
+
+    def _init_channel_attrs(self):
+        # These attributes will be assigned during opening of GRPC channel
+        self.channel = None
+        self.metadata = None
+        self.uses_secure_channel = None
+        self.auth_stub = None
+        self.kvstub = None
+        self.watcher = None
+        self.clusterstub = None
+        self.leasestub = None
+        self.maintenancestub = None
+
+    async def open(self):
+        """Opens GRPC channel"""
+
+        if self.channel:
             return
 
         cert_params = [c is not None for c in (self.cert_cert, self.cert_key)]
@@ -210,17 +159,19 @@ class Etcd3Client(object):
 
     async def close(self):
         """Call the GRPC channel close semantics."""
-        if hasattr(self, 'channel'):
+        if self.channel:
             await self.channel.close()
+            self._init_channel_attrs()
 
     async def __aenter__(self):
-        await self._setup_channel()
+        await self.open()
         return self
 
     async def __aexit__(self, *args):
         await self.close()
 
-    async def _get_secure_creds(self, ca_cert, cert_key=None, cert_cert=None):
+    @staticmethod
+    async def _get_secure_creds(ca_cert, cert_key=None, cert_cert=None):
         cert_key_file = None
         cert_cert_file = None
 
@@ -241,52 +192,7 @@ class Etcd3Client(object):
             cert_cert_file
         )
 
-    def _build_get_range_request(self, key,
-                                 range_end=None,
-                                 limit=None,
-                                 revision=None,
-                                 sort_order=None,
-                                 sort_target='key',
-                                 serializable=None,
-                                 keys_only=False,
-                                 count_only=None,
-                                 min_mod_revision=None,
-                                 max_mod_revision=None,
-                                 min_create_revision=None,
-                                 max_create_revision=None):
-        range_request = etcdrpc.RangeRequest()
-        range_request.key = utils.to_bytes(key)
-        range_request.keys_only = keys_only
-        if range_end is not None:
-            range_request.range_end = utils.to_bytes(range_end)
-
-        if sort_order is None:
-            range_request.sort_order = etcdrpc.RangeRequest.NONE
-        elif sort_order == 'ascend':
-            range_request.sort_order = etcdrpc.RangeRequest.ASCEND
-        elif sort_order == 'descend':
-            range_request.sort_order = etcdrpc.RangeRequest.DESCEND
-        else:
-            raise ValueError('unknown sort order: "{}"'.format(sort_order))
-
-        if sort_target is None or sort_target == 'key':
-            range_request.sort_target = etcdrpc.RangeRequest.KEY
-        elif sort_target == 'version':
-            range_request.sort_target = etcdrpc.RangeRequest.VERSION
-        elif sort_target == 'create':
-            range_request.sort_target = etcdrpc.RangeRequest.CREATE
-        elif sort_target == 'mod':
-            range_request.sort_target = etcdrpc.RangeRequest.MOD
-        elif sort_target == 'value':
-            range_request.sort_target = etcdrpc.RangeRequest.VALUE
-        else:
-            raise ValueError('sort_target must be one of "key", '
-                             '"version", "create", "mod" or "value"')
-
-        return range_request
-
     @_handle_errors
-    @_ensure_channel
     @_ensure_channel
     async def get(self, key, serializable=False):
         """
@@ -324,7 +230,6 @@ class Etcd3Client(object):
             return kv.value, KVMetadata(kv, range_response.header)
 
     @_handle_errors
-    @_ensure_channel
     @_ensure_channel
     async def get_prefix(self, key_prefix, sort_order=None, sort_target='key',
                          keys_only=False):
@@ -418,15 +323,6 @@ class Etcd3Client(object):
             for kv in range_response.kvs:
                 yield (kv.value, KVMetadata(kv, range_response.header))
 
-    def _build_put_request(self, key, value, lease=None, prev_kv=False):
-        put_request = etcdrpc.PutRequest()
-        put_request.key = utils.to_bytes(key)
-        put_request.value = utils.to_bytes(value)
-        put_request.lease = utils.lease_to_id(lease)
-        put_request.prev_kv = prev_kv
-
-        return put_request
-
     @_handle_errors
     @_ensure_channel
     async def put(self, key, value, lease=None, prev_kv=False):
@@ -486,18 +382,6 @@ class Etcd3Client(object):
         )
 
         return status
-
-    def _build_delete_request(self, key,
-                              range_end=None,
-                              prev_kv=False):
-        delete_request = etcdrpc.DeleteRangeRequest()
-        delete_request.key = utils.to_bytes(key)
-        delete_request.prev_kv = prev_kv
-
-        if range_end is not None:
-            delete_request.range_end = utils.to_bytes(range_end)
-
-        return delete_request
 
     @_handle_errors
     @_ensure_channel
@@ -686,47 +570,6 @@ class Etcd3Client(object):
         """
         await self.watcher.cancel(watch_id)
 
-    def _ops_to_requests(self, ops):
-        """
-        Return a list of grpc requests.
-
-        Returns list from an input list of etcd3.transactions.{Put, Get,
-        Delete, Txn} objects.
-        """
-        request_ops = []
-        for op in ops:
-            if isinstance(op, transactions.Put):
-                request = self._build_put_request(op.key, op.value,
-                                                  op.lease, op.prev_kv)
-                request_op = etcdrpc.RequestOp(request_put=request)
-                request_ops.append(request_op)
-
-            elif isinstance(op, transactions.Get):
-                request = self._build_get_range_request(op.key, op.range_end)
-                request_op = etcdrpc.RequestOp(request_range=request)
-                request_ops.append(request_op)
-
-            elif isinstance(op, transactions.Delete):
-                request = self._build_delete_request(op.key, op.range_end,
-                                                     op.prev_kv)
-                request_op = etcdrpc.RequestOp(request_delete_range=request)
-                request_ops.append(request_op)
-
-            elif isinstance(op, transactions.Txn):
-                compare = [c.build_message() for c in op.compare]
-                success_ops = self._ops_to_requests(op.success)
-                failure_ops = self._ops_to_requests(op.failure)
-                request = etcdrpc.TxnRequest(compare=compare,
-                                             success=success_ops,
-                                             failure=failure_ops)
-                request_op = etcdrpc.RequestOp(request_txn=request)
-                request_ops.append(request_op)
-
-            else:
-                raise Exception(
-                    'Unknown request class {}'.format(op.__class__))
-        return request_ops
-
     @_handle_errors
     @_ensure_channel
     async def transaction(self, compare, success=None, failure=None):
@@ -838,7 +681,7 @@ class Etcd3Client(object):
 
         async def request_stream():
             nonlocal client
-            await client._setup_channel()
+            await client.open()
             yield etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
 
         return self.leasestub.LeaseKeepAlive(
@@ -936,7 +779,6 @@ class Etcd3Client(object):
             metadata=self.metadata
         )
 
-    # @property
     @_ensure_channel
     async def members(self):
         """
@@ -1007,29 +849,6 @@ class Etcd3Client(object):
         """
         hash_request = etcdrpc.HashRequest()
         return (await self.maintenancestub.Hash(hash_request)).hash
-
-    def _build_alarm_request(self, alarm_action, member_id, alarm_type):
-        alarm_request = etcdrpc.AlarmRequest()
-
-        if alarm_action == 'get':
-            alarm_request.action = etcdrpc.AlarmRequest.GET
-        elif alarm_action == 'activate':
-            alarm_request.action = etcdrpc.AlarmRequest.ACTIVATE
-        elif alarm_action == 'deactivate':
-            alarm_request.action = etcdrpc.AlarmRequest.DEACTIVATE
-        else:
-            raise ValueError('Unknown alarm action: {}'.format(alarm_action))
-
-        alarm_request.memberID = member_id
-
-        if alarm_type == 'none':
-            alarm_request.alarm = etcdrpc.NONE
-        elif alarm_type == 'no space':
-            alarm_request.alarm = etcdrpc.NOSPACE
-        else:
-            raise ValueError('Unknown alarm type: {}'.format(alarm_type))
-
-        return alarm_request
 
     @_handle_errors
     @_ensure_channel
