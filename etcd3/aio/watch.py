@@ -6,8 +6,7 @@ import grpc
 import etcd3.etcdrpc as etcdrpc
 import etcd3.events as events
 import etcd3.exceptions as exceptions
-import etcd3.utils as utils
-
+from etcd3.watch import create_watch_request
 
 _log = logging.getLogger(__name__)
 
@@ -45,30 +44,13 @@ class Watcher(object):
         self._new_watch_cond = asyncio.Condition(lock=self._lock)
         self._new_watch = None
 
-    def _create_watch_request(self, key, range_end=None, start_revision=None,
-                              progress_notify=False, filters=None,
-                              prev_kv=False):
-        create_watch = etcdrpc.WatchCreateRequest()
-        create_watch.key = utils.to_bytes(key)
-        if range_end is not None:
-            create_watch.range_end = utils.to_bytes(range_end)
-        if start_revision is not None:
-            create_watch.start_revision = start_revision
-        if progress_notify:
-            create_watch.progress_notify = progress_notify
-        if filters is not None:
-            create_watch.filters = filters
-        if prev_kv:
-            create_watch.prev_kv = prev_kv
-        return etcdrpc.WatchRequest(create_request=create_watch)
-
     async def add_callback(self, key, callback, range_end=None,  # noqa: C901
                            start_revision=None, progress_notify=False,
                            filters=None, prev_kv=False):
-        rq = self._create_watch_request(key, range_end=range_end,
-                                        start_revision=start_revision,
-                                        progress_notify=progress_notify,
-                                        filters=filters, prev_kv=prev_kv)
+        rq = create_watch_request(key, range_end=range_end,
+                                  start_revision=start_revision,
+                                  progress_notify=progress_notify,
+                                  filters=filters, prev_kv=prev_kv)
 
         async with self._lock:
             # Start the callback thread if it is not yet running.
