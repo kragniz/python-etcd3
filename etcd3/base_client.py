@@ -78,7 +78,7 @@ class BaseClient(object):
                                  revision=None,
                                  sort_order=None,
                                  sort_target='key',
-                                 serializable=None,
+                                 serializable=False,
                                  keys_only=False,
                                  count_only=None,
                                  min_mod_revision=None,
@@ -113,6 +113,8 @@ class BaseClient(object):
         else:
             raise ValueError('sort_target must be one of "key", '
                              '"version", "create", "mod" or "value"')
+
+        range_request.serializable = serializable
 
         return range_request
 
