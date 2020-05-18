@@ -193,14 +193,6 @@ class _NewWatch(object):
         self.err = None
 
 
-async def _new_request_iter(_request_queue):
-    while True:
-        rq = await _request_queue.get()
-        if rq is None:
-            return
-        yield rq
-
-
 async def _safe_callback(callback, event_or_err):
     try:
         await callback(event_or_err)
