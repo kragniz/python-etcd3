@@ -161,6 +161,7 @@ class TestEtcd3(object):
     #     characters(blacklist_categories=['Cs', 'Cc']),
     #     characters(blacklist_categories=['Cs', 'Cc']),
     # )
+    @pytest.mark.asyncio
     async def test_get_key_serializable(self, etcd, key="foo", string="xxx"):
         etcdctl('put', '/doot/' + key, string)
         with _out_quorum():
