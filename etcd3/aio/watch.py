@@ -2,11 +2,12 @@ import asyncio
 import logging
 
 import grpc
+import grpclib
 
 import etcd3.aio.etcdrpc as etcdrpc
 import etcd3.events as events
 import etcd3.exceptions as exceptions
-from etcd3.watch import create_watch_request
+import etcd3.utils as utils
 
 _log = logging.getLogger(__name__)
 
@@ -47,10 +48,10 @@ class Watcher(object):
     async def add_callback(self, key, callback, range_end=None,  # noqa: C901
                            start_revision=None, progress_notify=False,
                            filters=None, prev_kv=False):
-        rq = create_watch_request(key, range_end=range_end,
-                                  start_revision=start_revision,
-                                  progress_notify=progress_notify,
-                                  filters=filters, prev_kv=prev_kv)
+        rq = self._create_watch_request(key, range_end=range_end,
+                                        start_revision=start_revision,
+                                        progress_notify=progress_notify,
+                                        filters=filters, prev_kv=prev_kv)
 
         async with self._lock:
             # Start the callback thread if it is not yet running.
@@ -98,32 +99,30 @@ class Watcher(object):
             await self._cancel_no_lock(watch_id)
 
     async def _run(self):
-        while request := await self._request_queue.get():
-            try:
-                rs = await self._watch_stub.Watch(
-                    messages=[request],
-                    metadata=self._metadata,
-                    timeout=1)
+        async with self._watch_stub.Watch.open(
+                timeout=self.timeout, metadata=self._metadata) as stream:
+            while request := await self._request_queue.get():
+                try:
+                    await stream.send_message(request)
+                    while response := await stream.recv_message():
+                        await self._handle_response(response)
+                except grpclib.exceptions.StreamTerminatedError as err:
+                    async with self._lock:
+                        if self._new_watch:
+                            self._new_watch.err = err
+                            self._new_watch_cond.notify_all()
 
-            except grpc.RpcError as err:
-                async with self._lock:
-                    if self._new_watch:
-                        self._new_watch.err = err
-                        self._new_watch_cond.notify_all()
+                        callbacks = self._callbacks
+                        self._callbacks = {}
 
-                    callbacks = self._callbacks
-                    self._callbacks = {}
+                        # Rotate request queue. This way we can terminate one gRPC
+                        # stream and initiate another one whilst avoiding a race
+                        # between them over requests in the queue.
+                        await self._request_queue.put(None)
+                        self._request_queue = asyncio.Queue(maxsize=10)
 
-                    # Rotate request queue. This way we can terminate one gRPC
-                    # stream and initiate another one whilst avoiding a race
-                    # between them over requests in the queue.
-                    await self._request_queue.put(None)
-                    self._request_queue = asyncio.Queue(maxsize=10)
-
-                for callback in callbacks.values():
-                    await _safe_callback(callback, err)
-            else:
-                await self._handle_response(rs)
+                    for callback in callbacks.values():
+                        await _safe_callback(callback, err)
 
     async def _handle_response(self, rs):
         async with self._lock:
@@ -168,6 +167,23 @@ class Watcher(object):
         cancel_watch.watch_id = watch_id
         rq = etcdrpc.WatchRequest(cancel_request=cancel_watch)
         await self._request_queue.put(rq)
+
+    def _create_watch_request(self, key, range_end=None, start_revision=None,
+                              progress_notify=False, filters=None,
+                              prev_kv=False):
+        create_watch = etcdrpc.WatchCreateRequest()
+        create_watch.key = utils.to_bytes(key)
+        if range_end is not None:
+            create_watch.range_end = utils.to_bytes(range_end)
+        if start_revision is not None:
+            create_watch.start_revision = start_revision
+        if progress_notify:
+            create_watch.progress_notify = progress_notify
+        if filters is not None:
+            create_watch.filters = filters
+        if prev_kv:
+            create_watch.prev_kv = prev_kv
+        return etcdrpc.WatchRequest(create_request=create_watch)
 
 
 class _NewWatch(object):

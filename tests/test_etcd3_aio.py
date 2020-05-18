@@ -32,8 +32,7 @@ from six.moves.urllib.parse import urlparse
 
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-import etcd3
-import etcd3.etcdrpc as etcdrpc
+import etcd3.aio.etcdrpc as etcdrpc
 import etcd3.exceptions
 import etcd3.utils as utils
 from etcd3.client import EtcdTokenCallCredentials
