@@ -3,9 +3,7 @@ import functools
 import inspect
 import warnings
 
-from aiofiles import open
-import grpc
-import aiogrpc
+import aiofiles
 from grpclib.client import Channel
 from grpclib.const import Status as grpclibStatus
 import grpclib.exceptions
@@ -170,23 +168,17 @@ class Etcd3Client:
         cert_params = [c is not None for c in (self.cert_cert, self.cert_key)]
         if self.ca_cert is not None:
             if all(cert_params):
-                credentials = await self._get_secure_creds(
-                    self.ca_cert,
-                    self.cert_key,
-                    self.cert_cert
-                )
-                self.uses_secure_channel = True
-                # self.channel = aiogrpc.secure_channel(self._url, credentials,
-                #                                       loop=self.loop)
-                self.channel = Channel(host=self.host, port=self.port, loop=self.loop)
+                certfile = '/tmp/certfile.crt'
+                async with aiofiles.open(certfile, 'w') as combined_certfile:
+                    for cf_path in (self.cert_cert, self.ca_cert,):
+                        async with aiofiles.open(cf_path) as cf:
+                            await combined_certfile.write(await cf.read())
             else:
-                credentials = await self._get_secure_creds(self.ca_cert, None, None)
-                self.uses_secure_channel = True
-                # self.channel = aiogrpc.secure_channel(self._url, credentials,
-                #                                       options=self.grpc_options,
-                #                                       loop=self.loop)
-                self.channel = Channel(host=self.host, port=self.port, loop=self.loop)
+                certfile = self.ca_cert
 
+            self.channel = Channel(host=self.host, port=self.port, ssl=True, loop=self.loop)
+            self.channel._ssl.load_cert_chain(certfile, keyfile=self.cert_key)
+            self.uses_secure_channel = True
         else:
             self.uses_secure_channel = False
             self.channel = Channel(host=self.host, port=self.port, loop=self.loop)
@@ -220,28 +212,6 @@ class Etcd3Client:
 
     async def __aexit__(self, *args):
         await self.close()
-
-    @staticmethod
-    async def _get_secure_creds(ca_cert, cert_key=None, cert_cert=None):
-        cert_key_file = None
-        cert_cert_file = None
-
-        async with open(ca_cert, 'rb') as f:
-            ca_cert_file = await f.read()
-
-        if cert_key is not None:
-            async with open(cert_key, 'rb') as f:
-                cert_key_file = await f.read()
-
-        if cert_cert is not None:
-            async with open(cert_cert, 'rb') as f:
-                cert_cert_file = await f.read()
-
-        return grpc.ssl_channel_credentials(
-            ca_cert_file,
-            cert_key_file,
-            cert_cert_file
-        )
 
     @_handle_errors
     @_ensure_channel
