@@ -4,6 +4,7 @@ import inspect
 import warnings
 
 from aiofiles import open
+import grpc
 import aiogrpc
 from grpclib.client import Channel
 from grpclib.const import Status as grpclibStatus
@@ -198,9 +199,8 @@ class Etcd3Client:
                 password=self.password
             )
 
-            resp = await self.auth_stub.Authenticate(auth_request, self.timeout)
+            resp = await self.auth_stub.Authenticate(auth_request, timeout=self.timeout)
             self.metadata = (('token', resp.token),)
-            # self.call_credentials = grpc.metadata_call_credentials(resp.token)
 
         self.kvstub = etcdrpc.KVStub(self.channel)
         self.watcher = watch.Watcher(etcdrpc.WatchStub(self.channel), timeout=self.timeout)
