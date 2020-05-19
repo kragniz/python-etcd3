@@ -15,9 +15,70 @@ import etcd3.aio.watch as watch
 import etcd3.aio.etcdrpc as etcdrpc
 import etcd3.exceptions as exceptions
 import etcd3.utils as utils
-from etcd3.base_client import EtcdTokenCallCredentials, _translate_exception, \
-    Transactions, KVMetadata, Status, Alarm
+import etcd3.aio.transactions as transactions
 
+_EXCEPTIONS_BY_CODE = {
+    grpc.StatusCode.INTERNAL: exceptions.InternalServerError,
+    grpc.StatusCode.UNAVAILABLE: exceptions.ConnectionFailedError,
+    grpc.StatusCode.DEADLINE_EXCEEDED: exceptions.ConnectionTimeoutError,
+    grpc.StatusCode.FAILED_PRECONDITION: exceptions.PreconditionFailedError,
+}
+
+def _translate_exception(exc):
+    code = exc.code()
+    exception = _EXCEPTIONS_BY_CODE.get(code)
+    if exception is None:
+        raise
+    raise exception
+
+
+class Transactions(object):
+    def __init__(self):
+        self.value = transactions.Value
+        self.version = transactions.Version
+        self.create = transactions.Create
+        self.mod = transactions.Mod
+
+        self.put = transactions.Put
+        self.get = transactions.Get
+        self.delete = transactions.Delete
+        self.txn = transactions.Txn
+
+
+class KVMetadata(object):
+    def __init__(self, keyvalue, header):
+        self.key = keyvalue.key
+        self.create_revision = keyvalue.create_revision
+        self.mod_revision = keyvalue.mod_revision
+        self.version = keyvalue.version
+        self.lease_id = keyvalue.lease
+        self.response_header = header
+
+
+class Status(object):
+    def __init__(self, version, db_size, leader, raft_index, raft_term):
+        self.version = version
+        self.db_size = db_size
+        self.leader = leader
+        self.raft_index = raft_index
+        self.raft_term = raft_term
+
+
+class Alarm(object):
+    def __init__(self, alarm_type, member_id):
+        self.alarm_type = alarm_type
+        self.member_id = member_id
+
+
+class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
+    """Metadata wrapper for raw access token credentials."""
+
+    def __init__(self, access_token):
+        self._access_token = access_token
+
+    def __call__(self, context, callback):
+        metadata = (('token', self._access_token),)
+        callback(metadata, None)
 
 def _handle_errors(f):  # noqa: C901
     if inspect.isasyncgenfunction(f):
@@ -59,7 +120,7 @@ def _ensure_channel(f):
     return functools.wraps(f)(handler)
 
 
-class Etcd3Client(object):
+class Etcd3Client:
     def __init__(self, host='localhost', port=2379,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
                  user=None, password=None, grpc_options=None,
