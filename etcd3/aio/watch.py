@@ -41,7 +41,8 @@ class Watcher(object):
         self._lock = asyncio.Lock()
         self._request_queue = asyncio.Queue(maxsize=10)
         self._callbacks = {}
-        self._callback_thread = None
+        self._sender_task = None
+        self._receiver_task = None
         self._new_watch_cond = asyncio.Condition(lock=self._lock)
         self._new_watch = None
 
@@ -55,8 +56,8 @@ class Watcher(object):
 
         async with self._lock:
             # Start the callback thread if it is not yet running.
-            if not self._callback_thread:
-                self._callback_thread = asyncio.get_event_loop().create_task(self._run())
+            if not self._sender_task:
+                self._sender_task = asyncio.get_running_loop().create_task(self._run_sender())
 
             # Only one create watch request can be pending at a time, so if
             # there one already, then wait for it to complete first.
@@ -98,31 +99,41 @@ class Watcher(object):
 
             await self._cancel_no_lock(watch_id)
 
-    async def _run(self):
-        async with self._watch_stub.Watch.open(
-                timeout=self.timeout, metadata=self._metadata) as stream:
+    async def _run_sender(self):
+        async with self._watch_stub.Watch.open(timeout=self.timeout, metadata=self._metadata) as stream:
             while request := await self._request_queue.get():
                 try:
                     await stream.send_message(request)
-                    while response := await stream.recv_message():
-                        await self._handle_response(response)
+                    if self._receiver_task is None:
+                        self._receiver_task = asyncio.get_running_loop().create_task(self._run_receiver(stream))
                 except grpclib.exceptions.StreamTerminatedError as err:
-                    async with self._lock:
-                        if self._new_watch:
-                            self._new_watch.err = err
-                            self._new_watch_cond.notify_all()
+                    await self._handle_steam_termination(err)
 
-                        callbacks = self._callbacks
-                        self._callbacks = {}
+            stream.end()
 
-                        # Rotate request queue. This way we can terminate one gRPC
-                        # stream and initiate another one whilst avoiding a race
-                        # between them over requests in the queue.
-                        await self._request_queue.put(None)
-                        self._request_queue = asyncio.Queue(maxsize=10)
+    async def _handle_steam_termination(self, err):
+        async with self._lock:
+            if self._new_watch:
+                self._new_watch.err = err
+                self._new_watch_cond.notify_all()
 
-                    for callback in callbacks.values():
-                        await _safe_callback(callback, err)
+            callbacks = self._callbacks
+            self._callbacks = {}
+
+            # Rotate request queue. This way we can terminate one gRPC
+            # stream and initiate another one whilst avoiding a race
+            # between them over requests in the queue.
+            await self._request_queue.put(None)
+            self._request_queue = asyncio.Queue(maxsize=10)
+        for callback in callbacks.values():
+            await _safe_callback(callback, err)
+
+    async def _run_receiver(self, stream):
+        try:
+            while response := await stream.recv_message():
+                await self._handle_response(response)
+        except grpclib.exceptions.StreamTerminatedError as err:
+            await self._handle_steam_termination(err)
 
     async def _handle_response(self, rs):
         async with self._lock:

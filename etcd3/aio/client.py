@@ -152,7 +152,7 @@ class Etcd3Client(object):
                 EtcdTokenCallCredentials(resp.token))
 
         self.kvstub = etcdrpc.KVStub(self.channel)
-        self.watcher = watch.Watcher(etcdrpc.WatchStub(self.channel))
+        self.watcher = watch.Watcher(etcdrpc.WatchStub(self.channel), timeout=self.timeout)
         self.clusterstub = etcdrpc.ClusterStub(self.channel)
         self.leasestub = etcdrpc.LeaseStub(self.channel)
         self.maintenancestub = etcdrpc.MaintenanceStub(self.channel)
