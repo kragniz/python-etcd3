@@ -21,7 +21,7 @@ class Lease(object):
 
     async def refresh(self):
         """Refresh the time to live for this lease."""
-        return [r async for r in self.etcd_client.refresh_lease(self.id)]
+        return await self.etcd_client.refresh_lease(self.id)
 
     # @property
     async def remaining_ttl(self):

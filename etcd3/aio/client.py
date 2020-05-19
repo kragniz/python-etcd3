@@ -726,16 +726,10 @@ class Etcd3Client:
         )
 
     @_handle_errors
-    def refresh_lease(self, lease_id):
-        client = self
-
-        async def request_stream():
-            nonlocal client
-            await client.open()
-            yield etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
-
-        return self.leasestub.LeaseKeepAlive(
-            request_stream(),
+    @_ensure_channel
+    async def refresh_lease(self, lease_id):
+        return await self.leasestub.LeaseKeepAlive(
+            [etcdrpc.LeaseKeepAliveRequest(ID=lease_id)],
             timeout=self.timeout,
             metadata=self.metadata)
 
