@@ -964,13 +964,13 @@ class Etcd3Client:
         :param file_obj: A file-like object to write the database contents in.
         """
         snapshot_request = etcdrpc.SnapshotRequest()
-        snapshot_response = self.maintenancestub.Snapshot(
+        snapshot_responses = await self.maintenancestub.Snapshot(
             snapshot_request,
             timeout=self.timeout,
             metadata=self.metadata
         )
 
-        async for response in snapshot_response:
+        for response in snapshot_responses:
             file_obj.write(response.blob)
 
     @staticmethod
