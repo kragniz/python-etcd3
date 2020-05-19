@@ -6,7 +6,8 @@ import warnings
 from aiofiles import open
 import aiogrpc
 from grpclib.client import Channel
-import grpc
+from grpclib.const import Status as grpclibStatus
+import grpclib.exceptions
 
 import etcd3.aio.leases as leases
 import etcd3.aio.locks as locks
@@ -18,18 +19,18 @@ import etcd3.utils as utils
 import etcd3.aio.transactions as transactions
 
 _EXCEPTIONS_BY_CODE = {
-    grpc.StatusCode.INTERNAL: exceptions.InternalServerError,
-    grpc.StatusCode.UNAVAILABLE: exceptions.ConnectionFailedError,
-    grpc.StatusCode.DEADLINE_EXCEEDED: exceptions.ConnectionTimeoutError,
-    grpc.StatusCode.FAILED_PRECONDITION: exceptions.PreconditionFailedError,
+    grpclibStatus.INTERNAL: exceptions.InternalServerError,
+    grpclibStatus.UNAVAILABLE: exceptions.ConnectionFailedError,
+    grpclibStatus.DEADLINE_EXCEEDED: exceptions.ConnectionTimeoutError,
+    grpclibStatus.FAILED_PRECONDITION: exceptions.PreconditionFailedError,
 }
 
-def _translate_exception(exc):
-    code = exc.code()
-    exception = _EXCEPTIONS_BY_CODE.get(code)
-    if exception is None:
+
+def _translate_exception(error: grpclib.exceptions.GRPCError):
+    if exception := _EXCEPTIONS_BY_CODE.get(error.status):
+        raise exception
+    else:
         raise
-    raise exception
 
 
 class Transactions(object):
@@ -70,35 +71,25 @@ class Alarm(object):
         self.member_id = member_id
 
 
-class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
-    """Metadata wrapper for raw access token credentials."""
-
-    def __init__(self, access_token):
-        self._access_token = access_token
-
-    def __call__(self, context, callback):
-        metadata = (('token', self._access_token),)
-        callback(metadata, None)
-
 def _handle_errors(f):  # noqa: C901
     if inspect.isasyncgenfunction(f):
         async def handler(*args, **kwargs):
             try:
                 async for data in f(*args, **kwargs):
                     yield data
-            except grpc.RpcError as exc:
+            except grpclib.exceptions.GRPCError as exc:
                 _translate_exception(exc)
     elif inspect.iscoroutinefunction(f):
         async def handler(*args, **kwargs):
             try:
                 return await f(*args, **kwargs)
-            except grpc.RpcError as exc:
+            except grpclib.exceptions.GRPCError as exc:
                 _translate_exception(exc)
     else:
         def handler(*args, **kwargs):
             try:
                 return f(*args, **kwargs)
-            except grpc.RpcError as exc:
+            except grpclib.exceptions.GRPCError as exc:
                 _translate_exception(exc)
 
     return functools.wraps(f)(handler)
@@ -209,8 +200,7 @@ class Etcd3Client:
 
             resp = await self.auth_stub.Authenticate(auth_request, self.timeout)
             self.metadata = (('token', resp.token),)
-            self.call_credentials = grpc.metadata_call_credentials(
-                EtcdTokenCallCredentials(resp.token))
+            # self.call_credentials = grpc.metadata_call_credentials(resp.token)
 
         self.kvstub = etcdrpc.KVStub(self.channel)
         self.watcher = watch.Watcher(etcdrpc.WatchStub(self.channel), timeout=self.timeout)

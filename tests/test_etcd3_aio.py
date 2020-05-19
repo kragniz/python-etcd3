@@ -18,7 +18,7 @@ import threading
 import time
 import inspect
 
-import grpc
+import grpclib
 
 # from hypothesis import given, settings
 # from hypothesis.strategies import characters
@@ -89,12 +89,9 @@ def _out_quorum():
 
 
 class TestEtcd3(object):
-    class MockedException(grpc.RpcError):
-        def __init__(self, code):
-            self._code = code
-
-        def code(self):
-            return self._code
+    class MockedException(grpclib.exceptions.GRPCError):
+        def __init__(self, status):
+            self.status = status
 
     @pytest.fixture
     async def etcd(self, event_loop):
@@ -336,7 +333,7 @@ class TestEtcd3(object):
 
         async def pass_exception_to_callback(callback):
             await asyncio.sleep(1)
-            await callback(self.MockedException(grpc.StatusCode.UNAVAILABLE))
+            await callback(self.MockedException(grpclib.const.Status.UNAVAILABLE))
 
         task = None
 
@@ -732,7 +729,7 @@ class TestEtcd3(object):
     @pytest.mark.asyncio
     async def test_internal_exception_on_internal_error(self, etcd):
         etcd.open()
-        exception = self.MockedException(grpc.StatusCode.INTERNAL)
+        exception = self.MockedException(grpclib.const.Status.INTERNAL)
         kv_mock = mock.MagicMock()
         kv_mock.Range.side_effect = exception
         etcd.kvstub = kv_mock
@@ -744,7 +741,7 @@ class TestEtcd3(object):
     async def test_connection_failure_exception_on_connection_failure(
             self, etcd):
         etcd.open()
-        exception = self.MockedException(grpc.StatusCode.UNAVAILABLE)
+        exception = self.MockedException(grpclib.const.Status.UNAVAILABLE)
         kv_mock = mock.MagicMock()
         kv_mock.Range.side_effect = exception
         etcd.kvstub = kv_mock
@@ -755,7 +752,7 @@ class TestEtcd3(object):
     @pytest.mark.asyncio
     async def test_connection_timeout_exception_on_connection_timeout(
             self, etcd):
-        exception = self.MockedException(grpc.StatusCode.DEADLINE_EXCEEDED)
+        exception = self.MockedException(grpclib.const.Status.DEADLINE_EXCEEDED)
 
         class MockKvstub:
             async def Range(self, *args, **kwargs):
@@ -768,14 +765,14 @@ class TestEtcd3(object):
 
     @pytest.mark.asyncio
     async def test_grpc_exception_on_unknown_code(self, etcd):
-        exception = self.MockedException(grpc.StatusCode.DATA_LOSS)
+        exception = self.MockedException(grpclib.const.Status.DATA_LOSS)
         kv_mock = mock.MagicMock()
         kv_mock.Range.side_effect = exception
         etcd.kvstub = kv_mock
 
         try:
             await etcd.get("foo")
-        except grpc.RpcError:
+        except grpclib.exceptions.GRPCError:
             pass
         else:
             raise RuntimeError
@@ -963,7 +960,7 @@ class TestClient(object):
         _, meta = await etcd.get("/foo")
         revision = meta.mod_revision
         await etcd.compact(revision)
-        with pytest.raises(grpc.RpcError):
+        with pytest.raises(grpclib.exceptions.GRPCError):
             await etcd.compact(revision)
 
     @pytest.mark.asyncio
