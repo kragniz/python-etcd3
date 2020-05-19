@@ -310,8 +310,7 @@ class Etcd3Client:
 
         range_response = await self.kvstub.Range(
             range_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -342,8 +341,7 @@ class Etcd3Client:
 
         range_response = await self.kvstub.Range(
             range_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
@@ -372,8 +370,7 @@ class Etcd3Client:
 
         range_response = await self.kvstub.Range(
             range_request,
-            self.timeout,
-            credentials=self.call_credentials,
+            timeout=self.timeout,
             metadata=self.metadata
         )
 
