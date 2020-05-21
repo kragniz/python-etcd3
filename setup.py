@@ -34,12 +34,10 @@ setup(
     packages=[
         'etcd3',
         'etcd3.etcdrpc',
-        'etcd3.aio',
     ],
     package_dir={
         'etcd3': 'etcd3',
         'etcd3.etcdrpc': 'etcd3/etcdrpc',
-        'etcd3.aio': 'etcd3/aio',
     },
     include_package_data=True,
     install_requires=requirements,

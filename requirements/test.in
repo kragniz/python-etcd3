@@ -6,7 +6,6 @@ coverage
 flake8-import-order
 flake8
 grpcio-tools
-hypothesis
 more-itertools<6  # python2.7
 pytest==4.6.5
 pytest-cov

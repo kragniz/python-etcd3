@@ -1,4 +1,4 @@
-import etcd3.aio.etcdrpc as etcdrpc
+import etcd3.etcdrpc as etcdrpc
 import etcd3.utils as utils
 
 _OPERATORS = {

@@ -23,23 +23,23 @@ class Member(object):
                                              peer_urls=self.peer_urls,
                                              client_urls=self.client_urls))
 
-    def remove(self):
+    async def remove(self):
         """Remove this member from the cluster."""
-        self._etcd_client.remove_member(self.id)
+        await self._etcd_client.remove_member(self.id)
 
-    def update(self, peer_urls):
+    async def update(self, peer_urls):
         """
         Update the configuration of this member.
 
         :param peer_urls: new list of peer urls the member will use to
                           communicate with the cluster
         """
-        self._etcd_client.update_member(self.id, peer_urls)
+        await self._etcd_client.update_member(self.id, peer_urls)
 
-    @property
-    def active_alarms(self):
+    # @property
+    async def active_alarms(self):
         """Get active alarms of the member.
 
         :returns: Alarms
         """
-        return self._etcd_client.list_alarms(member_id=self.id)
+        return await self._etcd_client.list_alarms(member_id=self.id)

@@ -1,5 +1,4 @@
 aiofiles
-aiogrpc
 grpclib
-grpcio>=1.2.0
 protobuf==3.6.1
+tenacity==5.0.2

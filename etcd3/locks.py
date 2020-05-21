@@ -1,8 +1,10 @@
-import threading
-import time
 import uuid
 
-from etcd3 import events, exceptions
+import tenacity
+
+# from etcd3 import exceptions
+
+lock_prefix = '/locks/'
 
 
 class Lock(object):
@@ -31,8 +33,6 @@ class Lock(object):
     :type ttl: int
     """
 
-    lock_prefix = '/locks/'
-
     def __init__(self, name, ttl=60,
                  etcd_client=None):
         self.name = name
@@ -40,13 +40,13 @@ class Lock(object):
         if etcd_client is not None:
             self.etcd_client = etcd_client
 
-        self.key = self.lock_prefix + self.name
+        self.key = lock_prefix + self.name
         self.lease = None
         # store uuid as bytes, since it avoids having to decode each time we
         # need to compare
         self.uuid = uuid.uuid1().bytes
 
-    def acquire(self, timeout=10):
+    async def acquire(self, timeout=10):
         """Acquire the lock.
 
         :params timeout: Maximum time to wait before returning. `None` means
@@ -55,68 +55,59 @@ class Lock(object):
         :returns: True if the lock has been acquired, False otherwise.
 
         """
-        if timeout is not None:
-            deadline = time.time() + timeout
-
-        while True:
-            if self._try_acquire():
-                return True
-
-            if timeout is not None:
-                remaining_timeout = max(deadline - time.time(), 0)
-                if remaining_timeout == 0:
-                    return False
-            else:
-                remaining_timeout = None
-
-            self._wait_delete_event(remaining_timeout)
-
-    def _try_acquire(self):
-        self.lease = self.etcd_client.lease(self.ttl)
-
-        success, metadata = self.etcd_client.transaction(
-            compare=[
-                self.etcd_client.transactions.create(self.key) == 0
-            ],
-            success=[
-                self.etcd_client.transactions.put(self.key, self.uuid,
-                                                  lease=self.lease)
-            ],
-            failure=[
-                self.etcd_client.transactions.get(self.key)
-            ]
+        stop = (
+            tenacity.stop_never
+            if timeout is None else tenacity.stop_after_delay(timeout)
         )
-        if success is True:
-            self.revision = metadata[0].response_put.header.revision
-            return True
-        self.revision = metadata[0][0][1].mod_revision
-        self.lease = None
-        return False
 
-    def _wait_delete_event(self, timeout):
+        def wait(retry_state):
+            # if timeout is None:
+            #     remaining_timeout = None
+            # else:
+            #     remaining_timeout = max(timeout - retry_state.start_time, 0)
+            # TODO(jd): Wait for a DELETE event to happen: that'd mean the lock
+            # has been released, rather than retrying on PUT events too
+            # try:
+            #     await self.etcd_client.watch_once(self.key,
+            #                                       remaining_timeout)
+            # except exceptions.WatchTimedOut:
+            #     pass
+            return 0
+
+        @tenacity.retry(retry=tenacity.retry_never,
+                        stop=stop,
+                        wait=wait)
+        async def _acquire():
+            # TODO: save the created revision so we can check it later to make
+            # sure we still have the lock
+
+            self.lease = await self.etcd_client.lease(self.ttl)
+
+            success, _ = await self.etcd_client.transaction(
+                compare=[
+                    self.etcd_client.transactions.create(self.key) == 0
+                ],
+                success=[
+                    self.etcd_client.transactions.put(self.key, self.uuid,
+                                                      lease=self.lease)
+                ],
+                failure=[
+                    self.etcd_client.transactions.get(self.key)
+                ]
+            )
+            if success is True:
+                return True
+            self.lease = None
+            raise tenacity.TryAgain
+
         try:
-            event_iter, cancel = self.etcd_client.watch(
-                self.key, start_revision=self.revision + 1)
-        except exceptions.WatchTimedOut:
-            return
+            return await _acquire()
+        except tenacity.RetryError:
+            return False
 
-        if timeout is not None:
-            timer = threading.Timer(timeout, cancel)
-            timer.start()
-        else:
-            timer = None
-
-        for event in event_iter:
-            if isinstance(event, events.DeleteEvent):
-                if timer is not None:
-                    timer.cancel()
-
-                cancel()
-                break
-
-    def release(self):
+    async def release(self):
         """Release the lock."""
-        success, _ = self.etcd_client.transaction(
+        success, _ = await self.etcd_client.transaction(
             compare=[
                 self.etcd_client.transactions.value(self.key) == self.uuid
             ],
@@ -125,26 +116,26 @@ class Lock(object):
         )
         return success
 
-    def refresh(self):
+    async def refresh(self):
         """Refresh the time to live on this lock."""
         if self.lease is not None:
-            return self.lease.refresh()
+            return await self.lease.refresh()
         else:
             raise ValueError('No lease associated with this lock - have you '
                              'acquired the lock yet?')
 
-    def is_acquired(self):
+    async def is_acquired(self):
         """Check if this lock is currently acquired."""
-        uuid, _ = self.etcd_client.get(self.key)
+        uuid, _ = await self.etcd_client.get(self.key)
 
         if uuid is None:
             return False
 
         return uuid == self.uuid
 
-    def __enter__(self):
-        self.acquire()
+    async def __aenter__(self):
+        await self.acquire()
         return self
 
-    def __exit__(self, exception_type, exception_value, traceback):
-        self.release()
+    async def __aexit__(self, exception_type, exception_value, traceback):
+        await self.release()
