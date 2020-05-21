@@ -30,7 +30,6 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions
 import etcd3.utils as utils
-from etcd3.members import Member
 
 etcd_version = os.environ.get('TEST_ETCD_VERSION', 'v3.2.8')
 
@@ -40,11 +39,6 @@ if six.PY2:
     int_types = (int, long)
 else:
     int_types = (int,)
-
-
-# Don't set any deadline in Hypothesis
-# settings.register_profile("default", deadline=None)
-# settings.load_profile("default")
 
 
 def etcdctl(*args):
@@ -105,21 +99,18 @@ class TestEtcd3:
         assert value is None
         assert meta is None
 
-    # @given(characters(blacklist_categories=['Cs', 'Cc']))
     @pytest.mark.asyncio
     async def test_get_key(self, etcd, string="xxx"):
         etcdctl('put', '/doot/a_key', string)
         returned, _ = await etcd.get('/doot/a_key')
         assert returned == string.encode('utf-8')
 
-    # @given(characters(blacklist_categories=['Cs', 'Cc']))
     @pytest.mark.asyncio
     async def test_get_random_key(self, etcd, string="xxxx"):
         etcdctl('put', '/doot/' + string, 'dootdoot')
         returned, _ = await etcd.get('/doot/' + string)
         assert returned == b'dootdoot'
 
-    # @given(characters(blacklist_categories=['Cs', 'Cc']))
     @pytest.mark.asyncio
     async def test_get_have_cluster_revision(self, etcd, string="xxx"):
         etcdctl('put', '/doot/' + string, 'dootdoot')
@@ -956,7 +947,6 @@ class TestClient(object):
                 loop=event_loop
             )
             await client.get('probably-invalid-key')
-
 
     def test_user_or_pwd_auth_raises_exception(self, event_loop):
         with pytest.raises(Exception, match='both user and password'):

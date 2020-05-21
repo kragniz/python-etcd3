@@ -9,13 +9,13 @@ from grpclib.client import Channel
 from grpclib.const import Status as grpclibStatus
 import grpclib.exceptions
 
-import leases as leases
-import locks as locks
-import watch as watch
+import etcd3.leases as leases
+import etcd3.locks as locks
+import etcd3.watch as watch
 import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions as exceptions
 import etcd3.utils as utils
-import transactions as transactions
+import etcd3.transactions as transactions
 from etcd3.members import Member
 
 _EXCEPTIONS_BY_CODE = {
