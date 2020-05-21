@@ -926,16 +926,21 @@ class TestClient(object):
 
     @pytest.mark.asyncio
     async def test_secure_channel_ca_cert_only(self, event_loop):
-        client = etcd3.client(
-            ca_cert="tests/ca.crt",
-            cert_key=None,
-            cert_cert=None,
-            backend="asyncio",
-            loop=event_loop
-        )
-        await client.open()
+        with tempfile.NamedTemporaryFile() as certfile_bundle:
+            for fname in ('client.crt', 'ca.crt', 'client.key',):
+                with open(f'tests/{fname}', 'r+b') as f:
+                    certfile_bundle.write(f.read())
+            certfile_bundle.flush()
+            client = etcd3.client(
+                ca_cert=certfile_bundle.name,
+                cert_key=None,
+                cert_cert=None,
+                backend="asyncio",
+                loop=event_loop
+            )
+            await client.open()
 
-        assert client.uses_secure_channel is True
+            assert client.uses_secure_channel is True
 
     def test_secure_channel_ca_cert_and_key_raise_exception(self, event_loop):
         with pytest.raises(ValueError):

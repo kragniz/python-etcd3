@@ -1,6 +1,7 @@
 import asyncio
 import functools
 import inspect
+import tempfile
 import warnings
 
 import aiofiles
@@ -167,17 +168,19 @@ class Etcd3Client:
 
         cert_params = [c is not None for c in (self.cert_cert, self.cert_key)]
         if self.ca_cert is not None:
+            self.channel = Channel(host=self.host, port=self.port, ssl=True, loop=self.loop)
+
             if all(cert_params):
-                certfile = '/tmp/certfile.crt'
-                async with aiofiles.open(certfile, 'w') as combined_certfile:
+                cert_bundle_fname = tempfile.mktemp()
+                async with aiofiles.open(cert_bundle_fname, 'w') as cert_bundle:
                     for cf_path in (self.cert_cert, self.ca_cert,):
                         async with aiofiles.open(cf_path) as cf:
-                            await combined_certfile.write(await cf.read())
+                            await cert_bundle.write(await cf.read())
+                    await cert_bundle.flush()
+                    self.channel._ssl.load_cert_chain(cert_bundle_fname, keyfile=self.cert_key)
             else:
-                certfile = self.ca_cert
+                self.channel._ssl.load_cert_chain(self.ca_cert, keyfile=self.cert_key)
 
-            self.channel = Channel(host=self.host, port=self.port, ssl=True, loop=self.loop)
-            self.channel._ssl.load_cert_chain(certfile, keyfile=self.cert_key)
             self.uses_secure_channel = True
         else:
             self.uses_secure_channel = False
