@@ -8,9 +8,9 @@ This project is based on based on based on [grpclib](https://github.com/vmagamed
 ## Basic usage:
 
 ```python
-import etcd3
+import etcd3aio
 
-etcd = etcd3.client()
+etcd = etcd3aio.client()
 await etcd.get('foo')
 await etcd.put('bar', 'doot')
 await etcd.delete('bar')

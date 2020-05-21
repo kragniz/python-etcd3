@@ -3,10 +3,10 @@ import logging
 
 import grpclib
 
-import etcd3.etcdrpc as etcdrpc
-import etcd3.events as events
-import etcd3.exceptions as exceptions
-import etcd3.utils as utils
+import etcd3aio.etcdrpc as etcdrpc
+import etcd3aio.events as events
+import etcd3aio.exceptions as exceptions
+import etcd3aio.utils as utils
 
 _log = logging.getLogger(__name__)
 

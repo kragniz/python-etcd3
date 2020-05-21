@@ -1,5 +1,5 @@
-import etcd3.etcdrpc as etcdrpc
-import etcd3.utils as utils
+import etcd3aio.etcdrpc as etcdrpc
+import etcd3aio.utils as utils
 
 _OPERATORS = {
     etcdrpc.Compare.EQUAL: "==",

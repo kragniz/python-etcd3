@@ -9,14 +9,14 @@ from grpclib.client import Channel
 from grpclib.const import Status as grpclibStatus
 import grpclib.exceptions
 
-import etcd3.leases as leases
-import etcd3.locks as locks
-import etcd3.watch as watch
-import etcd3.etcdrpc as etcdrpc
-import etcd3.exceptions as exceptions
-import etcd3.utils as utils
-import etcd3.transactions as transactions
-from etcd3.members import Member
+import etcd3aio.leases as leases
+import etcd3aio.locks as locks
+import etcd3aio.watch as watch
+import etcd3aio.etcdrpc as etcdrpc
+import etcd3aio.exceptions as exceptions
+import etcd3aio.utils as utils
+import etcd3aio.transactions as transactions
+from etcd3aio.members import Member
 
 _EXCEPTIONS_BY_CODE = {
     grpclibStatus.INTERNAL: exceptions.InternalServerError,
@@ -226,8 +226,8 @@ class Etcd3Client:
 
         .. code-block:: python
 
-            >>> import etcd3
-            >>> etcd = etcd3.client()
+            >>> import etcd3aio
+            >>> etcd = etcd3aio.client()
             >>> etcd.get('/thing/key')
             'hello world'
 
@@ -353,8 +353,8 @@ class Etcd3Client:
 
         .. code-block:: python
 
-            >>> import etcd3
-            >>> etcd = etcd3.client()
+            >>> import etcd3aio
+            >>> etcd = etcd3aio.client()
             >>> etcd.put('/thing/key', 'hello world')
 
         :param key: key in etcd to set
