@@ -24,13 +24,13 @@ requirements = load_reqs('requirements/base.txt')
 test_requirements = load_reqs('requirements/test.txt')
 
 setup(
-    name='etcd3',
-    version='0.12.0',
-    description="Python client for the etcd3 API",
+    name='etcd3aio',
+    version='0.1.0',
+    description="Python client for the etcd3 API for asyncio",
     long_description=readme + '\n\n' + history,
-    author="Louis Taylor",
-    author_email='louis@kragniz.eu',
-    url='https://github.com/kragniz/python-etcd3',
+    author="Aleksei Gusev",
+    author_email='aleksei.gusev@gmail.com',
+    url='https://github.com/hron/etcd3aio',
     packages=[
         'etcd3',
         'etcd3.etcdrpc',
