@@ -1,5 +1,6 @@
 from etcd3 import client, exceptions
 from etcd3.endpoint import Endpoint
+import time
 
 
 class ClientFacade:
@@ -17,18 +18,32 @@ class ClientFacade:
             try:
                 return self.client.put(key, value)
                 break
-            except exceptions.Etcd3Exception:
-                self.client.switchEndpoint()
-                print("Connection failed trying different endpoint")
+            except exceptions.UnhealthyClusterError as ex:
+                print(ex)
+                time.sleep(60)
+            except exceptions.ConnectionFailedError as ex:
+                try:
+                    self.client.switchEndpoint()
+                    print(ex)
+                except exceptions.NoServerAvailableError as ex:
+                    print(ex)
+                    time.sleep(60)
 
     def get(self, key):
         while True:
             try:
                 return self.client.get(key)
                 break
-            except exceptions.Etcd3Exception:
-                self.client.switchEndpoint()
-                print("Connection failed trying different endpoint")
+            except exceptions.UnhealthyClusterError as ex:
+                print(ex)
+                time.sleep(60)
+            except exceptions.ConnectionFailedError as ex:
+                try:
+                    self.client.switchEndpoint()
+                    print(ex)
+                except exceptions.NoServerAvailableError as ex:
+                    print(ex)
+                    time.sleep(60)
 
 
 def main():
