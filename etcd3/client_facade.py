@@ -1,6 +1,7 @@
+import time
+
 from etcd3 import client, exceptions
 from etcd3.endpoint import Endpoint
-import time
 
 
 class ClientFacade:
