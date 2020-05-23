@@ -1,2 +1,4 @@
+aiofiles
+aiogrpc
 grpcio>=1.2.0
 protobuf==3.6.1

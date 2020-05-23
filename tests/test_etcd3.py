@@ -276,7 +276,12 @@ class TestEtcd3(object):
         t.join()
 
     def test_watch_key_with_revision_compacted(self, etcd):
-        etcdctl('put', '/random', '1')  # Some data to compact
+        etcdctl('put', '/watchcompation', '0')  # Some data to compact
+        value, meta = etcd.get('/watchcompation')
+        revision = meta.mod_revision
+
+        # Compact etcd and test watcher
+        etcd.compact(revision)
 
         def update_etcd(v):
             etcdctl('put', '/watchcompation', v)
@@ -285,23 +290,17 @@ class TestEtcd3(object):
                 utils.to_bytes(v)
 
         def update_key():
-            # sleep to make watch can get the event
-            time.sleep(3)
-            update_etcd('0')
-            time.sleep(1)
+            time.sleep(0.25)
             update_etcd('1')
-            time.sleep(1)
             update_etcd('2')
-            time.sleep(1)
             update_etcd('3')
-            time.sleep(1)
 
         t = threading.Thread(name="update_key", target=update_key)
         t.start()
 
         def watch_compacted_revision_test():
             events_iterator, cancel = etcd.watch(
-                b'/watchcompation', start_revision=1)
+                b'/watchcompation', start_revision=(revision - 1))
 
             error_raised = False
             compacted_revision = 0
@@ -313,12 +312,13 @@ class TestEtcd3(object):
                 compacted_revision = err.compacted_revision
 
             assert error_raised is True
-            assert compacted_revision == 2
+            assert compacted_revision == revision
 
             change_count = 0
             events_iterator, cancel = etcd.watch(
                 b'/watchcompation', start_revision=compacted_revision)
             for event in events_iterator:
+                print(event)
                 assert event.key == b'/watchcompation'
                 assert event.value == \
                     utils.to_bytes(str(change_count))
@@ -330,8 +330,7 @@ class TestEtcd3(object):
                 if change_count > 2:
                     cancel()
 
-        # Compact etcd and test watcher
-        etcd.compact(2)
+            assert change_count == 3
 
         watch_compacted_revision_test()
 
@@ -1071,9 +1070,12 @@ class TestClient(object):
                 cert_cert='tests/client.crt')
 
     def test_compact(self, etcd):
-        etcd.compact(3)
+        etcd.put("/foo", "x")
+        _, meta = etcd.get("/foo")
+        revision = meta.mod_revision
+        etcd.compact(revision)
         with pytest.raises(grpc.RpcError):
-            etcd.compact(3)
+            etcd.compact(revision)
 
     def test_channel_with_no_cert(self):
         client = etcd3.client(
@@ -1083,21 +1085,22 @@ class TestClient(object):
         )
         assert client.uses_secure_channel is False
 
-    @mock.patch('etcdrpc.AuthStub')
+    @mock.patch('etcd3.etcdrpc.AuthStub')
     def test_user_pwd_auth(self, auth_mock):
         auth_resp_mock = mock.MagicMock()
         auth_resp_mock.token = 'foo'
         auth_mock.Authenticate = auth_resp_mock
         self._enable_auth_in_etcd()
+        try:
+            # Create a client using username and password auth
+            client = etcd3.client(
+                user='root',
+                password='pwd'
+            )
 
-        # Create a client using username and password auth
-        client = etcd3.client(
-            user='root',
-            password='pwd'
-        )
-
-        assert client.call_credentials is not None
-        self._disable_auth_in_etcd()
+            assert client.call_credentials is not None
+        finally:
+            self._disable_auth_in_etcd()
 
     def test_user_or_pwd_auth_raises_exception(self):
         with pytest.raises(Exception):
@@ -1111,8 +1114,8 @@ class TestClient(object):
         subprocess.call(['etcdctl', 'auth', 'enable'])
 
     def _disable_auth_in_etcd(self):
-        subprocess.call(['etcdctl', 'user', 'remove', 'root'])
-        subprocess.call(['etcdctl', '-u', 'root:pwd', 'auth', 'disable'])
+        subprocess.call(['etcdctl', '--user', 'root:pwd', 'auth', 'disable'])
+        subprocess.call(['etcdctl', 'user', 'delete', 'root'])
 
 
 class TestCompares(object):
