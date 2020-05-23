@@ -978,14 +978,9 @@ class TestClient(object):
 
         assert client.uses_secure_channel is False
 
-    @mock.patch('etcd3.etcdrpc.AuthStub')
     @pytest.mark.asyncio
-    async def test_user_pwd_auth(self, auth_mock, event_loop):
+    async def test_user_pwd_auth(self, event_loop):
         with self._enabled_auth_in_etcd():
-            auth_resp_mock = mock.MagicMock()
-            auth_resp_mock.token = 'foo'
-            auth_mock.Authenticate = auth_resp_mock
-
             # Create a client using username and password auth
             client = etcd3.client(
                 user='root',
