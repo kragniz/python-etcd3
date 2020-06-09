@@ -25,7 +25,7 @@ class Lock(object):
             lock.refresh()
 
     :param name: name of the lock
-    :type name: string or bytes
+    :type name: str
     :param ttl: length of time for the lock to live for in seconds. The lock
                 will be released after this time elapses, unless refreshed
     :type ttl: int
