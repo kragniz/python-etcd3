@@ -13,7 +13,7 @@ atomicwrites==1.3.0       # via pytest
 attrs==19.3.0             # via hypothesis, pytest
 babel==2.8.0              # via sphinx
 bumpversion==0.5.3        # via -r test.in
-certifi==2020.4.5.1       # via requests
+certifi==2020.6.20       # via requests
 cffi==1.14.0              # via xattr
 chardet==3.0.4            # via requests
 click==7.1.2              # via pifpaf
