@@ -507,6 +507,21 @@ class TestEtcd3(object):
                 assert event.value == utils.to_bytes(str(count))
                 count += 1
 
+    def test_watch_shutdown(self, etcd):
+        """
+        Test to ensure etcd.close() properly shuts down the watcher and callback thread
+        """
+        etcdctl('put', '/doot/watch', '0')
+        etcd.watch(b'/doot/watch')
+
+        # Dont close channel so cleanup can still happen
+        mock.patch.object(etcd.channel, 'close')
+
+        # Check that callback thread is
+        assert etcd.watcher._callback_thread.is_alive()
+        etcd.close()
+        assert etcd.watcher._callback_thread.is_alive() is False
+
     def test_transaction_success(self, etcd):
         etcdctl('put', '/doot/txn', 'dootdoot')
         etcd.transaction(
