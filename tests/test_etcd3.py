@@ -508,9 +508,7 @@ class TestEtcd3(object):
                 count += 1
 
     def test_watch_shutdown(self, etcd):
-        """
-        Test to ensure callback thread is stopped
-        """
+        # Test to ensure callback thread is stopped
         etcdctl('put', '/doot/watch', '0')
         etcd.watch(b'/doot/watch')
 
