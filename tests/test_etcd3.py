@@ -509,7 +509,7 @@ class TestEtcd3(object):
 
     def test_watch_shutdown(self, etcd):
         """
-        Test to ensure etcd.close() properly shuts down the watcher and callback thread
+        Test to ensure callback thread is stopped
         """
         etcdctl('put', '/doot/watch', '0')
         etcd.watch(b'/doot/watch')
