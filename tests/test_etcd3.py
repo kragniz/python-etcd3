@@ -517,7 +517,7 @@ class TestEtcd3(object):
         # Dont close channel so cleanup can still happen
         mock.patch.object(etcd.channel, 'close')
 
-        # Check that callback thread is
+        # Check that callback thread is not alive after close
         assert etcd.watcher._callback_thread.is_alive()
         etcd.close()
         assert etcd.watcher._callback_thread.is_alive() is False
