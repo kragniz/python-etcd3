@@ -44,7 +44,7 @@ packaging==20.3           # via pytest, sphinx
 pbr==5.4.5                # via fixtures, mock, pifpaf, testtools
 pifpaf==2.4.0             # via -r test.in
 pluggy==0.13.1            # via pytest, tox
-psutil==5.7.0             # via pifpaf
+psutil==5.7.1             # via pifpaf
 py==1.8.1                 # via pytest, tox
 pycodestyle==2.5.0        # via flake8, flake8-import-order
 pycparser==2.20           # via cffi
