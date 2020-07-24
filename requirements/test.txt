@@ -17,7 +17,7 @@ certifi==2020.4.5.1       # via requests
 cffi==1.14.0              # via xattr
 chardet==3.0.4            # via requests
 click==7.1.2              # via pifpaf
-coverage==5.1             # via -r test.in, pytest-cov
+coverage==5.2.1             # via -r test.in, pytest-cov
 daiquiri==2.1.1           # via pifpaf
 distlib==0.3.0            # via virtualenv
 docutils==0.16            # via sphinx
