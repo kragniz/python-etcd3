@@ -50,7 +50,7 @@ pycodestyle==2.5.0        # via flake8, flake8-import-order
 pycparser==2.20           # via cffi
 pydocstyle==3.0.0         # via -r test.in, flake8-docstrings
 pyflakes==2.1.1           # via flake8
-pygments==2.6.1           # via sphinx
+pygments==2.7.1           # via sphinx
 pyparsing==2.4.7          # via packaging
 pytest-cov==2.8.1         # via -r test.in
 pytest==4.6.5             # via -r test.in, pytest-cov
