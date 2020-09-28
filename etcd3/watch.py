@@ -11,7 +11,6 @@ import etcd3.events as events
 import etcd3.exceptions as exceptions
 import etcd3.utils as utils
 
-
 _log = logging.getLogger(__name__)
 
 
@@ -33,7 +32,7 @@ class Watch(object):
 
 
 class Watcher(object):
-
+    
     def __init__(self, watchstub, timeout=None, call_credentials=None,
                  metadata=None):
         self.timeout = timeout
@@ -71,7 +70,7 @@ class Watcher(object):
                                         start_revision=start_revision,
                                         progress_notify=progress_notify,
                                         filters=filters, prev_kv=prev_kv)
-
+        
         with self._lock:
             # Start the callback thread if it is not yet running.
             if not self._callback_thread:
@@ -135,37 +134,42 @@ class Watcher(object):
                         self._new_watch_cond.notify_all()
 
                     callbacks = self._callbacks
-                    self._callbacks = {}
-
+                    
                     # Rotate request queue. This way we can terminate one gRPC
                     # stream and initiate another one whilst avoiding a race
                     # between them over requests in the queue.
                     self._request_queue.put(None)
                     self._request_queue = queue.Queue(maxsize=10)
 
-                for callback in six.itervalues(callbacks):
-                    _safe_callback(callback, err)
+                    for callback in six.itervalues(self._callbacks):
+                        _safe_callback(callback, err)
+                    self._callbacks = {}
 
     def _handle_response(self, rs):
         with self._lock:
-            if rs.created:
-                # If the new watch request has already expired then cancel the
-                # created watch right away.
-                if not self._new_watch:
-                    self._cancel_no_lock(rs.watch_id)
-                    return
+            if rs.created: 
+                if not rs.canceled:
+                    # If the new watch request has already expired then cancel the
+                    # created watch right away.
+                    if not self._new_watch:
+                        self._cancel_no_lock(rs.watch_id)
+                        return
 
-                if rs.compact_revision != 0:
-                    self._new_watch.err = exceptions.RevisionCompactedError(
-                        rs.compact_revision)
-                    return
+                    if rs.compact_revision != 0:
+                        self._new_watch.err = exceptions.RevisionCompactedError(
+                            rs.compact_revision)
+                        return
 
-                self._callbacks[rs.watch_id] = self._new_watch.callback
-                self._new_watch.id = rs.watch_id
-                self._new_watch_cond.notify_all()
-
+                    self._callbacks[rs.watch_id] = self._new_watch.callback
+                    self._new_watch.id = rs.watch_id
+                    self._new_watch_cond.notify_all()
+                elif rs.cancel_reason:
+                    rpc_error = grpc.RpcError()
+                    rpc_error.code = lambda: grpc.StatusCode.CANCELLED
+                    rpc_error.message = rs.cancel_reason
+                    raise rpc_error
             callback = self._callbacks.get(rs.watch_id)
-
+        
         # Ignore leftovers from canceled watches.
         if not callback:
             return
