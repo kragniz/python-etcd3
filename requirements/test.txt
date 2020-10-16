@@ -73,7 +73,7 @@ urllib3==1.25.9           # via requests
 virtualenv==20.0.18       # via tox
 wcwidth==0.1.9            # via pytest
 xattr==0.9.7              # via pifpaf
-zipp==3.1.0               # via importlib-metadata
+zipp==3.3.1               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
