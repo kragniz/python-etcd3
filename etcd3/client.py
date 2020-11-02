@@ -138,8 +138,8 @@ class Etcd3Client(object):
 
         cred_params = [c is not None for c in (user, password)]
 
+        self.auth_stub = etcdrpc.AuthStub(self.channel)
         if all(cred_params):
-            self.auth_stub = etcdrpc.AuthStub(self.channel)
             auth_request = etcdrpc.AuthenticateRequest(
                 name=user,
                 password=password
@@ -1181,6 +1181,34 @@ class Etcd3Client(object):
 
         for response in snapshot_response:
             file_obj.write(response.blob)
+
+    @property
+    def users(self):
+        """
+        List of all users associated with the cluster.
+
+        :type: sequence of str
+
+        """
+        user_list_request = etcdrpc.AuthUserListRequest()
+
+        resp = self.auth_stub.UserList(user_list_request, self.timeout)
+
+        return resp.users
+
+    @_handle_errors
+    def add_user(self, use, passwd, usePasswd=True):
+        """
+        Add a new user to the the cluster.
+
+        :param user: User name to for the new user
+        :param passwd: Password for the usee
+        """
+        options = etcdrpc.auth__bp2.UserAddOptions(not usePassword)
+        resp = etcdrpc.auth_stub.UserAdd(user, passwd, options)
+        return resp.revision
+
+
 
 
 def client(host='localhost', port=2379,

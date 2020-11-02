@@ -1302,3 +1302,17 @@ class TestCompares(object):
         create_compare = tx.create(key) > -12
         assert create_compare.op == etcdrpc.Compare.GREATER
         assert create_compare.build_message().target == etcdrpc.Compare.CREATE
+
+
+class TestUsers(object):
+    @pytest.fixture
+    def etcd(self):
+        yield etcd3.client()
+
+    def test_user_list(self, etcd):
+        assert len(list(etcd.users)) == 0
+
+    def test_user_add(self, etcd):
+        resp = etcd.add_user("etcd3_test_user",  "juicyjuice")
+        assert resp == 0, "Bad revision"
+
