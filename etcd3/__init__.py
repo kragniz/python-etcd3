@@ -2,12 +2,15 @@ from __future__ import absolute_import
 
 import etcd3.etcdrpc as etcdrpc
 from etcd3.client import Etcd3Client
+from etcd3.client import Perms
 from etcd3.client import Transactions
 from etcd3.client import client
 from etcd3.exceptions import Etcd3Exception
 from etcd3.leases import Lease
 from etcd3.locks import Lock
 from etcd3.members import Member
+from etcd3.role import Perm, Role
+from etcd3.user import User
 
 __author__ = 'Louis Taylor'
 __email__ = 'louis@kragniz.eu'
@@ -22,4 +25,8 @@ __all__ = (
     'Lease',
     'Lock',
     'Member',
+    'Perm',
+    'Perms',
+    'Role',
+    'User',
 )

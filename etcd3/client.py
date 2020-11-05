@@ -1,10 +1,13 @@
+import collections
 import functools
 import inspect
+import sys
 import threading
 
 import grpc
 import grpc._channel
 
+import six
 from six.moves import queue
 
 import etcd3.etcdrpc as etcdrpc
@@ -12,7 +15,9 @@ import etcd3.exceptions as exceptions
 import etcd3.leases as leases
 import etcd3.locks as locks
 import etcd3.members
+import etcd3.role
 import etcd3.transactions as transactions
+import etcd3.user
 import etcd3.utils as utils
 import etcd3.watch as watch
 
@@ -21,15 +26,50 @@ _EXCEPTIONS_BY_CODE = {
     grpc.StatusCode.UNAVAILABLE: exceptions.ConnectionFailedError,
     grpc.StatusCode.DEADLINE_EXCEEDED: exceptions.ConnectionTimeoutError,
     grpc.StatusCode.FAILED_PRECONDITION: exceptions.PreconditionFailedError,
+    grpc.StatusCode.PERMISSION_DENIED: exceptions.PermissionDeniedError,
 }
+
+# Allow overriding exceptions based on the details coming back from the grpc
+# exception.
+_EXCEPTIONS_OVERRIDE = {
+    grpc.StatusCode.FAILED_PRECONDITION: {
+        "etcdserver: user name not found": exceptions.EntityNotFoundError,
+        "etcdserver: role name not found": exceptions.EntityNotFoundError,
+    },
+}
+
+# Grant permissions
+_Permissions = collections.namedtuple("_Permissions", ["r", "w", "rw"])
+Perms = _Permissions(
+    etcdrpc.Permission.READ,
+    etcdrpc.Permission.WRITE,
+    etcdrpc.Permission.READWRITE,
+)
+"""Permissions object instance necessary for granting permssions in roles.
+
+    :attribute r: Read only permission
+    :attribute w: Write only permission
+    :attribute rw: Read/write permission
+
+"""
 
 
 def _translate_exception(exc):
     code = exc.code()
-    exception = _EXCEPTIONS_BY_CODE.get(code)
+    details = exc.details()
+    exception = _EXCEPTIONS_OVERRIDE.get(code)
+    if exception and details in exception:
+        exception = exception[details]
+    else:
+        exception = _EXCEPTIONS_BY_CODE.get(code)
+
     if exception is None:
         raise
-    raise exception
+    if six.PY2:
+        raise exception(details)
+    elif six.PY3:
+        tb = sys.exc_info()[2]
+        raise exception(details).with_traceback(tb) from None
 
 
 def _handle_errors(f):
@@ -100,6 +140,7 @@ class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
 
 
 class Etcd3Client(object):
+    @_handle_errors
     def __init__(self, host='localhost', port=2379,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
                  user=None, password=None, grpc_options=None):
@@ -598,6 +639,7 @@ class Etcd3Client(object):
         Example usage:
 
         .. code-block:: python
+
             responses_iterator, cancel = etcd.watch_response('/doot/key')
             for response in responses_iterator:
                 print(response)
@@ -643,6 +685,7 @@ class Etcd3Client(object):
         Example usage:
 
         .. code-block:: python
+
             events_iterator, cancel = etcd.watch('/doot/key')
             for event in events_iterator:
                 print(event)
@@ -1170,33 +1213,276 @@ class Etcd3Client(object):
         for response in snapshot_response:
             file_obj.write(response.blob)
 
+    @_handle_errors
+    def enable_auth(self):
+        """Enable authentication in etcd."""
+        req = etcdrpc.AuthEnableRequest()
+        self.auth_stub.AuthEnable(
+            req,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    @_handle_errors
+    def disable_auth(self):
+        """Disable authentication in etcd."""
+        req = etcdrpc.AuthDisableRequest()
+        self.auth_stub.AuthDisable(
+            req,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
     @property
-    def users(self):
-        """
-        List of all users associated with the cluster.
+    def roles(self):
+        """List of all roles within the cluster.
 
         :type: sequence of str
 
         """
-        user_list_request = etcdrpc.AuthUserListRequest()
-
-        resp = self.auth_stub.UserList(user_list_request, self.timeout)
-
-        return resp.users
+        role_list_request = etcdrpc.AuthRoleListRequest()
+        resp = self.auth_stub.RoleList(
+            role_list_request,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+        return frozenset(resp.roles)
 
     @_handle_errors
-    def add_user(self, use, passwd, usePasswd=True):
+    def add_role(self, name):
+        """Add a new Auth Role to the the cluster.
+
+        :param name: Role name to add
+
         """
-        Add a new user to the the cluster.
+        req = etcdrpc.AuthRoleAddRequest()
+        req.name = name
+        self.auth_stub.RoleAdd(
+            req,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    @_handle_errors
+    def get_role(self, role):
+        """Retrieve a role from the cluster.
+
+        :param role: Name of the role to fetch
+
+        :returns: :class:`etcd3.role.Role` object
+
+        """
+        req = etcdrpc.AuthRoleGetRequest()
+        req.role = role
+        resp = self.auth_stub.RoleGet(
+            req,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+        return etcd3.role.Role(role, resp.perm, self)
+
+    @_handle_errors
+    def revoke_role(self, user, role):
+        """Revoke a specific role from a user.
+
+        :param user: Name of the user to remove the role from
+        :param role: Name of the role to revoke
+
+        """
+        req = etcdrpc.AuthUserRevokeRoleRequest()
+        req.name = user
+        req.role = role
+        self.auth_stub.UserRevokeRole(
+            req,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    @_handle_errors
+    def grant_role(self, user, role):
+        """Grant a specific role to a user.
+
+        :param user: Name of the user to grant the role to
+        :param role: Name of the role to grant
+
+        """
+        req = etcdrpc.AuthUserGrantRoleRequest()
+        req.user = user
+        req.role = role
+        self.auth_stub.UserGrantRole(
+            req,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    @_handle_errors
+    def delete_role(self, role):
+        """Delete a user from the cluster.
+
+        :param user: User name to delete
+
+        """
+        req = etcdrpc.AuthRoleDeleteRequest()
+        req.role = role
+        self.auth_stub.RoleDelete(
+            req,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    @_handle_errors
+    def grant_permission_role(self, role, perm, key, end=None, prefix=False):
+        """Assign a permissionto a role.
+
+        :param role: Name of the role to grant permission to
+        :param perm: Read ``etcd3.Perms.r`` Write ``etcd3.Perms.w``, or
+                           Read/Write ``etcd3.Perms.rw``
+        :param key: Key/heiarchy to grant the permission for
+        :param end: Used to set a range of keys
+        :param prefix: (Boolean) If True and "end" is not set add one to the
+                       last byte and use it for end
+
+        """
+        if prefix and end is None:
+            end = utils.prefix_range_end(utils.to_bytes(key))
+
+        if perm not in Perms:
+            raise ValueError("Invalid permission: %s" % repr(perm))
+
+        req = etcdrpc.AuthRoleGrantPermissionRequest()
+        req.name = role
+        req.perm.permType = perm
+        req.perm.key = utils.to_bytes(key)
+        if end is not None:
+            req.perm.range_end = utils.to_bytes(end)
+        self.auth_stub.RoleGrantPermission(
+            req,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    @_handle_errors
+    def revoke_permission_role(self, role, key, end=None, prefix=False):
+        """Revoke a permission from a role.
+
+        :param role: Name of the role to grant permission to
+        :param perm: Read ``etcd3.Perms.r`` Write ``etcd3.Perms.w``, or
+                           Read/Write ``etcd3.Perms.rw``
+        :param key: Key/heiarchy to grant the permission for
+        :param end: Used to set a range of keys
+        :param prefix: (Boolean) If True and "end" is not set add one to the
+                       last byte and use it for end
+
+        """
+        if prefix and end is None:
+            end = utils.prefix_range_end(utils.to_bytes(key))
+        req = etcdrpc.AuthRoleRevokePermissionRequest()
+        if end is not None:
+            req.range_end = utils.to_bytes(end)
+        req.role = role
+        req.key = utils.to_bytes(key)
+        self.auth_stub.RoleRevokePermission(
+            req,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    @property
+    def users(self):
+        """List of all users associated with the cluster.
+
+        :type: frozenset of str
+
+        """
+        req = etcdrpc.AuthUserListRequest()
+        resp = self.auth_stub.UserList(
+            req,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+        return frozenset(resp.users)
+
+    @_handle_errors
+    def add_user(self, user, passwd, use_password=True):
+        """Add a new user to the the cluster.
 
         :param user: User name to for the new user
         :param passwd: Password for the usee
+
         """
-        options = etcdrpc.auth__bp2.UserAddOptions(not usePassword)
-        resp = etcdrpc.auth_stub.UserAdd(user, passwd, options)
-        return resp.revision
+        req = etcdrpc.AuthUserAddRequest()
+        req.name = user
+        req.password = passwd
+        req.options.no_password = not use_password
+        self.auth_stub.UserAdd(
+            req,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
 
+    @_handle_errors
+    def get_user(self, user):
+        """Add a new user to the the cluster.
 
+        :param user: Name of the user to fetch
+        :returns: :class:`etcd3.user.User` object
+
+        """
+        req = etcdrpc.AuthUserGetRequest()
+        req.name = user
+        resp = self.auth_stub.UserGet(
+            req,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+        return etcd3.user.User(user, resp.roles, self)
+
+    @_handle_errors
+    def delete_user(self, user):
+        """Delete a user from the cluster.
+
+        :param user: User name to delete
+
+        """
+        req = etcdrpc.AuthUserDeleteRequest()
+        req.name = user
+        self.auth_stub.UserDelete(
+            req,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    @_handle_errors
+    def change_password(self, user, password):
+        """Change the password for a user.
+
+        :param user: User name to modify
+        :param password: New password to set
+
+        """
+        req = etcdrpc.AuthUserChangePasswordRequest()
+        req.name = user
+        req.password = password
+        self.auth_stub.UserChangePassword(
+            req,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
 
 
 def client(host='localhost', port=2379,
