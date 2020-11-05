@@ -6,6 +6,7 @@ Tests for `etcd3` module.
 
 import base64
 import contextlib
+import copy
 import json
 import os
 import signal
@@ -50,14 +51,30 @@ settings.register_profile("default", deadline=None)
 settings.load_profile("default")
 
 
-def etcdctl(*args):
-    endpoint = os.environ.get('PYTHON_ETCD_HTTP_URL')
+def etcdctl(*args, nojson=False):
+    endpoint = os.environ.get('PYTHON_HTTP_URL')
     if endpoint:
         args = ['--endpoints', endpoint] + list(args)
     args = ['etcdctl', '-w', 'json'] + list(args)
     print(" ".join(args))
     output = subprocess.check_output(args)
-    return json.loads(output.decode('utf-8'))
+    if nojson:
+        return output.decode("utf-8")
+    else:
+        return json.loads(output.decode('utf-8'))
+
+
+def get_etcd_client(**kwargs):
+    endpoint = os.environ.get('PYTHON_HTTP_URL')
+    args = copy.deepcopy(kwargs)
+    if endpoint:
+        url = urlparse(endpoint)
+        args["host"] = url.hostname
+        args["port"] = url.port
+        client = etcd3.client(**args)
+    else:
+        client = etcd3.client(**args)
+    return client
 
 
 # def etcdctl2(*args):
@@ -1050,12 +1067,13 @@ class TestEtcd3(object):
 class TestAlarms(object):
     @pytest.fixture
     def etcd(self):
-        etcd = etcd3.client()
-        yield etcd
-        etcd.disarm_alarm()
-        for m in etcd.members:
-            if m.active_alarms:
-                etcd.disarm_alarm(m.id)
+        with get_etcd_client() as client:
+            yield client
+
+            client.disarm_alarm()
+            for m in client.members:
+                if m.active_alarms:
+                    client.disarm_alarm(m.id)
 
     def test_create_alarm_all_members(self, etcd):
         alarms = etcd.create_alarm()
@@ -1123,7 +1141,8 @@ class TestEtcdTokenCallCredentials(object):
 class TestClient(object):
     @pytest.fixture
     def etcd(self):
-        yield etcd3.client()
+        with get_etcd_client() as client:
+            yield client
 
     def test_sort_target(self, etcd):
         key = 'key'.encode('utf-8')
@@ -1159,15 +1178,16 @@ class TestClient(object):
             etcd._build_get_range_request(key, sort_order='feelsbadman')
 
     def test_secure_channel(self):
-        client = etcd3.client(
+        client = get_etcd_client(
             ca_cert="tests/ca.crt",
             cert_key="tests/client.key",
-            cert_cert="tests/client.crt"
+            cert_cert="tests/client.crt",
+
         )
         assert client.uses_secure_channel is True
 
     def test_secure_channel_ca_cert_only(self):
-        client = etcd3.client(
+        client = get_etcd_client(
             ca_cert="tests/ca.crt",
             cert_key=None,
             cert_cert=None
@@ -1176,16 +1196,18 @@ class TestClient(object):
 
     def test_secure_channel_ca_cert_and_key_raise_exception(self):
         with pytest.raises(ValueError):
-            etcd3.client(
+            get_etcd_client(
                 ca_cert='tests/ca.crt',
                 cert_key='tests/client.crt',
-                cert_cert=None)
+                cert_cert=None,
+            )
 
         with pytest.raises(ValueError):
-            etcd3.client(
+            get_etcd_client(
                 ca_cert='tests/ca.crt',
                 cert_key=None,
-                cert_cert='tests/client.crt')
+                cert_cert='tests/client.crt',
+            )
 
     def test_compact(self, etcd):
         etcd.compact(3)
@@ -1193,10 +1215,11 @@ class TestClient(object):
             etcd.compact(3)
 
     def test_channel_with_no_cert(self):
-        client = etcd3.client(
+        client = get_etcd_client(
             ca_cert=None,
             cert_key=None,
-            cert_cert=None
+            cert_cert=None,
+
         )
         assert client.uses_secure_channel is False
 
@@ -1208,9 +1231,10 @@ class TestClient(object):
         self._enable_auth_in_etcd()
 
         # Create a client using username and password auth
-        client = etcd3.client(
+        client = get_etcd_client(
             user='root',
-            password='pwd'
+            password='pwd',
+
         )
 
         assert client.call_credentials is not None
@@ -1224,12 +1248,12 @@ class TestClient(object):
             etcd3.client(password='pwd')
 
     def _enable_auth_in_etcd(self):
-        subprocess.call(['etcdctl', '-w', 'json', 'user', 'add', 'root:pwd'])
-        subprocess.call(['etcdctl', 'auth', 'enable'])
+        etcdctl('user', 'add', 'root:pwd', nojson=True)
+        etcdctl('auth', 'enable', nojson=True)
 
     def _disable_auth_in_etcd(self):
-        subprocess.call(['etcdctl', 'user', 'remove', 'root'])
-        subprocess.call(['etcdctl', '-u', 'root:pwd', 'auth', 'disable'])
+        etcdctl('--user', 'root:pwd', 'auth', 'disable', nojson=True)
+        etcdctl('user', 'remove', 'root', nojson=True)
 
 
 class TestCompares(object):
@@ -1304,15 +1328,161 @@ class TestCompares(object):
         assert create_compare.build_message().target == etcdrpc.Compare.CREATE
 
 
-class TestUsers(object):
-    @pytest.fixture
-    def etcd(self):
-        yield etcd3.client()
+# Constants used for user and authentication testing
+ROOT_USER = "root"
+ROOT_PASS = "SuperMonkeyBall"
+ROOT_ROLE = "root"
+USER = "etcd3_test_user"
+USER_PASS = "juicyjuice"
+TEST_KEY = "test_key"
+TEST_VALUE = r"in_a_pinch_it'll_do"
+TEST_VALUE_NEXT = "tallapia"
 
-    def test_user_list(self, etcd):
-        assert len(list(etcd.users)) == 0
+# Test roles
+ROLE_R = "test_reader"
+ROLE_W = "test_writer"
+ROLE_RW = "test_readwriter"
 
-    def test_user_add(self, etcd):
-        resp = etcd.add_user("etcd3_test_user",  "juicyjuice")
-        assert resp == 0, "Bad revision"
 
+def test_auth_user_init():
+    with get_etcd_client() as client:
+        try:
+            client.get_user(ROOT_USER)
+            client.change_password(ROOT_USER, ROOT_PASS)
+        except etcd3.exceptions.EntityNotFoundError:
+            client.add_user(ROOT_USER, "GEORGE")
+            client.change_password(ROOT_USER, ROOT_PASS)
+        client.add_user(USER, USER_PASS)
+        with pytest.raises(Exception):
+            client.add_user(USER, USER_PASS)
+        resp = client.get_user(USER)
+        assert len(list(client.users)) > 0, "Too few users"
+        assert len(list(resp.roles)) == 0, "Too many roles"
+
+
+@pytest.mark.run(after="test_auth_user_init")
+def test_auth_role_init():
+    with get_etcd_client() as client:
+        try:
+            client.get_role(ROOT_ROLE)
+        except etcd3.exceptions.EntityNotFoundError:
+            client.add_role(ROOT_ROLE)
+        client.add_role(ROLE_R)
+        client.add_role(ROLE_RW)
+        client.add_role(ROLE_W)
+
+
+@pytest.mark.run(after="test_auth_role_init")
+def test_auth_role_setup():
+    with get_etcd_client() as client:
+        role = client.get_role(ROOT_ROLE)
+
+        role = client.get_role(ROLE_W)
+        role.grant(etcd3.Perms.w, "/test/w/", prefix=True)
+        role = client.get_role(ROLE_R)
+        role.grant(etcd3.Perms.r, "/test/r/", prefix=True)
+        role = client.get_role(ROLE_RW)
+        role.grant(etcd3.Perms.rw, "/test/rw/", prefix=True)
+
+
+@pytest.mark.run(after="test_auth_role_setup")
+def test_auth_data_for_perms_check():
+    with get_etcd_client() as client:
+        client.put('/doot/jones/%s' % TEST_KEY, TEST_VALUE)
+        client.put('/test/w/%s' % TEST_KEY, TEST_VALUE)
+        client.put('/test/r/%s' % TEST_KEY, TEST_VALUE)
+        client.put('/test/rw/%s' % TEST_KEY, TEST_VALUE)
+
+
+@pytest.mark.run(after="test_auth_data_for_perms_check")
+def test_auth_user_grant():
+    with get_etcd_client() as client:
+        client.grant_role(ROOT_USER, ROOT_ROLE)
+        client.grant_role(USER, ROLE_R)
+        client.grant_role(USER, ROLE_W)
+        client.grant_role(USER, ROLE_RW)
+        resp = client.get_user(USER)
+        assert len(list(resp.roles)) == 3
+
+
+@pytest.mark.run(after="test_auth_user_grant")
+def test_auth_enable_auth():
+    with get_etcd_client() as client:
+        assert len(list(client.users)) > 0
+        client.enable_auth()
+
+
+@pytest.mark.run(after="test_auth_enable_auth")
+def test_auth_key_manipulation():
+    with get_etcd_client(user=USER, password=USER_PASS) as client:
+        with pytest.raises(etcd3.exceptions.PermissionDeniedError):
+            client.get("/doot/jones/%s" % TEST_KEY)
+        with pytest.raises(etcd3.exceptions.PermissionDeniedError):
+            client.get('/test/w/%s' % TEST_KEY)
+
+        with pytest.raises(etcd3.exceptions.PermissionDeniedError):
+            client.put("/test/r/%s" % TEST_KEY, TEST_VALUE_NEXT)
+
+        client.put("/test/w/%s" % TEST_KEY, TEST_VALUE_NEXT)
+        val, meta = client.get('/test/r/%s' % TEST_KEY)
+        assert val == utils.to_bytes(TEST_VALUE)
+        val, meta = client.get('/test/rw/%s' % TEST_KEY)
+        assert val == utils.to_bytes(TEST_VALUE)
+
+
+@pytest.mark.run(after="test_auth_key_manipulation")
+def test_auth_root_manipulation():
+    with get_etcd_client(user=ROOT_USER, password=ROOT_PASS) as client:
+        val, meta = client.get("/doot/jones/%s" % TEST_KEY)
+        assert val == utils.to_bytes(TEST_VALUE)
+        val, meta = client.get("/test/w/%s" % TEST_KEY)
+        assert val == utils.to_bytes(TEST_VALUE_NEXT)
+        assert USER in client.users
+
+
+@pytest.mark.run(after="test_auth_root_manipulation")
+def test_auth_role_check():
+    with get_etcd_client(user=ROOT_USER, password=ROOT_PASS) as client:
+        test_key = utils.to_bytes("/test/r/")
+        val = client.get_role(ROLE_R)
+        assert val.role == ROLE_R
+        assert test_key in val.perms
+        assert val.perms[test_key].mode == etcd3.Perms.r
+        assert val.perms[test_key].key == test_key
+        assert val.perms[test_key].end == utils.prefix_range_end(test_key)
+
+
+@pytest.mark.run(after="test_auth_role_check")
+def test_auth_unpriv_user_delete():
+    with get_etcd_client(user=USER, password=USER_PASS) as client:
+        with pytest.raises(etcd3.exceptions.PermissionDeniedError):
+            client.delete(ROOT_USER)
+
+
+@pytest.mark.run(after="test_auth_unpriv_user_delete")
+def test_auth_root_user_delete():
+    with get_etcd_client(user=ROOT_USER, password=ROOT_PASS) as client:
+        x = set(client.users)
+        assert USER in x
+        assert ROLE_R in client.roles
+        user = client.get_user(USER)
+        user.revoke(ROLE_R)
+        client.delete_role(ROLE_R)
+        user.revoke(ROLE_W)
+        client.delete_role(ROLE_W)
+        user.revoke(ROLE_RW)
+        client.delete_role(ROLE_RW)
+        client.delete_user(USER)
+
+
+@pytest.mark.run(after="test_auth_user_delete")
+def test_auth_disable():
+    with get_etcd_client(user=ROOT_USER, password=ROOT_PASS) as client:
+        client.disable_auth()
+
+
+@pytest.mark.run(after="test_auth_disable")
+def test_auth_delete_roles():
+    with get_etcd_client() as client:
+        client.delete_role(ROOT_ROLE)
+        client.delete_user(ROOT_USER)
