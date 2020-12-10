@@ -15,7 +15,7 @@ babel==2.8.0              # via sphinx
 bumpversion==0.5.3        # via -r test.in
 certifi==2020.4.5.1       # via requests
 cffi==1.14.0              # via xattr
-chardet==3.0.4            # via requests
+chardet==4.0.0            # via requests
 click==7.1.2              # via pifpaf
 coverage==5.1             # via -r test.in, pytest-cov
 daiquiri==2.1.1           # via pifpaf
