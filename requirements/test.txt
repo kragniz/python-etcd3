@@ -63,7 +63,7 @@ snowballstemmer==2.0.0    # via pydocstyle, sphinx
 sortedcontainers==2.1.0   # via hypothesis
 sphinx==1.8.2             # via -r test.in
 sphinxcontrib-websupport==1.2.1  # via sphinx
-tenacity==5.0.2           # via -r test.in
+tenacity==6.3.1           # via -r test.in
 testtools==2.4.0          # via fixtures
 toml==0.10.0              # via tox
 tox==3.5.3                # via -r test.in
