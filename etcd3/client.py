@@ -1048,6 +1048,7 @@ class Etcd3Client(object):
         )
 
     @property
+    @_handle_errors
     def members(self):
         """
         List of all members associated with the cluster.
@@ -1248,6 +1249,7 @@ class Etcd3Client(object):
         )
 
     @property
+    @_handle_errors
     def roles(self):
         """List of all roles within the cluster.
 
@@ -1410,6 +1412,7 @@ class Etcd3Client(object):
         )
 
     @property
+    @_handle_errors
     def users(self):
         """List of all users associated with the cluster.
 
