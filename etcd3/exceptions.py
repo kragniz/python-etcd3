@@ -28,3 +28,8 @@ class RevisionCompactedError(Etcd3Exception):
     def __init__(self, compacted_revision):
         self.compacted_revision = compacted_revision
         super(RevisionCompactedError, self).__init__()
+
+
+class ResourceExhaustedError(Etcd3Exception):
+    def __str__(self):
+        return "etcd out of memory"
