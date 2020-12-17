@@ -2,6 +2,11 @@ import functools
 import inspect
 import threading
 
+import grpc
+import grpc._channel
+
+from six.moves import queue
+
 import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions as exceptions
 import etcd3.leases as leases
@@ -10,9 +15,6 @@ import etcd3.members
 import etcd3.transactions as transactions
 import etcd3.utils as utils
 import etcd3.watch as watch
-import grpc
-import grpc._channel
-from six.moves import queue
 
 _EXCEPTIONS_BY_CODE = {
     grpc.StatusCode.INTERNAL: exceptions.InternalServerError,
