@@ -689,9 +689,7 @@ class Etcd3Client(object):
 
         :returns: tuple of ``events_iterator`` and ``cancel``.
         """
-        kwargs['range_end'] = \
-            utils.prefix_range_end(utils.to_bytes(key_prefix))
-        response_iterator, cancel = self.watch(key_prefix, **kwargs)
+        response_iterator, cancel = self.watch_prefix(key_prefix, **kwargs)
         try:
             yield response_iterator, cancel
         except:
