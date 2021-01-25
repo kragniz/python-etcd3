@@ -103,9 +103,22 @@ class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
 class Etcd3Client(object):
     def __init__(self, host='localhost', port=2379,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
-                 user=None, password=None, grpc_options=None):
-
-        self._url = '{host}:{port}'.format(host=host, port=port)
+                 user=None, password=None, grpc_options=None,
+                 multi_host = [], host_version = ''):
+        if multi_host and host_version:
+            if host_version in ('ipv6', 'v6'):
+                host_version = 'ipv6'
+            else:
+                host_version = 'ipv4'
+            hosts = []
+            for host_info in multi_host:
+                hosts.append('{host}:{port}'.format(host=host_info['host'], 
+                                                    port=host_info['port']))
+            hosts = ",".join(hosts)
+            self._url = '{version}:{hosts}'.format(version=host_version, hosts=hosts)
+        else:
+            self._url = '{host}:{port}'.format(host=host, port=port)
+        
         self.metadata = None
 
         cert_params = [c is not None for c in (cert_cert, cert_key)]
