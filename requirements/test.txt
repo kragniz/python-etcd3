@@ -69,7 +69,7 @@ toml==0.10.0              # via tox
 tox==3.5.3                # via -r test.in
 traceback2==1.4.0         # via testtools, unittest2
 unittest2==1.1.0          # via testtools
-urllib3==1.25.9           # via requests
+urllib3==1.26.3           # via requests
 virtualenv==20.0.18       # via tox
 wcwidth==0.1.9            # via pytest
 xattr==0.9.7              # via pifpaf
