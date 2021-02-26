@@ -58,8 +58,10 @@ class Lock(object):
         :params timeout: Maximum time to wait before returning. `None` means
                          forever, any other value equal or greater than 0 is
                          the number of seconds.
+        :params raise_on_timeout: If True, will raise if timeout is reached.
         :returns: True if the lock has been acquired, False otherwise.
-
+                  Will raise LockTimeout if and only if raise_on_timeout is
+                  a True value and the timeout is reached.
         """
         if timeout is DEFAULT_TIMEOUT:
             timeout = self.default_timeout
