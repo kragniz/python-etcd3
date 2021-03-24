@@ -1313,6 +1313,7 @@ def client(host='localhost', port=2379, endpoints=None,
     """Return an instance of an Etcd3Client."""
     return Etcd3Client(host=host,
                        port=port,
+                       endpoints=endpoints,
                        ca_cert=ca_cert,
                        cert_key=cert_key,
                        cert_cert=cert_cert,
