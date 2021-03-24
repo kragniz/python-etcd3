@@ -983,39 +983,46 @@ class TestEtcd3(object):
 
     def test_internal_exception_on_internal_error(self, etcd):
         exception = self.MockedException(grpc.StatusCode.INTERNAL)
-        kv_mock = mock.MagicMock()
+        kv_mock = mock.PropertyMock()
         kv_mock.Range.side_effect = exception
-        etcd.kvstub = kv_mock
-
-        with pytest.raises(etcd3.exceptions.InternalServerError):
-            etcd.get("foo")
+        with mock.patch('etcd3.Etcd3Client.kvstub',
+                        new_callable=mock.PropertyMock) as property_mock:
+            property_mock.return_value = kv_mock
+            with pytest.raises(etcd3.exceptions.InternalServerError):
+                etcd.get("foo")
 
     def test_connection_failure_exception_on_connection_failure(self, etcd):
         exception = self.MockedException(grpc.StatusCode.UNAVAILABLE)
-        kv_mock = mock.MagicMock()
+        kv_mock = mock.PropertyMock()
         kv_mock.Range.side_effect = exception
-        etcd.kvstub = kv_mock
-
-        with pytest.raises(etcd3.exceptions.ConnectionFailedError):
-            etcd.get("foo")
+        with mock.patch('etcd3.Etcd3Client.kvstub',
+                        new_callable=mock.PropertyMock) as property_mock:
+            property_mock.return_value = kv_mock
+            with pytest.raises(etcd3.exceptions.ConnectionFailedError):
+                etcd.get("foo")
+            assert etcd.endpoint_in_use.is_failed()
 
     def test_connection_timeout_exception_on_connection_timeout(self, etcd):
         exception = self.MockedException(grpc.StatusCode.DEADLINE_EXCEEDED)
-        kv_mock = mock.MagicMock()
+        kv_mock = mock.PropertyMock()
         kv_mock.Range.side_effect = exception
-        etcd.kvstub = kv_mock
-
-        with pytest.raises(etcd3.exceptions.ConnectionTimeoutError):
-            etcd.get("foo")
+        with mock.patch('etcd3.Etcd3Client.kvstub',
+                        new_callable=mock.PropertyMock) as property_mock:
+            property_mock.return_value = kv_mock
+            with pytest.raises(etcd3.exceptions.ConnectionTimeoutError):
+                etcd.get("foo")
+            assert etcd.endpoint_in_use.is_failed()
 
     def test_grpc_exception_on_unknown_code(self, etcd):
         exception = self.MockedException(grpc.StatusCode.DATA_LOSS)
-        kv_mock = mock.MagicMock()
+        kv_mock = mock.PropertyMock()
         kv_mock.Range.side_effect = exception
-        etcd.kvstub = kv_mock
-
-        with pytest.raises(grpc.RpcError):
-            etcd.get("foo")
+        with mock.patch('etcd3.Etcd3Client.kvstub',
+                        new_callable=mock.PropertyMock) as property_mock:
+            property_mock.return_value = kv_mock
+            with pytest.raises(grpc.RpcError):
+                etcd.get("foo")
+            assert not etcd.endpoint_in_use.is_failed()
 
     def test_status_member(self, etcd):
         status = etcd.status()
