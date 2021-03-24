@@ -139,6 +139,9 @@ class Etcd3Client(object):
         self.metadata = None
         self.failover = failover
 
+        # Cache GRPC stubs here
+        self._stubs = {}
+
         # Step 1: verify credentials
         cert_params = [c is not None for c in (cert_cert, cert_key)]
         if ca_cert is not None:
@@ -171,7 +174,9 @@ class Etcd3Client(object):
             # If the endpoints are passed externally, just use those.
             self.endpoints = {ep.netloc: ep for ep in endpoints}
 
-        self._ep_in_use = random.choice(list(self.endpoints.keys()))
+        self._current_endpoint_label = random.choice(
+            list(self.endpoints.keys())
+        )
 
         # Step 3: if auth is enabled, call the auth endpoint
         self.timeout = timeout
@@ -199,25 +204,21 @@ class Etcd3Client(object):
         self.watcher = self.get_watcher()
         self.transactions = Transactions()
 
-    @property
-    def authstub(self):
-        return etcdrpc.AuthStub(self.channel)
+    def _create_stub_property(name, stub_class):
+        def get_stub(self):
+            stub = self._stubs.get(name)
+            if stub is None:
+                stub = self._stubs[name] = stub_class(self.channel)
+            return stub
+        return property(get_stub)
 
-    @property
-    def kvstub(self):
-        return etcdrpc.KVStub(self.channel)
-
-    @property
-    def clusterstub(self):
-        return etcdrpc.ClusterStub(self.channel)
-
-    @property
-    def leasestub(self):
-        return etcdrpc.LeaseStub(self.channel)
-
-    @property
-    def maintenancestub(self):
-        return etcdrpc.MaintenanceStub(self.channel)
+    authstub = _create_stub_property("authstub", etcdrpc.AuthStub)
+    kvstub = _create_stub_property("kvstub", etcdrpc.KVStub)
+    clusterstub = _create_stub_property("clusterstub", etcdrpc.ClusterStub)
+    leasestub = _create_stub_property("leasestub", etcdrpc.LeaseStub)
+    maintenancestub = _create_stub_property(
+        "maintenancestub", etcdrpc.MaintenanceStub
+    )
 
     def get_watcher(self):
         watchstub = etcdrpc.WatchStub(self.channel)
@@ -229,11 +230,21 @@ class Etcd3Client(object):
         )
 
     @property
+    def _current_endpoint_label(self):
+        return self._current_ep_label
+
+    @_current_endpoint_label.setter
+    def _current_endpoint_label(self, value):
+        if getattr(self, "_current_ep_label", None) is not value:
+            self._stubs.clear()
+        self._current_ep_label = value
+
+    @property
     def endpoint_in_use(self):
         """Get the current endpoint in use."""
-        if self._ep_in_use is None:
+        if self._current_endpoint_label is None:
             return None
-        return self.endpoints[self._ep_in_use]
+        return self.endpoints[self._current_endpoint_label]
 
     @property
     def channel(self):
@@ -253,7 +264,7 @@ class Etcd3Client(object):
         for label, endpoint in self.endpoints:
             if endpoint.is_failed():
                 continue
-            self._ep_in_use = label
+            self._current_endpoint_label = label
             return self.channel
         raise exceptions.NoServerAvailableError(
             "No endpoint available and not failed")
@@ -298,6 +309,7 @@ class Etcd3Client(object):
             # subsequent requests.
             # TODO: stop/respawn the watcher?
             self.endpoint_in_use.fail()
+            self._stubs.clear()
         exception = _EXCEPTIONS_BY_CODE.get(code)
         if exception is None:
             raise
@@ -1309,6 +1321,7 @@ class Etcd3Client(object):
     # Remove utility functions from class namespace
     del _handle_errors
     del _handle_generator_errors
+    del _create_stub_property
 
 
 def client(host='localhost', port=2379, endpoints=None,
