@@ -169,7 +169,7 @@ class Etcd3Client(object):
             self.endpoints = {ep.netloc: ep}
         else:
             # If the endpoints are passed externally, just use those.
-            self.endpoints = endpoints
+            self.endpoints = {ep.netloc: ep for ep in endpoints}
 
         self._ep_in_use = random.choice(list(self.endpoints.keys()))
 
