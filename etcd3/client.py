@@ -244,7 +244,7 @@ class Etcd3Client(object):
         """
         try:
             return self.endpoint_in_use.use()
-        except ValueError as e:
+        except ValueError:
             if not self.failover:
                 raise
             else:
