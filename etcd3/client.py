@@ -101,8 +101,6 @@ class Endpoint(object):
             raise ValueError('Trying to use a failed node')
         self.in_use = True
         self.last_failed = 0
-        # TODO: is this channel always working? Maybe it's a good idea to
-        # respawn a new one?
         return self.channel
 
     def __str__(self):
