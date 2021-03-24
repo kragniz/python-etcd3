@@ -87,6 +87,9 @@ class Endpoint(object):
         self.last_failed = 0
         self.channel = self._mkchannel(opts)
 
+    def close(self):
+        self.channel.close()
+
     def fail(self):
         """Transition the endpoint to a failed state."""
         self.in_use = False
@@ -259,8 +262,8 @@ class Etcd3Client(object):
 
     def close(self):
         """Call the GRPC channel close semantics."""
-        if hasattr(self, 'channel'):
-            self.channel.close()
+        for endpoint in self.endpoints.values():
+            endpoint.close()
 
     def __enter__(self):
         return self
