@@ -247,8 +247,6 @@ class Etcd3Client(object):
         except ValueError:
             if not self.failover:
                 raise
-            else:
-                pass
         # We're failing over. We get the first non-failed channel
         # we encounter, and use it by calling this function again,
         # recursively
