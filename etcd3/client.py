@@ -198,8 +198,6 @@ class Etcd3Client(object):
                 'must be specified.'
             )
 
-        # The watcher is a special beast, as it spawns threads
-        self.watcher = self.get_watcher()
         self.transactions = Transactions()
 
     def _create_stub_property(name, stub_class):
@@ -226,6 +224,17 @@ class Etcd3Client(object):
             call_credentials=self.call_credentials,
             metadata=self.metadata
         )
+
+    @property
+    def watcher(self):
+        watcher = self._stubs.get("watcher")
+        if watcher is None:
+            watcher = self._stubs["watcher"] = self.get_watcher()
+        return watcher
+
+    @watcher.setter
+    def watcher(self, value):
+        self._stubs["watcher"] = value
 
     @property
     def _current_endpoint_label(self):
@@ -305,9 +314,11 @@ class Etcd3Client(object):
             # This sets the current node to failed.
             # If others are available, they will be used on
             # subsequent requests.
-            # TODO: stop/respawn the watcher?
             self.endpoint_in_use.fail()
+            old_watcher = self._stubs.get("watcher")
             self._stubs.clear()
+            if old_watcher:
+                old_watcher.close()
         exception = _EXCEPTIONS_BY_CODE.get(code)
         if exception is None:
             raise
