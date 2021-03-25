@@ -1,5 +1,5 @@
 -r base.in
-PyYAML==5.1
+PyYAML==5.4
 Sphinx==1.8.2
 bumpversion==0.5.3
 coverage
