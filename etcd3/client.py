@@ -82,7 +82,7 @@ class Endpoint(object):
             raise ValueError(
                 'Please set TLS credentials for secure connections')
         self.credentials = creds
-        self.time_retry = 300.0
+        self.time_retry = time_retry
         self.in_use = False
         self.last_failed = 0
         self.channel = self._mkchannel(opts)
