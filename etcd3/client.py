@@ -236,6 +236,12 @@ class Etcd3Client(object):
     def watcher(self, value):
         self._stubs["watcher"] = value
 
+    def _clear_old_stubs(self):
+        old_watcher = self._stubs.get("watcher")
+        self._stubs.clear()
+        if old_watcher:
+            old_watcher.close()
+
     @property
     def _current_endpoint_label(self):
         return self._current_ep_label
@@ -243,7 +249,7 @@ class Etcd3Client(object):
     @_current_endpoint_label.setter
     def _current_endpoint_label(self, value):
         if getattr(self, "_current_ep_label", None) is not value:
-            self._stubs.clear()
+            self._clear_old_stubs()
         self._current_ep_label = value
 
     @property
@@ -278,6 +284,9 @@ class Etcd3Client(object):
 
     def close(self):
         """Call the GRPC channel close semantics."""
+        possible_watcher = self._stubs.get("watcher")
+        if possible_watcher:
+            possible_watcher.close()
         for endpoint in self.endpoints.values():
             endpoint.close()
 
@@ -315,10 +324,7 @@ class Etcd3Client(object):
             # If others are available, they will be used on
             # subsequent requests.
             self.endpoint_in_use.fail()
-            old_watcher = self._stubs.get("watcher")
-            self._stubs.clear()
-            if old_watcher:
-                old_watcher.close()
+            self._clear_old_stubs()
         exception = _EXCEPTIONS_BY_CODE.get(code)
         if exception is None:
             raise
