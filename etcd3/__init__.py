@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import etcd3.etcdrpc as etcdrpc
+from etcd3.client import Endpoint
 from etcd3.client import Etcd3Client
 from etcd3.client import Transactions
 from etcd3.client import client
@@ -15,6 +16,7 @@ __version__ = '0.12.0'
 
 __all__ = (
     'etcdrpc',
+    'Endpoint',
     'Etcd3Client',
     'Etcd3Exception',
     'Transactions',
