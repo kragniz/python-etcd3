@@ -1013,6 +1013,19 @@ class TestEtcd3(object):
                 etcd.get("foo")
             assert etcd.endpoint_in_use.is_failed()
 
+    def test_single_endpoint_failover(self, etcd):
+        etcd.failover = True
+        exception = self.MockedException(grpc.StatusCode.UNAVAILABLE)
+        kv_mock = mock.PropertyMock()
+        kv_mock.Range.side_effect = exception
+        with mock.patch('etcd3.Etcd3Client.kvstub',
+                        new_callable=mock.PropertyMock) as property_mock:
+            property_mock.return_value = kv_mock
+            with pytest.raises(etcd3.exceptions.ConnectionFailedError):
+                etcd.get("foo")
+        with pytest.raises(etcd3.exceptions.NoServerAvailableError):
+            etcd.get("foo")
+
     def test_grpc_exception_on_unknown_code(self, etcd):
         exception = self.MockedException(grpc.StatusCode.DATA_LOSS)
         kv_mock = mock.PropertyMock()

@@ -274,7 +274,7 @@ class Etcd3Client(object):
         # We're failing over. We get the first non-failed channel
         # we encounter, and use it by calling this function again,
         # recursively
-        for label, endpoint in self.endpoints:
+        for label, endpoint in self.endpoints.items():
             if endpoint.is_failed():
                 continue
             self._current_endpoint_label = label
