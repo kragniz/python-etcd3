@@ -144,7 +144,7 @@ class Etcd3Client(object):
         cert_params = [c is not None for c in (cert_cert, cert_key)]
         if ca_cert is not None:
             if all(cert_params):
-                credentials = self._get_secure_creds(
+                credentials = self.get_secure_creds(
                     ca_cert,
                     cert_key,
                     cert_cert
@@ -156,7 +156,7 @@ class Etcd3Client(object):
                     'to use a secure channel ca_cert is required by itself, '
                     'or cert_cert and cert_key must both be specified.')
             else:
-                credentials = self._get_secure_creds(ca_cert, None, None)
+                credentials = self.get_secure_creds(ca_cert, None, None)
                 self.uses_secure_channel = True
         else:
             self.uses_secure_channel = False
@@ -296,7 +296,8 @@ class Etcd3Client(object):
     def __exit__(self, *args):
         self.close()
 
-    def _get_secure_creds(self, ca_cert, cert_key=None, cert_cert=None):
+    @staticmethod
+    def get_secure_creds(ca_cert, cert_key=None, cert_cert=None):
         cert_key_file = None
         cert_cert_file = None
 
