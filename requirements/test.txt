@@ -53,7 +53,7 @@ pyflakes==2.1.1           # via flake8
 pygments==2.6.1           # via sphinx
 pyparsing==2.4.7          # via packaging
 pytest-cov==2.8.1         # via -r test.in
-pytest==4.6.5             # via -r test.in, pytest-cov
+pytest==6.2.4             # via -r test.in, pytest-cov
 python-json-logger==0.1.11  # via daiquiri
 python-mimeparse==1.6.0   # via testtools
 pytz==2019.3              # via babel
