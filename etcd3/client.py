@@ -904,12 +904,11 @@ class Etcd3Client(object):
     def refresh_lease(self, lease_id):
         keep_alive_request = etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
         request_stream = [keep_alive_request]
-        for response in self.leasestub.LeaseKeepAlive(
+        return list(self.leasestub.LeaseKeepAlive(
                 iter(request_stream),
                 self.timeout,
                 credentials=self.call_credentials,
-                metadata=self.metadata):
-            yield response
+                metadata=self.metadata))
 
     @_handle_errors
     def get_lease_info(self, lease_id):
