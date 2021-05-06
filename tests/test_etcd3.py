@@ -446,6 +446,48 @@ class TestEtcd3(object):
         assert events[1].key.decode() == '/doot/watch/prefix/callback/1'
         assert events[1].value.decode() == '1'
 
+    def test_watch_prefix_callback_with_filter(self, etcd):
+        def update_etcd(v):
+            etcdctl('put', '/doot/watch/prefix/callback/' + v, v)
+            out = etcdctl('get', '/doot/watch/prefix/callback/' + v)
+            assert base64.b64decode(out['kvs'][0]['value']) == \
+                utils.to_bytes(v)
+
+        def delete_etcd(v):
+            etcdctl('del', '/doot/watch/prefix/callback/' + v)
+
+        def update_key():
+            time.sleep(3)
+            update_etcd('0')
+            time.sleep(1)
+            update_etcd('1')
+            time.sleep(1)
+            delete_etcd('1')
+            time.sleep(1)
+
+        events = []
+
+        def callback(event):
+            events.extend(event.events)
+
+        t = threading.Thread(name="update_key_prefix", target=update_key)
+        t.start()
+
+        watch_id = etcd.add_watch_prefix_callback(
+            '/doot/watch/prefix/callback/',
+            callback,
+            filters=[etcdrpc.WatchCreateRequest.FilterType.Value('NODELETE')]
+        )
+
+        t.join()
+        etcd.cancel_watch(watch_id)
+
+        assert len(events) == 2
+        assert events[0].key.decode() == '/doot/watch/prefix/callback/0'
+        assert events[0].value.decode() == '0'
+        assert events[1].key.decode() == '/doot/watch/prefix/callback/1'
+        assert events[1].value.decode() == '1'
+
     def test_sequential_watch_prefix_once(self, etcd):
         try:
             etcd.watch_prefix_once('/doot/', 1)
