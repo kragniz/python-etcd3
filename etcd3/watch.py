@@ -60,7 +60,7 @@ class Watcher(object):
         if progress_notify:
             create_watch.progress_notify = progress_notify
         if filters is not None:
-            create_watch.filters = filters
+            create_watch.filters.extend(filters)
         if prev_kv:
             create_watch.prev_kv = prev_kv
         return etcdrpc.WatchRequest(create_request=create_watch)
