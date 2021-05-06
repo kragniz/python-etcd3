@@ -476,7 +476,7 @@ class TestEtcd3(object):
         watch_id = etcd.add_watch_prefix_callback(
             '/doot/watch/prefix/callback/',
             callback,
-            filters=[etcdrpc.WatchCreateRequest.FilterType.NODELETE]
+            filters=[etcdrpc.WatchCreateRequest.FilterType.Value('NODELETE')]
         )
 
         t.join()
