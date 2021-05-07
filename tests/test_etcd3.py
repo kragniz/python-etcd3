@@ -704,6 +704,68 @@ class TestEtcd3(object):
             assert meta.key.startswith(b"/doot/")
             assert not value
 
+    def test_get_count_only(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/count{}'.format(i), 'i am in all')
+        resp = etcd.get_prefix_response(
+            key_prefix='/doot/count',
+            count_only=True
+        )
+        assert len(resp.kvs) == 0
+        assert resp.count == 20
+
+    def test_get_limit(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/limit{}'.format(i), 'i am in all')
+        for i in range(20):
+            resp = etcd.get_prefix_response(key_prefix='/doot/limit', limit=i)
+            assert resp.count == 20
+            if i == 0 or i == 20:
+                assert len(resp.kvs) == 20
+                assert resp.more is False
+            else:
+                assert len(resp.kvs) == i
+                assert resp.more is True
+
+    def test_get_revision(self, etcd):
+        revisions = []
+        for i in range(20):
+            resp = etcdctl('put', '/doot/revision{}'.format(i), 'i am in all')
+            revisions.append(resp['header']['revision'])
+        for i, revision in enumerate(revisions):
+            resp = etcd.get_prefix_response(
+                key_prefix='/doot/revisiond',
+                revision=revision
+            )
+            assert resp.count == i + 1
+
+    def test_get_min_mod_revision(self, etcd):
+        revisions = []
+        for i in range(5):
+            resp = etcdctl('put', '/doot/revision', str(i))
+            revisions.append(resp['header']['revision'])
+        for revision in revisions:
+            resp = etcd.get_response(
+                key='/doot/revision',
+                min_mod_revision=revision
+            )
+            assert len(resp.kvs) == 1
+
+    def test_get_max_mod_revision(self, etcd):
+        revisions = []
+        for i in range(5):
+            resp = etcdctl('put', '/doot/revision', str(i))
+            revisions.append(resp['header']['revision'])
+        for revision in revisions:
+            resp = etcd.get_response(
+                key='/doot/revision',
+                max_mod_revision=revision
+            )
+            if revision == revisions[-1]:
+                assert len(resp.kvs) == 1
+            else:
+                assert len(resp.kvs) == 0
+
     def test_sort_order(self, etcd):
         def remove_prefix(string, prefix):
             return string[len(prefix):]
