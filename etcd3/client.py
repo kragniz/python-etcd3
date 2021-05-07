@@ -74,12 +74,14 @@ class KVMetadata(object):
 
 
 class Status(object):
-    def __init__(self, version, db_size, leader, raft_index, raft_term):
+    def __init__(self, version, db_size, leader, raft_index, raft_term,
+                 header=None):
         self.version = version
         self.db_size = db_size
         self.leader = leader
         self.raft_index = raft_index
         self.raft_term = raft_term
+        self.header = header
 
 
 class Alarm(object):
@@ -218,6 +220,19 @@ class Etcd3Client(object):
         range_request.keys_only = keys_only
         if range_end is not None:
             range_request.range_end = utils.to_bytes(range_end)
+
+        if limit is not None:
+            range_request.limit = limit
+        if revision is not None:
+            range_request.revision = revision
+        if min_mod_revision is not None:
+            range_request.min_mod_revision = min_mod_revision
+        if max_mod_revision is not None:
+            range_request.max_mod_revision = max_mod_revision
+        if min_create_revision is not None:
+            range_request.min_create_revision = min_create_revision
+        if max_create_revision is not None:
+            range_request.max_create_revision = max_create_revision
 
         if sort_order is None:
             range_request.sort_order = etcdrpc.RangeRequest.NONE
@@ -550,7 +565,8 @@ class Etcd3Client(object):
                       status_response.dbSize,
                       leader,
                       status_response.raftIndex,
-                      status_response.raftTerm)
+                      status_response.raftTerm,
+                      status_response.header)
 
     @_handle_errors
     def add_watch_callback(self, *args, **kwargs):
