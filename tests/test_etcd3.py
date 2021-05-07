@@ -734,10 +734,10 @@ class TestEtcd3(object):
             revisions.append(resp['header']['revision'])
         for i, revision in enumerate(revisions):
             resp = etcd.get_prefix_response(
-                key_prefix='/doot/revisiond',
+                key_prefix='/doot/revision',
                 revision=revision
             )
-            assert resp.count == i + 1
+            assert resp.count == min(len(revisions), i + 1)
 
     def test_get_min_mod_revision(self, etcd):
         revisions = []
