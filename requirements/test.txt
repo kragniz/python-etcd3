@@ -59,7 +59,7 @@ python-mimeparse==1.6.0   # via testtools
 pytz==2019.3              # via babel
 pyyaml==5.1               # via -r test.in
 requests==2.23.0          # via sphinx
-snowballstemmer==2.0.0    # via pydocstyle, sphinx
+snowballstemmer==2.1.0    # via pydocstyle, sphinx
 sortedcontainers==2.1.0   # via hypothesis
 sphinx==1.8.2             # via -r test.in
 sphinxcontrib-websupport==1.2.1  # via sphinx
