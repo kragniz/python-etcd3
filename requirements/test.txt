@@ -42,7 +42,7 @@ mock==2.0.0               # via -r test.in
 more-itertools==5.0.0     # via -r test.in, pytest
 packaging==20.3           # via pytest, sphinx
 pbr==5.4.5                # via fixtures, mock, pifpaf, testtools
-pifpaf==2.4.0             # via -r test.in
+pifpaf==3.1.5             # via -r test.in
 pluggy==0.13.1            # via pytest, tox
 psutil==5.7.0             # via pifpaf
 py==1.8.1                 # via pytest, tox
