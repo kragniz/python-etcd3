@@ -48,7 +48,7 @@ psutil==5.7.0             # via pifpaf
 py==1.8.1                 # via pytest, tox
 pycodestyle==2.5.0        # via flake8, flake8-import-order
 pycparser==2.20           # via cffi
-pydocstyle==3.0.0         # via -r test.in, flake8-docstrings
+pydocstyle==6.1.0         # via -r test.in, flake8-docstrings
 pyflakes==2.1.1           # via flake8
 pygments==2.6.1           # via sphinx
 pyparsing==2.4.7          # via packaging
