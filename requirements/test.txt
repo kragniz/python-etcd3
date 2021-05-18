@@ -36,7 +36,7 @@ imagesize==1.2.0          # via sphinx
 importlib-metadata==1.6.0  # via pytest
 jinja2==2.11.2            # via pifpaf, sphinx
 linecache2==1.0.0         # via traceback2
-markupsafe==1.1.1         # via jinja2
+markupsafe==2.0.1         # via jinja2
 mccabe==0.6.1             # via flake8
 mock==2.0.0               # via -r test.in
 more-itertools==5.0.0     # via -r test.in, pytest
