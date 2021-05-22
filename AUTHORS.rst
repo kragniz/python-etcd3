@@ -10,4 +10,5 @@ Development Lead
 Contributors
 ------------
 
-None yet. Why not be the first?
+* Giuseppe Lavagetto <glavagetto@wikimedia.org>
+* InvalidInterrupt <invalidinterrupt@users.noreply.github.com>
