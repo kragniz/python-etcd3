@@ -92,8 +92,8 @@ class TestEtcd3(object):
         def code(self):
             return self._code
 
-    @pytest.fixture
-    def etcd(self):
+    @contextlib.contextmanager
+    def get_clean_etcd(self):
         endpoint = os.environ.get('PYTHON_ETCD_HTTP_URL')
         timeout = 5
         if endpoint:
@@ -115,66 +115,79 @@ class TestEtcd3(object):
 
         delete_keys_definitely()
 
+    @pytest.fixture
+    def etcd(self):
+        with self.get_clean_etcd() as etcd:
+            yield etcd
+
     def test_get_unknown_key(self, etcd):
         value, meta = etcd.get('probably-invalid-key')
         assert value is None
         assert meta is None
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
-    def test_get_key(self, etcd, string):
-        etcdctl('put', '/doot/a_key', string)
-        returned, _ = etcd.get('/doot/a_key')
-        assert returned == string.encode('utf-8')
+    def test_get_key(self, string):
+        with self.get_clean_etcd() as etcd:
+            etcdctl('put', '/doot/a_key', string)
+            returned, _ = etcd.get('/doot/a_key')
+            assert returned == string.encode('utf-8')
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
-    def test_get_random_key(self, etcd, string):
-        etcdctl('put', '/doot/' + string, 'dootdoot')
-        returned, _ = etcd.get('/doot/' + string)
-        assert returned == b'dootdoot'
+    def test_get_random_key(self, string):
+        with self.get_clean_etcd() as etcd:
+            etcdctl('put', '/doot/' + string, 'dootdoot')
+            returned, _ = etcd.get('/doot/' + string)
+            assert returned == b'dootdoot'
 
     @given(
         characters(blacklist_categories=['Cs', 'Cc']),
         characters(blacklist_categories=['Cs', 'Cc']),
     )
-    def test_get_key_serializable(self, etcd, key, string):
-        etcdctl('put', '/doot/' + key, string)
-        with _out_quorum():
-            returned, _ = etcd.get('/doot/' + key, serializable=True)
-        assert returned == string.encode('utf-8')
+    def test_get_key_serializable(self, key, string):
+        with self.get_clean_etcd() as etcd:
+            etcdctl('put', '/doot/' + key, string)
+            with _out_quorum():
+                returned, _ = etcd.get('/doot/' + key, serializable=True)
+            assert returned == string.encode('utf-8')
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
-    def test_get_have_cluster_revision(self, etcd, string):
-        etcdctl('put', '/doot/' + string, 'dootdoot')
-        _, md = etcd.get('/doot/' + string)
-        assert md.response_header.revision > 0
+    def test_get_have_cluster_revision(self, string):
+        with self.get_clean_etcd() as etcd:
+            etcdctl('put', '/doot/' + string, 'dootdoot')
+            _, md = etcd.get('/doot/' + string)
+            assert md.response_header.revision > 0
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
-    def test_put_key(self, etcd, string):
-        etcd.put('/doot/put_1', string)
-        out = etcdctl('get', '/doot/put_1')
-        assert base64.b64decode(out['kvs'][0]['value']) == \
-            string.encode('utf-8')
+    def test_put_key(self, string):
+        with self.get_clean_etcd() as etcd:
+            etcd.put('/doot/put_1', string)
+            out = etcdctl('get', '/doot/put_1')
+            assert base64.b64decode(out['kvs'][0]['value']) == \
+                string.encode('utf-8')
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
-    def test_put_has_cluster_revision(self, etcd, string):
-        response = etcd.put('/doot/put_1', string)
-        assert response.header.revision > 0
+    def test_put_has_cluster_revision(self, string):
+        with self.get_clean_etcd() as etcd:
+            response = etcd.put('/doot/put_1', string)
+            assert response.header.revision > 0
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
-    def test_put_has_prev_kv(self, etcd, string):
-        etcdctl('put', '/doot/put_1', 'old_value')
-        response = etcd.put('/doot/put_1', string, prev_kv=True)
-        assert response.prev_kv.value == b'old_value'
+    def test_put_has_prev_kv(self, string):
+        with self.get_clean_etcd() as etcd:
+            etcdctl('put', '/doot/put_1', 'old_value')
+            response = etcd.put('/doot/put_1', string, prev_kv=True)
+            assert response.prev_kv.value == b'old_value'
 
     @given(characters(blacklist_categories=['Cs', 'Cc']))
-    def test_put_if_not_exists(self, etcd, string):
-        txn_status = etcd.put_if_not_exists('/doot/put_1', string)
-        assert txn_status is True
+    def test_put_if_not_exists(self, string):
+        with self.get_clean_etcd() as etcd:
+            txn_status = etcd.put_if_not_exists('/doot/put_1', string)
+            assert txn_status is True
 
-        txn_status = etcd.put_if_not_exists('/doot/put_1', string)
-        assert txn_status is False
+            txn_status = etcd.put_if_not_exists('/doot/put_1', string)
+            assert txn_status is False
 
-        etcdctl('del', '/doot/put_1')
+            etcdctl('del', '/doot/put_1')
 
     def test_delete_key(self, etcd):
         etcdctl('put', '/doot/delete_this', 'delete pls')
