@@ -446,6 +446,48 @@ class TestEtcd3(object):
         assert events[1].key.decode() == '/doot/watch/prefix/callback/1'
         assert events[1].value.decode() == '1'
 
+    def test_watch_prefix_callback_with_filter(self, etcd):
+        def update_etcd(v):
+            etcdctl('put', '/doot/watch/prefix/callback/' + v, v)
+            out = etcdctl('get', '/doot/watch/prefix/callback/' + v)
+            assert base64.b64decode(out['kvs'][0]['value']) == \
+                utils.to_bytes(v)
+
+        def delete_etcd(v):
+            etcdctl('del', '/doot/watch/prefix/callback/' + v)
+
+        def update_key():
+            time.sleep(3)
+            update_etcd('0')
+            time.sleep(1)
+            update_etcd('1')
+            time.sleep(1)
+            delete_etcd('1')
+            time.sleep(1)
+
+        events = []
+
+        def callback(event):
+            events.extend(event.events)
+
+        t = threading.Thread(name="update_key_prefix", target=update_key)
+        t.start()
+
+        watch_id = etcd.add_watch_prefix_callback(
+            '/doot/watch/prefix/callback/',
+            callback,
+            filters=[etcdrpc.WatchCreateRequest.FilterType.Value('NODELETE')]
+        )
+
+        t.join()
+        etcd.cancel_watch(watch_id)
+
+        assert len(events) == 2
+        assert events[0].key.decode() == '/doot/watch/prefix/callback/0'
+        assert events[0].value.decode() == '0'
+        assert events[1].key.decode() == '/doot/watch/prefix/callback/1'
+        assert events[1].value.decode() == '1'
+
     def test_sequential_watch_prefix_once(self, etcd):
         try:
             etcd.watch_prefix_once('/doot/', 1)
@@ -661,6 +703,68 @@ class TestEtcd3(object):
         for value, meta in values:
             assert meta.key.startswith(b"/doot/")
             assert not value
+
+    def test_get_count_only(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/count{}'.format(i), 'i am in all')
+        resp = etcd.get_prefix_response(
+            key_prefix='/doot/count',
+            count_only=True
+        )
+        assert len(resp.kvs) == 0
+        assert resp.count == 20
+
+    def test_get_limit(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/limit{}'.format(i), 'i am in all')
+        for i in range(20):
+            resp = etcd.get_prefix_response(key_prefix='/doot/limit', limit=i)
+            assert resp.count == 20
+            if i == 0 or i == 20:
+                assert len(resp.kvs) == 20
+                assert resp.more is False
+            else:
+                assert len(resp.kvs) == i
+                assert resp.more is True
+
+    def test_get_revision(self, etcd):
+        revisions = []
+        for i in range(20):
+            resp = etcdctl('put', '/doot/revision{}'.format(i), 'i am in all')
+            revisions.append(resp['header']['revision'])
+        for i, revision in enumerate(revisions):
+            resp = etcd.get_prefix_response(
+                key_prefix='/doot/revision',
+                revision=revision
+            )
+            assert resp.count == min(len(revisions), i + 1)
+
+    def test_get_min_mod_revision(self, etcd):
+        revisions = []
+        for i in range(5):
+            resp = etcdctl('put', '/doot/revision', str(i))
+            revisions.append(resp['header']['revision'])
+        for revision in revisions:
+            resp = etcd.get_response(
+                key='/doot/revision',
+                min_mod_revision=revision
+            )
+            assert len(resp.kvs) == 1
+
+    def test_get_max_mod_revision(self, etcd):
+        revisions = []
+        for i in range(5):
+            resp = etcdctl('put', '/doot/revision', str(i))
+            revisions.append(resp['header']['revision'])
+        for revision in revisions:
+            resp = etcd.get_response(
+                key='/doot/revision',
+                max_mod_revision=revision
+            )
+            if revision == revisions[-1]:
+                assert len(resp.kvs) == 1
+            else:
+                assert len(resp.kvs) == 0
 
     def test_sort_order(self, etcd):
         def remove_prefix(string, prefix):

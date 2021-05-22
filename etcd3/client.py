@@ -208,7 +208,7 @@ class Etcd3Client(object):
                                  sort_target='key',
                                  serializable=False,
                                  keys_only=False,
-                                 count_only=None,
+                                 count_only=False,
                                  min_mod_revision=None,
                                  max_mod_revision=None,
                                  min_create_revision=None,
@@ -216,34 +216,50 @@ class Etcd3Client(object):
         range_request = etcdrpc.RangeRequest()
         range_request.key = utils.to_bytes(key)
         range_request.keys_only = keys_only
+        range_request.count_only = count_only
+        range_request.serializable = serializable
+
         if range_end is not None:
             range_request.range_end = utils.to_bytes(range_end)
+        if limit is not None:
+            range_request.limit = limit
+        if revision is not None:
+            range_request.revision = revision
+        if min_mod_revision is not None:
+            range_request.min_mod_revision = min_mod_revision
+        if max_mod_revision is not None:
+            range_request.max_mod_revision = max_mod_revision
+        if min_create_revision is not None:
+            range_request.min_mod_revision = min_create_revision
+        if max_create_revision is not None:
+            range_request.min_mod_revision = max_create_revision
 
-        if sort_order is None:
-            range_request.sort_order = etcdrpc.RangeRequest.NONE
-        elif sort_order == 'ascend':
-            range_request.sort_order = etcdrpc.RangeRequest.ASCEND
-        elif sort_order == 'descend':
-            range_request.sort_order = etcdrpc.RangeRequest.DESCEND
-        else:
+        sort_orders = {
+            None: etcdrpc.RangeRequest.NONE,
+            'ascend': etcdrpc.RangeRequest.ASCEND,
+            'descend': etcdrpc.RangeRequest.DESCEND,
+        }
+        request_sort_order = sort_orders.get(sort_order)
+        if request_sort_order is None:
             raise ValueError('unknown sort order: "{}"'.format(sort_order))
+        range_request.sort_order = request_sort_order
 
-        if sort_target is None or sort_target == 'key':
-            range_request.sort_target = etcdrpc.RangeRequest.KEY
-        elif sort_target == 'version':
-            range_request.sort_target = etcdrpc.RangeRequest.VERSION
-        elif sort_target == 'create':
-            range_request.sort_target = etcdrpc.RangeRequest.CREATE
-        elif sort_target == 'mod':
-            range_request.sort_target = etcdrpc.RangeRequest.MOD
-        elif sort_target == 'value':
-            range_request.sort_target = etcdrpc.RangeRequest.VALUE
-        else:
+        sort_targets = {
+            None: etcdrpc.RangeRequest.KEY,
+            'key': etcdrpc.RangeRequest.KEY,
+            'version': etcdrpc.RangeRequest.VERSION,
+            'create': etcdrpc.RangeRequest.CREATE,
+            'mod': etcdrpc.RangeRequest.MOD,
+            'value': etcdrpc.RangeRequest.VALUE,
+        }
+        request_sort_target = sort_targets.get(sort_target)
+        if request_sort_target is None:
             raise ValueError('sort_target must be one of "key", '
                              '"version", "create", "mod" or "value"')
 
         range_request.revision = revision
         range_request.serializable = serializable
+        range_request.sort_target = request_sort_target
 
         return range_request
 
