@@ -1,7 +1,7 @@
+import contextlib
 import functools
 import inspect
 import threading
-
 import grpc
 import grpc._channel
 
@@ -691,6 +691,23 @@ class Etcd3Client(object):
         kwargs['range_end'] = \
             utils.prefix_range_end(utils.to_bytes(key_prefix))
         return self.watch(key_prefix, **kwargs)
+
+    @contextlib.contextmanager
+    def watch_prefix_safely(self, key_prefix, **kwargs):
+        """
+        Safely watch a range of keys with a prefix, auto cancel on exception.
+
+        :param key_prefix: prefix to watch
+
+        :returns: tuple of ``events_iterator`` and ``cancel``.
+        """
+        response_iterator, cancel = self.watch_prefix(key_prefix, **kwargs)
+        try:
+            yield response_iterator, cancel
+        except:
+            raise
+        finally:
+            cancel()
 
     @_handle_errors
     def watch_once_response(self, key, timeout=None, **kwargs):
