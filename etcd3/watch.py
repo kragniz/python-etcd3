@@ -45,6 +45,7 @@ class Watcher(object):
         self._request_queue = queue.Queue(maxsize=10)
         self._callbacks = {}
         self._callback_thread = None
+        self._shutdown_callback_thread = threading.Event()
         self._new_watch_cond = threading.Condition(lock=self._lock)
         self._new_watch = None
 
@@ -118,12 +119,21 @@ class Watcher(object):
 
             self._cancel_no_lock(watch_id)
 
+    def shutdown(self):
+        self._shutdown_callback_thread.set()
+        if self._callback_thread:
+            self._callback_thread.join()
+
     def _run(self):
-        while True:
-            response_iter = self._watch_stub.Watch(
-                _new_request_iter(self._request_queue),
-                credentials=self._credentials,
-                metadata=self._metadata)
+        while not self._shutdown_callback_thread.is_set():
+            try:
+                response_iter = self._watch_stub.Watch(
+                    _new_request_iter(self._request_queue),
+                    credentials=self._credentials,
+                    metadata=self._metadata)
+            except ValueError:
+                continue
+
             try:
                 for rs in response_iter:
                     self._handle_response(rs)

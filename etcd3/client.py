@@ -172,6 +172,7 @@ class Etcd3Client(object):
         """Call the GRPC channel close semantics."""
         if hasattr(self, 'channel'):
             self.channel.close()
+            self.watcher.shutdown()
 
     def __enter__(self):
         return self
