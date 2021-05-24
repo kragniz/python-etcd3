@@ -19,6 +19,7 @@ import etcd3.watch as watch
 _EXCEPTIONS_BY_CODE = {
     grpc.StatusCode.INTERNAL: exceptions.InternalServerError,
     grpc.StatusCode.UNAVAILABLE: exceptions.ConnectionFailedError,
+    grpc.StatusCode.CANCELLED: exceptions.ConnectionFailedError,
     grpc.StatusCode.DEADLINE_EXCEEDED: exceptions.ConnectionTimeoutError,
     grpc.StatusCode.FAILED_PRECONDITION: exceptions.PreconditionFailedError,
 }
@@ -102,9 +103,22 @@ class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
 class Etcd3Client(object):
     def __init__(self, host='localhost', port=2379,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
-                 user=None, password=None, grpc_options=None):
-
-        self._url = '{host}:{port}'.format(host=host, port=port)
+                 user=None, password=None, grpc_options=None,
+                 multi_host = [], host_version = ''):
+        if multi_host and host_version:
+            if host_version in ('ipv6', 'v6'):
+                host_version = 'ipv6'
+            else:
+                host_version = 'ipv4'
+            hosts = []
+            for host_info in multi_host:
+                hosts.append('{host}:{port}'.format(host=host_info['host'], 
+                                                    port=host_info['port']))
+            hosts = ",".join(hosts)
+            self._url = '{version}:{hosts}'.format(version=host_version, hosts=hosts)
+        else:
+            self._url = '{host}:{port}'.format(host=host, port=port)
+        
         self.metadata = None
 
         cert_params = [c is not None for c in (cert_cert, cert_key)]
@@ -307,10 +321,10 @@ class Etcd3Client(object):
 
         range_request = self._build_get_range_request(
             key=key_prefix,
-            range_end=utils.prefix_range_end(utils.to_bytes(key_prefix)),
+            range_end=utils.increment_last_byte(utils.to_bytes(key_prefix)),
             **kwargs
         )
-
+        
         return self.kvstub.Range(
             range_request,
             self.timeout,
@@ -332,7 +346,7 @@ class Etcd3Client(object):
             (kv.value, KVMetadata(kv, range_response.header))
             for kv in range_response.kvs
         )
-
+        
     @_handle_errors
     def get_range_response(self, range_start, range_end, sort_order=None,
                            sort_target='key', **kwargs):
@@ -530,7 +544,7 @@ class Etcd3Client(object):
         """Delete a range of keys with a prefix in etcd."""
         delete_request = self._build_delete_request(
             prefix,
-            range_end=utils.prefix_range_end(utils.to_bytes(prefix))
+            range_end=utils.increment_last_byte(utils.to_bytes(prefix))
         )
         return self.kvstub.DeleteRange(
             delete_request,
@@ -598,7 +612,7 @@ class Etcd3Client(object):
         :returns: watch_id. Later it could be used for cancelling watch.
         """
         kwargs['range_end'] = \
-            utils.prefix_range_end(utils.to_bytes(key_prefix))
+            utils.increment_last_byte(utils.to_bytes(key_prefix))
 
         return self.add_watch_callback(key_prefix, callback, **kwargs)
 
@@ -677,7 +691,7 @@ class Etcd3Client(object):
         :returns: tuple of ``responses_iterator`` and ``cancel``.
         """
         kwargs['range_end'] = \
-            utils.prefix_range_end(utils.to_bytes(key_prefix))
+            utils.increment_last_byte(utils.to_bytes(key_prefix))
         return self.watch_response(key_prefix, **kwargs)
 
     def watch_prefix(self, key_prefix, **kwargs):
@@ -689,7 +703,7 @@ class Etcd3Client(object):
         :returns: tuple of ``events_iterator`` and ``cancel``.
         """
         kwargs['range_end'] = \
-            utils.prefix_range_end(utils.to_bytes(key_prefix))
+            utils.increment_last_byte(utils.to_bytes(key_prefix))
         return self.watch(key_prefix, **kwargs)
 
     @_handle_errors
@@ -742,7 +756,7 @@ class Etcd3Client(object):
         will raise ``WatchTimedOut`` exception.
         """
         kwargs['range_end'] = \
-            utils.prefix_range_end(utils.to_bytes(key_prefix))
+            utils.increment_last_byte(utils.to_bytes(key_prefix))
         return self.watch_once_response(key_prefix, timeout=timeout, **kwargs)
 
     def watch_prefix_once(self, key_prefix, timeout=None, **kwargs):
@@ -753,7 +767,7 @@ class Etcd3Client(object):
         will raise ``WatchTimedOut`` exception.
         """
         kwargs['range_end'] = \
-            utils.prefix_range_end(utils.to_bytes(key_prefix))
+            utils.increment_last_byte(utils.to_bytes(key_prefix))
         return self.watch_once(key_prefix, timeout=timeout, **kwargs)
 
     @_handle_errors
