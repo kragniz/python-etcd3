@@ -62,7 +62,7 @@ grpcio-tools==1.38.0
     # via -r requirements/test.in
 hypothesis==6.13.1
     # via -r requirements/test.in
-idna==2.10
+idna==3.2
     # via requests
 imagesize==1.2.0
     # via sphinx
