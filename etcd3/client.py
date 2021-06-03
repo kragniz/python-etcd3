@@ -130,9 +130,19 @@ class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
 
 
 class Etcd3Client(object):
-    def __init__(self, host='localhost', port=2379, endpoints=None,
+    def __init__(self, host=None, port=None, endpoints=None,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
                  user=None, password=None, grpc_options=None, failover=False):
+
+        if endpoints and any(
+                (host, port, ca_cert, cert_key, cert_cert, grpc_options)
+        ):
+            raise ValueError(
+                "endpoints may not be specified with host, port, ca_cert, "
+                "cert_key, cert_cert, or grpc_options"
+            )
+        host = host or "localhost"
+        port = port or 2379
 
         self.metadata = None
         self.failover = failover
