@@ -1398,7 +1398,7 @@ class Etcd3Client(object):
     del _create_stub_property
 
 
-def client(host='localhost', port=2379, endpoints=None,
+def client(host=None, port=None, endpoints=None,
            ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
            user=None, password=None, grpc_options=None, failover=False):
     """Return an instance of an Etcd3Client."""
