@@ -52,6 +52,9 @@ API
 .. autoclass:: etcd3.Etcd3Client
     :members:
 
+.. autoclass:: etcd3.Endpoint
+    :members:
+
 .. autoclass:: etcd3.Member
     :members:
 

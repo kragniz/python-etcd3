@@ -70,7 +70,20 @@ class Alarm(object):
 
 
 class Endpoint(object):
-    """Represents an etcd cluster endpoint."""
+    """Represents an etcd cluster endpoint.
+
+    :param str host: Endpoint host
+    :param int port: Endpoint port
+    :param bool secure: Use secure channel, default True
+    :param creds: Credentials to use for secure channel, required if
+                  secure=True
+    :type creds: grpc.ChannelCredentials, optional
+    :param time_retry: Seconds to wait before retrying this endpoint after
+                       failure, default 300.0
+    :type time_retry: int or float
+    :param opts: Additional gRPC options
+    :type opts: dict, optional
+    """
 
     def __init__(self, host, port, secure=True, creds=None, time_retry=300.0,
                  opts=None):
@@ -130,6 +143,41 @@ class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
 
 
 class Etcd3Client(object):
+    """
+    etcd v3 API client.
+
+    If ``endpoints`` is specified, ``host``, ``port``, ``ca_cert``,
+    ``cert_key``, ``cert_cert``, and ``grpc_options`` must not be.
+
+    When failover is enabled, requests still will not be auto-retried.
+    Instead, the application may retry the request, and the ``Etcd3Client``
+    will then attempt to send it to a different endpoint that has not recently
+    failed. If all configured endpoints have failed and are not ready to be
+    retried, an ``exceptions.NoServerAvailableError`` will be raised.
+
+    :param host: Host to connect to, 'localhost' if not specified
+    :type host: str, optional
+    :param port: Port to connect to on host, 2379 if not specified
+    :type port: int, optional
+    :param endpoints: Endpoints to use in lieu of host and port
+    :type endpoints: Iterable(Endpoint), optional
+    :param ca_cert: Filesystem path of etcd CA certificate
+    :type ca_cert: str or os.PathLike, optional
+    :param cert_key: Filesystem path of client key
+    :type cert_key: str or os.PathLike, optional
+    :param cert_cert: Filesystem path of client certificate
+    :type cert_cert: str or os.PathLike, optional
+    :param timeout: Timeout for all RPC in seconds
+    :type timeout: int or float, optional
+    :param user: Username for authentication
+    :type user: str, optional
+    :param password: Password for authentication
+    :type password: str, optional
+    :param dict grpc_options: Additional gRPC options
+    :type grpc_options: dict, optional
+    :param bool failover: Failover between endpoints, default False
+    """
+
     def __init__(self, host=None, port=None, endpoints=None,
                  ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
                  user=None, password=None, grpc_options=None, failover=False):
