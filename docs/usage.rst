@@ -60,3 +60,30 @@ API
 
 .. autoclass:: etcd3.Lock
     :members:
+
+.. autoclass:: etcd3.Role
+    :members:
+
+.. autoclass:: etcd3.Perm
+    :members:
+
+.. autoclass:: etcd3.User
+    :members:
+
+.. The etcd3 double up below is due to an apparent bug?
+.. attribute:: etcd3.Perms
+
+    Permissions modes used within roles 
+
+    .. attribute:: etcd3.etcd3.Perms.r
+
+        Read only permission
+
+    .. attribute:: etcd3.Perms.w
+
+        Write only permission
+
+    .. attribute:: etcd3.Perms.rw
+
+        Read/write permission
+

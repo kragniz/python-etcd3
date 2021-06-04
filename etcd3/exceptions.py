@@ -20,6 +20,16 @@ class ConnectionTimeoutError(Etcd3Exception):
         return "etcd connection timeout"
 
 
+class EntityNotFoundError(Etcd3Exception):
+    def __str__(self):
+        return self.args[0]
+
+
+class PermissionDeniedError(Etcd3Exception):
+    def __str__(self):
+        return "permission denied"
+
+
 class PreconditionFailedError(Etcd3Exception):
     pass
 

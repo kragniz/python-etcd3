@@ -8,8 +8,9 @@ include README.rst
 include requirements/base.txt
 include requirements/test.txt
 
-recursive-include tests *
-recursive-exclude * __pycache__
-recursive-exclude * *.py[co]
+recursive-include tests
+recursive-exclude __pycache__ *.proto
+recursive-exclude *.py[co]  *.in
+exclude .build.yml .dockerignore .gitignore Dockerfile docker-compose.yml tox.ini
 
 recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
