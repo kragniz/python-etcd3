@@ -1231,12 +1231,14 @@ class TestClient(object):
             etcd3.client(password='pwd')
 
     def _enable_auth_in_etcd(self):
-        subprocess.call(['etcdctl', '-w', 'json', 'user', 'add', 'root:pwd'])
-        subprocess.call(['etcdctl', 'auth', 'enable'])
+        subprocess.check_call(['etcdctl', '-w', 'json', 'user', 'add',
+                               'root:pwd'])
+        subprocess.check_call(['etcdctl', 'auth', 'enable'])
 
     def _disable_auth_in_etcd(self):
-        subprocess.call(['etcdctl', 'user', 'remove', 'root'])
-        subprocess.call(['etcdctl', '-u', 'root:pwd', 'auth', 'disable'])
+        subprocess.check_call(['etcdctl', '--user', 'root:pwd', 'auth',
+                               'disable'])
+        subprocess.check_call(['etcdctl', 'user', 'remove', 'root'])
 
 
 class TestCompares(object):
