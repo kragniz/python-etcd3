@@ -1392,11 +1392,6 @@ class Etcd3Client(object):
         for response in snapshot_response:
             file_obj.write(response.blob)
 
-    # Remove utility functions from class namespace
-    del _handle_errors
-    del _handle_generator_errors
-    del _create_stub_property
-
 
 def client(host=None, port=None, endpoints=None,
            ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
