@@ -142,12 +142,9 @@ class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
         callback(metadata, None)
 
 
-class Etcd3Client(object):
+class MultiEndpointEtcd3Client(object):
     """
-    etcd v3 API client.
-
-    If ``endpoints`` is specified, ``host``, ``port``, ``ca_cert``,
-    ``cert_key``, ``cert_cert``, and ``grpc_options`` must not be.
+    etcd v3 API client with multiple endpoints.
 
     When failover is enabled, requests still will not be auto-retried.
     Instead, the application may retry the request, and the ``Etcd3Client``
@@ -155,42 +152,19 @@ class Etcd3Client(object):
     failed. If all configured endpoints have failed and are not ready to be
     retried, an ``exceptions.NoServerAvailableError`` will be raised.
 
-    :param host: Host to connect to, 'localhost' if not specified
-    :type host: str, optional
-    :param port: Port to connect to on host, 2379 if not specified
-    :type port: int, optional
     :param endpoints: Endpoints to use in lieu of host and port
     :type endpoints: Iterable(Endpoint), optional
-    :param ca_cert: Filesystem path of etcd CA certificate
-    :type ca_cert: str or os.PathLike, optional
-    :param cert_key: Filesystem path of client key
-    :type cert_key: str or os.PathLike, optional
-    :param cert_cert: Filesystem path of client certificate
-    :type cert_cert: str or os.PathLike, optional
     :param timeout: Timeout for all RPC in seconds
     :type timeout: int or float, optional
     :param user: Username for authentication
     :type user: str, optional
     :param password: Password for authentication
     :type password: str, optional
-    :param dict grpc_options: Additional gRPC options
-    :type grpc_options: dict, optional
     :param bool failover: Failover between endpoints, default False
     """
 
-    def __init__(self, host=None, port=None, endpoints=None,
-                 ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
-                 user=None, password=None, grpc_options=None, failover=False):
-
-        if endpoints and any(
-                (host, port, ca_cert, cert_key, cert_cert, grpc_options)
-        ):
-            raise ValueError(
-                "endpoints may not be specified with host, port, ca_cert, "
-                "cert_key, cert_cert, or grpc_options"
-            )
-        host = host or "localhost"
-        port = port or 2379
+    def __init__(self, endpoints=None, timeout=None, user=None, password=None,
+                 failover=False):
 
         self.metadata = None
         self.failover = failover
@@ -198,43 +172,13 @@ class Etcd3Client(object):
         # Cache GRPC stubs here
         self._stubs = {}
 
-        # Step 1: verify credentials
-        cert_params = [c is not None for c in (cert_cert, cert_key)]
-        if ca_cert is not None:
-            if all(cert_params):
-                credentials = self.get_secure_creds(
-                    ca_cert,
-                    cert_key,
-                    cert_cert
-                )
-                self.uses_secure_channel = True
-            elif any(cert_params):
-                # some of the cert parameters are set
-                raise ValueError(
-                    'to use a secure channel ca_cert is required by itself, '
-                    'or cert_cert and cert_key must both be specified.')
-            else:
-                credentials = self.get_secure_creds(ca_cert, None, None)
-                self.uses_secure_channel = True
-        else:
-            self.uses_secure_channel = False
-            credentials = None
-
-        # Step 2: if more than one endpoint is available, add all of them, else
-        # use the host/port combination
-        if endpoints is None:
-            ep = Endpoint(host, port, secure=self.uses_secure_channel,
-                          creds=credentials, opts=grpc_options)
-            self.endpoints = {ep.netloc: ep}
-        else:
-            # If the endpoints are passed externally, just use those.
-            self.endpoints = {ep.netloc: ep for ep in endpoints}
-
+        # Step 1: setup endpoints
+        self.endpoints = {ep.netloc: ep for ep in endpoints}
         self._current_endpoint_label = random.choice(
             list(self.endpoints.keys())
         )
 
-        # Step 3: if auth is enabled, call the auth endpoint
+        # Step 2: if auth is enabled, call the auth endpoint
         self.timeout = timeout
         self.call_credentials = None
         cred_params = [c is not None for c in (user, password)]
@@ -1393,18 +1337,74 @@ class Etcd3Client(object):
             file_obj.write(response.blob)
 
 
-def client(host=None, port=None, endpoints=None,
+class Etcd3Client(MultiEndpointEtcd3Client):
+    """
+    etcd v3 API client.
+
+    :param host: Host to connect to, 'localhost' if not specified
+    :type host: str, optional
+    :param port: Port to connect to on host, 2379 if not specified
+    :type port: int, optional
+    :param ca_cert: Filesystem path of etcd CA certificate
+    :type ca_cert: str or os.PathLike, optional
+    :param cert_key: Filesystem path of client key
+    :type cert_key: str or os.PathLike, optional
+    :param cert_cert: Filesystem path of client certificate
+    :type cert_cert: str or os.PathLike, optional
+    :param timeout: Timeout for all RPC in seconds
+    :type timeout: int or float, optional
+    :param user: Username for authentication
+    :type user: str, optional
+    :param password: Password for authentication
+    :type password: str, optional
+    :param dict grpc_options: Additional gRPC options
+    :type grpc_options: dict, optional
+    """
+
+    def __init__(self, host='localhost', port=2379, ca_cert=None,
+                 cert_key=None, cert_cert=None, timeout=None, user=None,
+                 password=None, grpc_options=None):
+
+        # Step 1: verify credentials
+        cert_params = [c is not None for c in (cert_cert, cert_key)]
+        if ca_cert is not None:
+            if all(cert_params):
+                credentials = self.get_secure_creds(
+                    ca_cert,
+                    cert_key,
+                    cert_cert
+                )
+                self.uses_secure_channel = True
+            elif any(cert_params):
+                # some of the cert parameters are set
+                raise ValueError(
+                    'to use a secure channel ca_cert is required by itself, '
+                    'or cert_cert and cert_key must both be specified.')
+            else:
+                credentials = self.get_secure_creds(ca_cert, None, None)
+                self.uses_secure_channel = True
+        else:
+            self.uses_secure_channel = False
+            credentials = None
+
+        # Step 2: create Endpoint
+        ep = Endpoint(host, port, secure=self.uses_secure_channel,
+                      creds=credentials, opts=grpc_options)
+
+        super(Etcd3Client, self).__init__(endpoints=[ep], timeout=timeout,
+                                          user=user, password=password)
+
+
+def client(host='localhost', port=2379,
            ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
-           user=None, password=None, grpc_options=None, failover=False):
+           user=None, password=None, grpc_options=None):
     """Return an instance of an Etcd3Client."""
     return Etcd3Client(host=host,
                        port=port,
-                       endpoints=endpoints,
                        ca_cert=ca_cert,
                        cert_key=cert_key,
                        cert_cert=cert_cert,
                        timeout=timeout,
                        user=user,
                        password=password,
-                       grpc_options=grpc_options,
-                       failover=failover)
+                       grpc_options=grpc_options)

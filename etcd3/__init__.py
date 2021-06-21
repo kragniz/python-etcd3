@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import etcd3.etcdrpc as etcdrpc
 from etcd3.client import Endpoint
 from etcd3.client import Etcd3Client
+from etcd3.client import MultiEndpointEtcd3Client
 from etcd3.client import Transactions
 from etcd3.client import client
 from etcd3.exceptions import Etcd3Exception
@@ -24,4 +25,5 @@ __all__ = (
     'Lease',
     'Lock',
     'Member',
+    'MultiEndpointEtcd3Client'
 )

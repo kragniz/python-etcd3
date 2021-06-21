@@ -1326,9 +1326,9 @@ class TestFailoverClient(object):
             endpoints.append(etcd3.Endpoint(host=url.hostname,
                                             port=url.port,
                                             secure=False))
-        with etcd3.client(endpoints=endpoints,
-                          timeout=timeout,
-                          failover=True) as client:
+        with etcd3.MultiEndpointEtcd3Client(endpoints=endpoints,
+                                            timeout=timeout,
+                                            failover=True) as client:
             yield client
 
         @retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
@@ -1346,7 +1346,7 @@ class TestFailoverClient(object):
         exception = TestEtcd3.MockedException(grpc.StatusCode.UNAVAILABLE)
         kv_mock = mock.PropertyMock()
         kv_mock.Range.side_effect = exception
-        with mock.patch('etcd3.Etcd3Client.kvstub',
+        with mock.patch('etcd3.MultiEndpointEtcd3Client.kvstub',
                         new_callable=mock.PropertyMock) as property_mock:
             property_mock.return_value = kv_mock
             with pytest.raises(etcd3.exceptions.ConnectionFailedError):
