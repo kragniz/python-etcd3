@@ -1,6 +1,7 @@
 import functools
-import inspect
+import random
 import threading
+import time
 
 import grpc
 import grpc._channel
@@ -23,31 +24,11 @@ _EXCEPTIONS_BY_CODE = {
     grpc.StatusCode.FAILED_PRECONDITION: exceptions.PreconditionFailedError,
 }
 
-
-def _translate_exception(exc):
-    code = exc.code()
-    exception = _EXCEPTIONS_BY_CODE.get(code)
-    if exception is None:
-        raise
-    raise exception
-
-
-def _handle_errors(f):
-    if inspect.isgeneratorfunction(f):
-        def handler(*args, **kwargs):
-            try:
-                for data in f(*args, **kwargs):
-                    yield data
-            except grpc.RpcError as exc:
-                _translate_exception(exc)
-    else:
-        def handler(*args, **kwargs):
-            try:
-                return f(*args, **kwargs)
-            except grpc.RpcError as exc:
-                _translate_exception(exc)
-
-    return functools.wraps(f)(handler)
+_FAILED_EP_CODES = [
+    grpc.StatusCode.UNAVAILABLE,
+    grpc.StatusCode.DEADLINE_EXCEEDED,
+    grpc.StatusCode.INTERNAL
+]
 
 
 class Transactions(object):
@@ -88,6 +69,68 @@ class Alarm(object):
         self.member_id = member_id
 
 
+class Endpoint(object):
+    """Represents an etcd cluster endpoint.
+
+    :param str host: Endpoint host
+    :param int port: Endpoint port
+    :param bool secure: Use secure channel, default True
+    :param creds: Credentials to use for secure channel, required if
+                  secure=True
+    :type creds: grpc.ChannelCredentials, optional
+    :param time_retry: Seconds to wait before retrying this endpoint after
+                       failure, default 300.0
+    :type time_retry: int or float
+    :param opts: Additional gRPC options
+    :type opts: dict, optional
+    """
+
+    def __init__(self, host, port, secure=True, creds=None, time_retry=300.0,
+                 opts=None):
+        self.host = host
+        self.netloc = "{host}:{port}".format(host=host, port=port)
+        self.secure = secure
+        self.protocol = 'https' if secure else 'http'
+        if self.secure and creds is None:
+            raise ValueError(
+                'Please set TLS credentials for secure connections')
+        self.credentials = creds
+        self.time_retry = time_retry
+        self.in_use = False
+        self.last_failed = 0
+        self.channel = self._mkchannel(opts)
+
+    def close(self):
+        self.channel.close()
+
+    def fail(self):
+        """Transition the endpoint to a failed state."""
+        self.in_use = False
+        self.last_failed = time.time()
+
+    def use(self):
+        """Transition the endpoint to an active state."""
+        if self.is_failed():
+            raise ValueError('Trying to use a failed node')
+        self.in_use = True
+        self.last_failed = 0
+        return self.channel
+
+    def __str__(self):
+        return "Endpoint({}://{})".format(self.protocol, self.netloc)
+
+    def is_failed(self):
+        """Check if the current endpoint is failed."""
+        return ((time.time() - self.last_failed) < self.time_retry)
+
+    def _mkchannel(self, opts):
+        if self.secure:
+            return grpc.secure_channel(self.netloc, self.credentials,
+                                       options=opts)
+        else:
+            return grpc.insecure_channel(self.netloc, options=opts)
+
+
 class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
     """Metadata wrapper for raw access token credentials."""
 
@@ -99,53 +142,54 @@ class EtcdTokenCallCredentials(grpc.AuthMetadataPlugin):
         callback(metadata, None)
 
 
-class Etcd3Client(object):
-    def __init__(self, host='localhost', port=2379,
-                 ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
-                 user=None, password=None, grpc_options=None):
+class MultiEndpointEtcd3Client(object):
+    """
+    etcd v3 API client with multiple endpoints.
 
-        self._url = '{host}:{port}'.format(host=host, port=port)
+    When failover is enabled, requests still will not be auto-retried.
+    Instead, the application may retry the request, and the ``Etcd3Client``
+    will then attempt to send it to a different endpoint that has not recently
+    failed. If all configured endpoints have failed and are not ready to be
+    retried, an ``exceptions.NoServerAvailableError`` will be raised.
+
+    :param endpoints: Endpoints to use in lieu of host and port
+    :type endpoints: Iterable(Endpoint), optional
+    :param timeout: Timeout for all RPC in seconds
+    :type timeout: int or float, optional
+    :param user: Username for authentication
+    :type user: str, optional
+    :param password: Password for authentication
+    :type password: str, optional
+    :param bool failover: Failover between endpoints, default False
+    """
+
+    def __init__(self, endpoints=None, timeout=None, user=None, password=None,
+                 failover=False):
+
         self.metadata = None
+        self.failover = failover
 
-        cert_params = [c is not None for c in (cert_cert, cert_key)]
-        if ca_cert is not None:
-            if all(cert_params):
-                credentials = self._get_secure_creds(
-                    ca_cert,
-                    cert_key,
-                    cert_cert
-                )
-                self.uses_secure_channel = True
-                self.channel = grpc.secure_channel(self._url, credentials,
-                                                   options=grpc_options)
-            elif any(cert_params):
-                # some of the cert parameters are set
-                raise ValueError(
-                    'to use a secure channel ca_cert is required by itself, '
-                    'or cert_cert and cert_key must both be specified.')
-            else:
-                credentials = self._get_secure_creds(ca_cert, None, None)
-                self.uses_secure_channel = True
-                self.channel = grpc.secure_channel(self._url, credentials,
-                                                   options=grpc_options)
-        else:
-            self.uses_secure_channel = False
-            self.channel = grpc.insecure_channel(self._url,
-                                                 options=grpc_options)
+        # Cache GRPC stubs here
+        self._stubs = {}
 
+        # Step 1: setup endpoints
+        self.endpoints = {ep.netloc: ep for ep in endpoints}
+        self._current_endpoint_label = random.choice(
+            list(self.endpoints.keys())
+        )
+
+        # Step 2: if auth is enabled, call the auth endpoint
         self.timeout = timeout
         self.call_credentials = None
-
         cred_params = [c is not None for c in (user, password)]
 
         if all(cred_params):
-            self.auth_stub = etcdrpc.AuthStub(self.channel)
             auth_request = etcdrpc.AuthenticateRequest(
                 name=user,
                 password=password
             )
 
-            resp = self.auth_stub.Authenticate(auth_request, self.timeout)
+            resp = self.authstub.Authenticate(auth_request, self.timeout)
             self.metadata = (('token', resp.token),)
             self.call_credentials = grpc.metadata_call_credentials(
                 EtcdTokenCallCredentials(resp.token))
@@ -156,22 +200,97 @@ class Etcd3Client(object):
                 'must be specified.'
             )
 
-        self.kvstub = etcdrpc.KVStub(self.channel)
-        self.watcher = watch.Watcher(
-            etcdrpc.WatchStub(self.channel),
+        self.transactions = Transactions()
+
+    def _create_stub_property(name, stub_class):
+        def get_stub(self):
+            stub = self._stubs.get(name)
+            if stub is None:
+                stub = self._stubs[name] = stub_class(self.channel)
+            return stub
+        return property(get_stub)
+
+    authstub = _create_stub_property("authstub", etcdrpc.AuthStub)
+    kvstub = _create_stub_property("kvstub", etcdrpc.KVStub)
+    clusterstub = _create_stub_property("clusterstub", etcdrpc.ClusterStub)
+    leasestub = _create_stub_property("leasestub", etcdrpc.LeaseStub)
+    maintenancestub = _create_stub_property(
+        "maintenancestub", etcdrpc.MaintenanceStub
+    )
+
+    def get_watcher(self):
+        watchstub = etcdrpc.WatchStub(self.channel)
+        return watch.Watcher(
+            watchstub,
             timeout=self.timeout,
             call_credentials=self.call_credentials,
             metadata=self.metadata
         )
-        self.clusterstub = etcdrpc.ClusterStub(self.channel)
-        self.leasestub = etcdrpc.LeaseStub(self.channel)
-        self.maintenancestub = etcdrpc.MaintenanceStub(self.channel)
-        self.transactions = Transactions()
+
+    @property
+    def watcher(self):
+        watcher = self._stubs.get("watcher")
+        if watcher is None:
+            watcher = self._stubs["watcher"] = self.get_watcher()
+        return watcher
+
+    @watcher.setter
+    def watcher(self, value):
+        self._stubs["watcher"] = value
+
+    def _clear_old_stubs(self):
+        old_watcher = self._stubs.get("watcher")
+        self._stubs.clear()
+        if old_watcher:
+            old_watcher.close()
+
+    @property
+    def _current_endpoint_label(self):
+        return self._current_ep_label
+
+    @_current_endpoint_label.setter
+    def _current_endpoint_label(self, value):
+        if getattr(self, "_current_ep_label", None) is not value:
+            self._clear_old_stubs()
+        self._current_ep_label = value
+
+    @property
+    def endpoint_in_use(self):
+        """Get the current endpoint in use."""
+        if self._current_endpoint_label is None:
+            return None
+        return self.endpoints[self._current_endpoint_label]
+
+    @property
+    def channel(self):
+        """
+        Get an available channel on the first node that's not failed.
+
+        Raises an exception if no node is available
+        """
+        try:
+            return self.endpoint_in_use.use()
+        except ValueError:
+            if not self.failover:
+                raise
+        # We're failing over. We get the first non-failed channel
+        # we encounter, and use it by calling this function again,
+        # recursively
+        for label, endpoint in self.endpoints.items():
+            if endpoint.is_failed():
+                continue
+            self._current_endpoint_label = label
+            return self.channel
+        raise exceptions.NoServerAvailableError(
+            "No endpoint available and not failed")
 
     def close(self):
         """Call the GRPC channel close semantics."""
-        if hasattr(self, 'channel'):
-            self.channel.close()
+        possible_watcher = self._stubs.get("watcher")
+        if possible_watcher:
+            possible_watcher.close()
+        for endpoint in self.endpoints.values():
+            endpoint.close()
 
     def __enter__(self):
         return self
@@ -179,7 +298,8 @@ class Etcd3Client(object):
     def __exit__(self, *args):
         self.close()
 
-    def _get_secure_creds(self, ca_cert, cert_key=None, cert_cert=None):
+    @staticmethod
+    def get_secure_creds(ca_cert, cert_key=None, cert_cert=None):
         cert_key_file = None
         cert_cert_file = None
 
@@ -199,6 +319,38 @@ class Etcd3Client(object):
             cert_key_file,
             cert_cert_file
         )
+
+    def _manage_grpc_errors(self, exc):
+        code = exc.code()
+        if code in _FAILED_EP_CODES:
+            # This sets the current node to failed.
+            # If others are available, they will be used on
+            # subsequent requests.
+            self.endpoint_in_use.fail()
+            self._clear_old_stubs()
+        exception = _EXCEPTIONS_BY_CODE.get(code)
+        if exception is None:
+            raise
+        raise exception()
+
+    def _handle_errors(payload):
+        @functools.wraps(payload)
+        def handler(self, *args, **kwargs):
+            try:
+                return payload(self, *args, **kwargs)
+            except grpc.RpcError as exc:
+                self._manage_grpc_errors(exc)
+        return handler
+
+    def _handle_generator_errors(payload):
+        @functools.wraps(payload)
+        def handler(self, *args, **kwargs):
+            try:
+                for item in payload(self, *args, **kwargs):
+                    yield item
+            except grpc.RpcError as exc:
+                self._manage_grpc_errors(exc)
+        return handler
 
     def _build_get_range_request(self, key,
                                  range_end=None,
@@ -634,17 +786,19 @@ class Etcd3Client(object):
             response_queue.put(None)
             self.cancel_watch(watch_id)
 
-        @_handle_errors
         def iterator():
-            while not canceled.is_set():
-                response = response_queue.get()
-                if response is None:
-                    canceled.set()
-                if isinstance(response, Exception):
-                    canceled.set()
-                    raise response
-                if not canceled.is_set():
-                    yield response
+            try:
+                while not canceled.is_set():
+                    response = response_queue.get()
+                    if response is None:
+                        canceled.set()
+                    if isinstance(response, Exception):
+                        canceled.set()
+                        raise response
+                    if not canceled.is_set():
+                        yield response
+            except grpc.RpcError as exc:
+                self._manage_grpc_errors(exc)
 
         return iterator(), cancel
 
@@ -908,7 +1062,7 @@ class Etcd3Client(object):
             metadata=self.metadata
         )
 
-    @_handle_errors
+    @_handle_generator_errors
     def refresh_lease(self, lease_id):
         keep_alive_request = etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
         request_stream = [keep_alive_request]
@@ -1181,6 +1335,64 @@ class Etcd3Client(object):
 
         for response in snapshot_response:
             file_obj.write(response.blob)
+
+
+class Etcd3Client(MultiEndpointEtcd3Client):
+    """
+    etcd v3 API client.
+
+    :param host: Host to connect to, 'localhost' if not specified
+    :type host: str, optional
+    :param port: Port to connect to on host, 2379 if not specified
+    :type port: int, optional
+    :param ca_cert: Filesystem path of etcd CA certificate
+    :type ca_cert: str or os.PathLike, optional
+    :param cert_key: Filesystem path of client key
+    :type cert_key: str or os.PathLike, optional
+    :param cert_cert: Filesystem path of client certificate
+    :type cert_cert: str or os.PathLike, optional
+    :param timeout: Timeout for all RPC in seconds
+    :type timeout: int or float, optional
+    :param user: Username for authentication
+    :type user: str, optional
+    :param password: Password for authentication
+    :type password: str, optional
+    :param dict grpc_options: Additional gRPC options
+    :type grpc_options: dict, optional
+    """
+
+    def __init__(self, host='localhost', port=2379, ca_cert=None,
+                 cert_key=None, cert_cert=None, timeout=None, user=None,
+                 password=None, grpc_options=None):
+
+        # Step 1: verify credentials
+        cert_params = [c is not None for c in (cert_cert, cert_key)]
+        if ca_cert is not None:
+            if all(cert_params):
+                credentials = self.get_secure_creds(
+                    ca_cert,
+                    cert_key,
+                    cert_cert
+                )
+                self.uses_secure_channel = True
+            elif any(cert_params):
+                # some of the cert parameters are set
+                raise ValueError(
+                    'to use a secure channel ca_cert is required by itself, '
+                    'or cert_cert and cert_key must both be specified.')
+            else:
+                credentials = self.get_secure_creds(ca_cert, None, None)
+                self.uses_secure_channel = True
+        else:
+            self.uses_secure_channel = False
+            credentials = None
+
+        # Step 2: create Endpoint
+        ep = Endpoint(host, port, secure=self.uses_secure_channel,
+                      creds=credentials, opts=grpc_options)
+
+        super(Etcd3Client, self).__init__(endpoints=[ep], timeout=timeout,
+                                          user=user, password=password)
 
 
 def client(host='localhost', port=2379,

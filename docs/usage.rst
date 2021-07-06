@@ -49,7 +49,13 @@ You can check this has been stored correctly by testing with etcdctl:
 API
 ===
 
+.. autoclass:: etcd3.MultiEndpointEtcd3Client
+    :members:
+
 .. autoclass:: etcd3.Etcd3Client
+    :members:
+
+.. autoclass:: etcd3.Endpoint
     :members:
 
 .. autoclass:: etcd3.Member
