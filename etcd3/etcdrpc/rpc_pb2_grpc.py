@@ -5,9 +5,8 @@ from etcd3.etcdrpc import rpc_pb2 as rpc__pb2
 
 
 class KVStub(object):
-  """for grpc-gateway
-
-  """
+  # missing associated documentation comment in .proto file
+  pass
 
   def __init__(self, channel):
     """Constructor.
@@ -43,9 +42,8 @@ class KVStub(object):
 
 
 class KVServicer(object):
-  """for grpc-gateway
-
-  """
+  # missing associated documentation comment in .proto file
+  pass
 
   def Range(self, request, context):
     """Range gets the keys in the range from the key-value store.
@@ -201,11 +199,6 @@ class LeaseStub(object):
         request_serializer=rpc__pb2.LeaseTimeToLiveRequest.SerializeToString,
         response_deserializer=rpc__pb2.LeaseTimeToLiveResponse.FromString,
         )
-    self.LeaseLeases = channel.unary_unary(
-        '/etcdserverpb.Lease/LeaseLeases',
-        request_serializer=rpc__pb2.LeaseLeasesRequest.SerializeToString,
-        response_deserializer=rpc__pb2.LeaseLeasesResponse.FromString,
-        )
 
 
 class LeaseServicer(object):
@@ -243,13 +236,6 @@ class LeaseServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def LeaseLeases(self, request, context):
-    """LeaseLeases lists all existing leases.
-    """
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
 
 def add_LeaseServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -272,11 +258,6 @@ def add_LeaseServicer_to_server(servicer, server):
           servicer.LeaseTimeToLive,
           request_deserializer=rpc__pb2.LeaseTimeToLiveRequest.FromString,
           response_serializer=rpc__pb2.LeaseTimeToLiveResponse.SerializeToString,
-      ),
-      'LeaseLeases': grpc.unary_unary_rpc_method_handler(
-          servicer.LeaseLeases,
-          request_deserializer=rpc__pb2.LeaseLeasesRequest.FromString,
-          response_serializer=rpc__pb2.LeaseLeasesResponse.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
@@ -450,7 +431,7 @@ class MaintenanceServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def Hash(self, request, context):
-    """Hash computes the hash of the KV's backend.
+    """Hash returns the hash of the local KV state for consistency checking purpose.
     This is designed for testing; do not use this in production when there
     are ongoing transactions.
     """
