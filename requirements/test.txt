@@ -142,7 +142,7 @@ snowballstemmer==2.1.0
     #   sphinx
 sortedcontainers==2.4.0
     # via hypothesis
-sphinx==4.0.2
+sphinx==4.1.1
     # via -r requirements/test.in
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
