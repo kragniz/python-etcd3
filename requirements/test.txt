@@ -158,7 +158,7 @@ sphinxcontrib-serializinghtml==1.1.4
     # via sphinx
 tenacity==7.0.0
     # via -r requirements/test.in
-testtools==2.4.0
+testtools==2.5.0
     # via fixtures
 toml==0.10.2
     # via
