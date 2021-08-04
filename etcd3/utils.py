@@ -1,11 +1,14 @@
+import etcd3.exceptions as exceptions
+
+
 def prefix_range_end(prefix):
     """Create a bytestring that can be used as a range_end for a prefix."""
     s = bytearray(prefix)
     for i in reversed(range(len(s))):
         if s[i] < 0xff:
             s[i] = s[i] + 1
-            break
-    return bytes(s)
+            return s[:i + 1]
+    raise exceptions.NoPrefixEndError()
 
 
 def to_bytes(maybe_bytestring):
