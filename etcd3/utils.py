@@ -39,3 +39,8 @@ def response_to_event_iterator(response_iterator):
     for response in response_iterator:
         for event in response.events:
             yield event
+
+
+def txn_response_put_version(response):
+    """Get put revision from transaction response"""
+    return response.response_put.header.revision
