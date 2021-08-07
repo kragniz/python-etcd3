@@ -32,7 +32,3 @@ class RevisionCompactedError(Etcd3Exception):
 
 class NoServerAvailableError(Etcd3Exception):
     pass
-
-
-class NoPrefixEndError(Etcd3Exception):
-    pass

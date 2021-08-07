@@ -1122,8 +1122,7 @@ class TestUtils(object):
         assert etcd3.utils.prefix_range_end(b'ab\xff') == b'ac'
         assert (etcd3.utils.prefix_range_end(b'a\xff\xff\xff\xff\xff')
                 == b'b')
-        with pytest.raises(expected_exception=etcd3.exceptions.NoPrefixEndError) :
-            etcd3.utils.prefix_range_end(b'\xff\xff\xff\xff\xff')
+        assert b'\0' == etcd3.utils.prefix_range_end(b'\xff\xff\xff\xff\xff')
 
     def test_to_bytes(self):
         assert isinstance(etcd3.utils.to_bytes(b'doot'), bytes) is True
