@@ -165,7 +165,7 @@ toml==0.10.2
     #   coverage
     #   pytest
     #   tox
-tox==3.23.1
+tox==3.24.2
     # via -r requirements/test.in
 traceback2==1.4.0
     # via
