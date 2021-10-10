@@ -28,7 +28,7 @@ cffi==1.14.5
     # via xattr
 chardet==4.0.0
     # via requests
-click==8.0.1
+click==8.0.3
     # via pifpaf
 coverage[toml]==5.5
     # via
