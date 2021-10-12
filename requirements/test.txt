@@ -30,7 +30,7 @@ chardet==4.0.0
     # via requests
 click==8.0.1
     # via pifpaf
-coverage[toml]==5.5
+coverage[toml]==6.0.2
     # via
     #   -r requirements/test.in
     #   pytest-cov
