@@ -38,7 +38,7 @@ daiquiri==3.0.0
     # via pifpaf
 distlib==0.3.1
     # via virtualenv
-docutils==0.17.1
+docutils==0.18
     # via sphinx
 extras==1.0.0
     # via testtools
