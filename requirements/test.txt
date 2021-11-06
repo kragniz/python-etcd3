@@ -108,7 +108,7 @@ pycodestyle==2.7.0
     # via
     #   flake8
     #   flake8-import-order
-pycparser==2.20
+pycparser==2.21
     # via cffi
 pydocstyle==3.0.0
     # via
