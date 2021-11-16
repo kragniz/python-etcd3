@@ -136,7 +136,7 @@ pyyaml==5.4.1
     # via -r requirements/test.in
 requests==2.25.1
     # via sphinx
-snowballstemmer==2.1.0
+snowballstemmer==2.2.0
     # via
     #   pydocstyle
     #   sphinx
