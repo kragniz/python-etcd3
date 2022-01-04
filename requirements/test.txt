@@ -134,7 +134,7 @@ pytz==2021.1
     # via babel
 pyyaml==5.4.1
     # via -r requirements/test.in
-requests==2.25.1
+requests==2.27.0
     # via sphinx
 snowballstemmer==2.1.0
     # via
