@@ -74,7 +74,7 @@ jinja2==3.0.1
     #   sphinx
 linecache2==1.0.0
     # via traceback2
-markupsafe==2.0.1
+markupsafe==2.1.1
     # via jinja2
 mccabe==0.6.1
     # via flake8
