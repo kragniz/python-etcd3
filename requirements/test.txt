@@ -60,7 +60,7 @@ flake8==3.9.2
     #   flake8-docstrings
 grpcio-tools==1.38.0
     # via -r requirements/test.in
-hypothesis==6.13.1
+hypothesis==6.46.6
     # via -r requirements/test.in
 idna==2.10
     # via requests
