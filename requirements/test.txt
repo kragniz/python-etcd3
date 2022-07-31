@@ -54,7 +54,7 @@ flake8-docstrings==1.6.0
     # via -r requirements/test.in
 flake8-import-order==0.18.1
     # via -r requirements/test.in
-flake8==3.9.2
+flake8==5.0.0
     # via
     #   -r requirements/test.in
     #   flake8-docstrings
