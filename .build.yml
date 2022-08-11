@@ -2,6 +2,7 @@ image: archlinux
 packages:
   - python
   - python-pip
+  - python39
 sources:
   - https://github.com/kragniz/python-etcd3
 environment:
