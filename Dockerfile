@@ -1,12 +1,13 @@
-FROM python:3.5
+FROM python:3.9
 
 ARG HTTP_PROXY
 ARG http_proxy
 ARG HTTPS_PROXY
 ARG https_proxy
+ENV TEST_ETCD_VERSION v3.3.10
 
-RUN curl -L http://github.com/coreos/etcd/releases/download/v3.0.10/etcd-v3.0.10-linux-amd64.tar.gz | tar xzvf -
-ENV PATH $PATH:/etcd-v3.0.10-linux-amd64
+RUN curl -L https://github.com/etcd-io/etcd/releases/download/${TEST_ETCD_VERSION}/etcd-${TEST_ETCD_VERSION}-linux-amd64.tar.gz | tar xzvf -
+ENV PATH $PATH:/etcd-${TEST_ETCD_VERSION}-linux-amd64
 
 RUN pip install -U tox
 
@@ -16,9 +17,9 @@ WORKDIR python-etcd3
 COPY tox.ini ./
 COPY requirements/base.txt requirements/test.txt ./requirements/
 
-RUN tox -epy35 --notest
+RUN tox -epy39 --notest
 
 COPY . ./
 
 ENV ETCDCTL_API 3
-CMD ["tox", "-epy35"]
+CMD ["tox", "-epy39"]

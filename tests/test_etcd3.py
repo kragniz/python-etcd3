@@ -378,6 +378,7 @@ class TestEtcd3(object):
 
         def slow_watch_mock(*args, **kwargs):
             time.sleep(4)
+            return []
 
         foo_etcd.watcher._watch_stub.Watch = slow_watch_mock  # noqa
 
