@@ -1,192 +1,179 @@
+//
+// Copyright 2016-2021 The jetcd authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 syntax = "proto3";
-package etcdserverpb;
 
 import "kv.proto";
 import "auth.proto";
 
-// for grpc-gateway
+package etcdserverpb;
 
+option java_multiple_files = true;
+option java_package = "io.etcd.jetcd.api";
+option java_outer_classname = "JetcdProto";
+option objc_class_prefix = "Jetcd";
 
 service KV {
   // Range gets the keys in the range from the key-value store.
-  rpc Range(RangeRequest) returns (RangeResponse) {
-  }
+  rpc Range(RangeRequest) returns (RangeResponse) {}
 
   // Put puts the given key into the key-value store.
   // A put request increments the revision of the key-value store
   // and generates one event in the event history.
-  rpc Put(PutRequest) returns (PutResponse) {
-  }
+  rpc Put(PutRequest) returns (PutResponse) {}
 
   // DeleteRange deletes the given range from the key-value store.
   // A delete request increments the revision of the key-value store
   // and generates a delete event in the event history for every deleted key.
-  rpc DeleteRange(DeleteRangeRequest) returns (DeleteRangeResponse) {
-  }
+  rpc DeleteRange(DeleteRangeRequest) returns (DeleteRangeResponse) {}
 
   // Txn processes multiple requests in a single transaction.
   // A txn request increments the revision of the key-value store
   // and generates events with the same revision for every completed request.
   // It is not allowed to modify the same key several times within one txn.
-  rpc Txn(TxnRequest) returns (TxnResponse) {
-  }
+  rpc Txn(TxnRequest) returns (TxnResponse) {}
 
   // Compact compacts the event history in the etcd key-value store. The key-value
   // store should be periodically compacted or the event history will continue to grow
   // indefinitely.
-  rpc Compact(CompactionRequest) returns (CompactionResponse) {
-  }
+  rpc Compact(CompactionRequest) returns (CompactionResponse) {}
 }
 
 service Watch {
+  // Progress requests that a watch stream progress status
+  // be sent in the watch response stream as soon as possible.
+  // For watch progress responses, the header.revision indicates progress. All future events
+  // received in this stream are guaranteed to have a higher revision number than the
+  // header.revision number.
+  rpc Progress(WatchProgressRequest) returns (WatchResponse) {}
+
   // Watch watches for events happening or that have happened. Both input and output
   // are streams; the input stream is for creating and canceling watchers and the output
   // stream sends events. One watch RPC can watch on multiple key ranges, streaming events
   // for several watches at once. The entire event history can be watched starting from the
   // last compaction revision.
-  rpc Watch(stream WatchRequest) returns (stream WatchResponse) {
-  }
+  rpc Watch(stream WatchRequest) returns (stream WatchResponse) {}
 }
 
 service Lease {
   // LeaseGrant creates a lease which expires if the server does not receive a keepAlive
   // within a given time to live period. All keys attached to the lease will be expired and
   // deleted if the lease expires. Each expired key generates a delete event in the event history.
-  rpc LeaseGrant(LeaseGrantRequest) returns (LeaseGrantResponse) {
-  }
+  rpc LeaseGrant(LeaseGrantRequest) returns (LeaseGrantResponse) {}
 
   // LeaseRevoke revokes a lease. All keys attached to the lease will expire and be deleted.
-  rpc LeaseRevoke(LeaseRevokeRequest) returns (LeaseRevokeResponse) {
-  }
+  rpc LeaseRevoke(LeaseRevokeRequest) returns (LeaseRevokeResponse) {}
 
   // LeaseKeepAlive keeps the lease alive by streaming keep alive requests from the client
   // to the server and streaming keep alive responses from the server to the client.
-  rpc LeaseKeepAlive(stream LeaseKeepAliveRequest) returns (stream LeaseKeepAliveResponse) {
-  }
+  rpc LeaseKeepAlive(stream LeaseKeepAliveRequest) returns (stream LeaseKeepAliveResponse) {}
 
   // LeaseTimeToLive retrieves lease information.
-  rpc LeaseTimeToLive(LeaseTimeToLiveRequest) returns (LeaseTimeToLiveResponse) {
-  }
+  rpc LeaseTimeToLive(LeaseTimeToLiveRequest) returns (LeaseTimeToLiveResponse) {}
 
-  // LeaseLeases lists all existing leases.
-  rpc LeaseLeases(LeaseLeasesRequest) returns (LeaseLeasesResponse) {
-  }
+  // TODO(xiangli) List all existing Leases?
 }
 
 service Cluster {
   // MemberAdd adds a member into the cluster.
-  rpc MemberAdd(MemberAddRequest) returns (MemberAddResponse) {
-  }
+  rpc MemberAdd(MemberAddRequest) returns (MemberAddResponse) {}
 
   // MemberRemove removes an existing member from the cluster.
-  rpc MemberRemove(MemberRemoveRequest) returns (MemberRemoveResponse) {
-  }
+  rpc MemberRemove(MemberRemoveRequest) returns (MemberRemoveResponse) {}
 
   // MemberUpdate updates the member configuration.
-  rpc MemberUpdate(MemberUpdateRequest) returns (MemberUpdateResponse) {
-  }
+  rpc MemberUpdate(MemberUpdateRequest) returns (MemberUpdateResponse) {}
 
   // MemberList lists all the members in the cluster.
-  rpc MemberList(MemberListRequest) returns (MemberListResponse) {
-  }
+  rpc MemberList(MemberListRequest) returns (MemberListResponse) {}
 }
 
 service Maintenance {
   // Alarm activates, deactivates, and queries alarms regarding cluster health.
-  rpc Alarm(AlarmRequest) returns (AlarmResponse) {
-  }
+  rpc Alarm(AlarmRequest) returns (AlarmResponse) {}
 
   // Status gets the status of the member.
-  rpc Status(StatusRequest) returns (StatusResponse) {
-  }
+  rpc Status(StatusRequest) returns (StatusResponse) {}
 
   // Defragment defragments a member's backend database to recover storage space.
-  rpc Defragment(DefragmentRequest) returns (DefragmentResponse) {
-  }
+  rpc Defragment(DefragmentRequest) returns (DefragmentResponse) {}
 
-  // Hash computes the hash of the KV's backend.
+  // Hash returns the hash of the local KV state for consistency checking purpose.
   // This is designed for testing; do not use this in production when there
   // are ongoing transactions.
-  rpc Hash(HashRequest) returns (HashResponse) {
-  }
+  rpc Hash(HashRequest) returns (HashResponse) {}
 
   // HashKV computes the hash of all MVCC keys up to a given revision.
-  rpc HashKV(HashKVRequest) returns (HashKVResponse) {
-  }
+  rpc HashKV(HashKVRequest) returns (HashKVResponse) {}
 
   // Snapshot sends a snapshot of the entire backend from a member over a stream to a client.
-  rpc Snapshot(SnapshotRequest) returns (stream SnapshotResponse) {
-  }
+  rpc Snapshot(SnapshotRequest) returns (stream SnapshotResponse) {}
 
   // MoveLeader requests current leader node to transfer its leadership to transferee.
-  rpc MoveLeader(MoveLeaderRequest) returns (MoveLeaderResponse) {
-  }
+  rpc MoveLeader(MoveLeaderRequest) returns (MoveLeaderResponse) {}
 }
 
 service Auth {
   // AuthEnable enables authentication.
-  rpc AuthEnable(AuthEnableRequest) returns (AuthEnableResponse) {
-  }
+  rpc AuthEnable(AuthEnableRequest) returns (AuthEnableResponse) {}
 
   // AuthDisable disables authentication.
-  rpc AuthDisable(AuthDisableRequest) returns (AuthDisableResponse) {
-  }
+  rpc AuthDisable(AuthDisableRequest) returns (AuthDisableResponse) {}
 
   // Authenticate processes an authenticate request.
-  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse) {
-  }
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse) {}
 
   // UserAdd adds a new user.
-  rpc UserAdd(AuthUserAddRequest) returns (AuthUserAddResponse) {
-  }
+  rpc UserAdd(AuthUserAddRequest) returns (AuthUserAddResponse) {}
 
   // UserGet gets detailed user information.
-  rpc UserGet(AuthUserGetRequest) returns (AuthUserGetResponse) {
-  }
+  rpc UserGet(AuthUserGetRequest) returns (AuthUserGetResponse) {}
 
   // UserList gets a list of all users.
-  rpc UserList(AuthUserListRequest) returns (AuthUserListResponse) {
-  }
+  rpc UserList(AuthUserListRequest) returns (AuthUserListResponse) {}
 
   // UserDelete deletes a specified user.
-  rpc UserDelete(AuthUserDeleteRequest) returns (AuthUserDeleteResponse) {
-  }
+  rpc UserDelete(AuthUserDeleteRequest) returns (AuthUserDeleteResponse) {}
 
   // UserChangePassword changes the password of a specified user.
-  rpc UserChangePassword(AuthUserChangePasswordRequest) returns (AuthUserChangePasswordResponse) {
-  }
+  rpc UserChangePassword(AuthUserChangePasswordRequest) returns (AuthUserChangePasswordResponse) {}
 
   // UserGrant grants a role to a specified user.
-  rpc UserGrantRole(AuthUserGrantRoleRequest) returns (AuthUserGrantRoleResponse) {
-  }
+  rpc UserGrantRole(AuthUserGrantRoleRequest) returns (AuthUserGrantRoleResponse) {}
 
   // UserRevokeRole revokes a role of specified user.
-  rpc UserRevokeRole(AuthUserRevokeRoleRequest) returns (AuthUserRevokeRoleResponse) {
-  }
+  rpc UserRevokeRole(AuthUserRevokeRoleRequest) returns (AuthUserRevokeRoleResponse) {}
 
   // RoleAdd adds a new role.
-  rpc RoleAdd(AuthRoleAddRequest) returns (AuthRoleAddResponse) {
-  }
+  rpc RoleAdd(AuthRoleAddRequest) returns (AuthRoleAddResponse) {}
 
   // RoleGet gets detailed role information.
-  rpc RoleGet(AuthRoleGetRequest) returns (AuthRoleGetResponse) {
-  }
+  rpc RoleGet(AuthRoleGetRequest) returns (AuthRoleGetResponse) {}
 
   // RoleList gets lists of all roles.
-  rpc RoleList(AuthRoleListRequest) returns (AuthRoleListResponse) {
-  }
+  rpc RoleList(AuthRoleListRequest) returns (AuthRoleListResponse) {}
 
   // RoleDelete deletes a specified role.
-  rpc RoleDelete(AuthRoleDeleteRequest) returns (AuthRoleDeleteResponse) {
-  }
+  rpc RoleDelete(AuthRoleDeleteRequest) returns (AuthRoleDeleteResponse) {}
 
   // RoleGrantPermission grants a permission of a specified key or range to a specified role.
-  rpc RoleGrantPermission(AuthRoleGrantPermissionRequest) returns (AuthRoleGrantPermissionResponse) {
-  }
+  rpc RoleGrantPermission(AuthRoleGrantPermissionRequest) returns (AuthRoleGrantPermissionResponse) {}
 
   // RoleRevokePermission revokes a key or range permission of a specified role.
-  rpc RoleRevokePermission(AuthRoleRevokePermissionRequest) returns (AuthRoleRevokePermissionResponse) {
-  }
+  rpc RoleRevokePermission(AuthRoleRevokePermissionRequest) returns (AuthRoleRevokePermissionResponse) {}
 }
 
 message ResponseHeader {
@@ -195,6 +182,9 @@ message ResponseHeader {
   // member_id is the ID of the member which sent the response.
   uint64 member_id = 2;
   // revision is the key-value store revision when the request was applied.
+  // For watch progress responses, the header.revision indicates progress. All future events
+  // recieved in this stream are guaranteed to have a higher revision number than the
+  // header.revision number.
   int64 revision = 3;
   // raft_term is the raft term when the request was applied.
   uint64 raft_term = 4;
@@ -202,16 +192,16 @@ message ResponseHeader {
 
 message RangeRequest {
   enum SortOrder {
-	NONE = 0; // default, no sorting
-	ASCEND = 1; // lowest target value first
-	DESCEND = 2; // highest target value first
+    NONE = 0; // default, no sorting
+    ASCEND = 1; // lowest target value first
+    DESCEND = 2; // highest target value first
   }
   enum SortTarget {
-	KEY = 0;
-	VERSION = 1;
-	CREATE = 2;
-	MOD = 3;
-	VALUE = 4;
+    KEY = 0;
+    VERSION = 1;
+    CREATE = 2;
+    MOD = 3;
+    VALUE = 4;
   }
 
   // key is the first key for the range. If range_end is not given, the request only looks up key.
@@ -360,7 +350,7 @@ message Compare {
     VERSION = 0;
     CREATE = 1;
     MOD = 2;
-    VALUE= 3;
+    VALUE = 3;
     LEASE = 4;
   }
   // result is logical comparison operation for this comparison.
@@ -444,6 +434,12 @@ message CompactionResponse {
 message HashRequest {
 }
 
+message HashResponse {
+  ResponseHeader header = 1;
+  // hash is the hash value computed from the responding member's key-value store.
+  uint32 hash = 2;
+}
+
 message HashKVRequest {
   // revision is the key-value store revision for the hash operation.
   int64 revision = 1;
@@ -455,12 +451,6 @@ message HashKVResponse {
   uint32 hash = 2;
   // compact_revision is the compacted revision of key-value store when hash begins.
   int64 compact_revision = 3;
-}
-
-message HashResponse {
-  ResponseHeader header = 1;
-  // hash is the hash value computed from the responding member's KV's backend.
-  uint32 hash = 2;
 }
 
 message SnapshotRequest {
@@ -483,6 +473,7 @@ message WatchRequest {
   oneof request_union {
     WatchCreateRequest create_request = 1;
     WatchCancelRequest cancel_request = 2;
+    WatchProgressRequest progress_request = 3;
   }
 }
 
@@ -504,10 +495,10 @@ message WatchCreateRequest {
   bool progress_notify = 4;
 
   enum FilterType {
-  // filter out put event.
-  NOPUT = 0;
-  // filter out delete event.
-  NODELETE = 1;
+    // filter out put event.
+    NOPUT = 0;
+    // filter out delete event.
+    NODELETE = 1;
   }
   // filters filter the events at server side before it sends back to the watcher.
   repeated FilterType filters = 5;
@@ -520,6 +511,11 @@ message WatchCreateRequest {
 message WatchCancelRequest {
   // watch_id is the watcher id to cancel so that no more events are transmitted.
   int64 watch_id = 1;
+}
+
+// Requests a watch stream progress status be sent in the
+// watch response stream as soon as possible.
+message WatchProgressRequest {
 }
 
 message WatchResponse {
@@ -551,7 +547,7 @@ message WatchResponse {
 }
 
 message LeaseGrantRequest {
-  // TTL is the advisory time-to-live in seconds. Expired lease will return -1.
+  // TTL is the advisory time-to-live in seconds.
   int64 TTL = 1;
   // ID is the requested ID for the lease. If ID is set to 0, the lessor chooses an ID.
   int64 ID = 2;
@@ -605,19 +601,6 @@ message LeaseTimeToLiveResponse {
   int64 grantedTTL = 4;
   // Keys is the list of keys attached to this lease.
   repeated bytes keys = 5;
-}
-
-message LeaseLeasesRequest {
-}
-
-message LeaseStatus {
-  int64 ID = 1;
-  // TODO: int64 TTL = 2;
-}
-
-message LeaseLeasesResponse {
-  ResponseHeader header = 1;
-  repeated LeaseStatus leases = 2;
 }
 
 message Member {
@@ -694,16 +677,15 @@ message MoveLeaderResponse {
 }
 
 enum AlarmType {
-	NONE = 0; // default, used to query if any alarm is active
-	NOSPACE = 1; // space quota is exhausted
-	CORRUPT = 2; // kv store corruption detected
+  NONE = 0; // default, used to query if any alarm is active
+  NOSPACE = 1; // space quota is exhausted
 }
 
 message AlarmRequest {
   enum AlarmAction {
-	GET = 0;
-	ACTIVATE = 1;
-	DEACTIVATE = 2;
+    GET = 0;
+    ACTIVATE = 1;
+    DEACTIVATE = 2;
   }
   // action is the kind of alarm request to issue. The action
   // may GET alarm statuses, ACTIVATE an alarm, or DEACTIVATE a
