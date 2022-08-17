@@ -181,11 +181,13 @@ class TestEtcd3(object):
     @given(characters(blacklist_categories=['Cs', 'Cc']))
     def test_put_if_not_exists(self, string):
         with self.get_clean_etcd() as etcd:
-            txn_status = etcd.put_if_not_exists('/doot/put_1', string)
-            assert txn_status is True
+            etcdctl('del', '/doot/put_1')
 
-            txn_status = etcd.put_if_not_exists('/doot/put_1', string)
-            assert txn_status is False
+            txn_status, revision = etcd.put_if_not_exists('/doot/put_1', string)
+            assert txn_status is True and revision > 0
+
+            txn_status, revision = etcd.put_if_not_exists('/doot/put_1', string)
+            assert txn_status is False and revision is None
 
             etcdctl('del', '/doot/put_1')
 
@@ -541,8 +543,8 @@ class TestEtcd3(object):
         # Test watch_prefix_response & watch_prefix_once_response
         success_ops = [etcd.transactions.put('/doot/watch/prefix/0', '0'),
                        etcd.transactions.put('/doot/watch/prefix/1', '1')]
-        revision = etcd.transaction([], success_ops,
-                                    [])[1][0].response_put.header.revision
+        revision = utils.txn_response_put_version(etcd.transaction([], success_ops,
+                                                                   [])[1][0])
 
         responses_iterator, cancel = \
             etcd.watch_prefix_response('/doot/watch/prefix/',

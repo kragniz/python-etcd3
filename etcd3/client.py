@@ -601,17 +601,19 @@ class MultiEndpointEtcd3Client(object):
         :type value: bytes
         :param lease: Lease to associate with this key.
         :type lease: either :class:`.Lease`, or int (ID of lease)
-        :returns: state of transaction, ``True`` if the put was successful,
+        :returns: A tuple of (state of transaction, revision),
+                state of transaction:``True`` if the put was successful,
                   ``False`` otherwise
+                revision: revision of PUT if succeeded, None otherwise
         :rtype: bool
         """
-        status, _ = self.transaction(
+        status, responses = self.transaction(
             compare=[self.transactions.create(key) == '0'],
             success=[self.transactions.put(key, value, lease=lease)],
             failure=[],
         )
 
-        return status
+        return status, utils.txn_response_put_version(responses[0]) if status else None
 
     @_handle_errors
     def replace(self, key, initial_value, new_value):

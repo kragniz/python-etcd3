@@ -3,6 +3,7 @@ import time
 import uuid
 
 from etcd3 import events, exceptions
+from etcd3.utils import txn_response_put_version
 
 
 class Lock(object):
@@ -87,7 +88,7 @@ class Lock(object):
             ]
         )
         if success is True:
-            self.revision = metadata[0].response_put.header.revision
+            self.revision = txn_response_put_version(metadata[0])
             return True
         self.revision = metadata[0][0][1].mod_revision
         self.lease = None
