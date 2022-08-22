@@ -4,8 +4,8 @@ def prefix_range_end(prefix):
     for i in reversed(range(len(s))):
         if s[i] < 0xff:
             s[i] = s[i] + 1
-            break
-    return bytes(s)
+            return s[:i + 1]
+    return b'\0'
 
 
 def to_bytes(maybe_bytestring):
