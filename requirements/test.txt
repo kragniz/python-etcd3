@@ -36,7 +36,7 @@ coverage[toml]==5.5
     #   pytest-cov
 daiquiri==3.0.0
     # via pifpaf
-distlib==0.3.1
+distlib==0.3.6
     # via virtualenv
 docutils==0.17.1
     # via sphinx
