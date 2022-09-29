@@ -7,7 +7,7 @@
 #
 grpcio==1.38.0
     # via -r requirements/base.in
-protobuf==3.17.0
+protobuf==4.21.7
     # via -r requirements/base.in
 six==1.16.0
     # via
