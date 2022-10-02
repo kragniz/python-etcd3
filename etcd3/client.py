@@ -1086,7 +1086,7 @@ class MultiEndpointEtcd3Client(object):
         )
 
     @_handle_errors
-    def lock(self, name, ttl=60):
+    def lock(self, name, ttl=None, lock_prefix=None):
         """
         Create a new lock.
 
@@ -1096,10 +1096,12 @@ class MultiEndpointEtcd3Client(object):
                     lock will be released after this time elapses, unless
                     refreshed
         :type ttl: int
+        :param lock_prefix: pre-name of the lock
+        :type lock_prefix: string or bytes
         :returns: new lock
         :rtype: :class:`.Lock`
         """
-        return locks.Lock(name, ttl=ttl, etcd_client=self)
+        return locks.Lock(name, ttl=ttl, lock_prefix=lock_prefix, etcd_client=self)
 
     @_handle_errors
     def add_member(self, urls):
