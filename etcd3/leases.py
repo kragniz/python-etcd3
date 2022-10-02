@@ -21,7 +21,7 @@ class Lease(object):
 
     def refresh(self):
         """Refresh the time to live for this lease."""
-        return list(self.etcd_client.refresh_lease(self.id))
+        return self.etcd_client.refresh_lease(self.id)
 
     @property
     def remaining_ttl(self):

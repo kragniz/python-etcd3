@@ -480,10 +480,10 @@ class MultiEndpointEtcd3Client(object):
         :returns: sequence of (value, metadata) tuples
         """
         range_response = self.get_prefix_response(key_prefix, **kwargs)
-        return (
+        return [
             (kv.value, KVMetadata(kv, range_response.header))
             for kv in range_response.kvs
-        )
+        ]
 
     @_handle_errors
     def get_range_response(self, range_start, range_end, sort_order=None,
@@ -514,8 +514,10 @@ class MultiEndpointEtcd3Client(object):
         """
         range_response = self.get_range_response(range_start, range_end,
                                                  **kwargs)
-        for kv in range_response.kvs:
-            yield (kv.value, KVMetadata(kv, range_response.header))
+        return [
+            (kv.value, KVMetadata(kv, range_response.header))
+            for kv in range_response.kvs
+        ]
 
     @_handle_errors
     def get_all_response(self, sort_order=None, sort_target='key',
@@ -544,8 +546,10 @@ class MultiEndpointEtcd3Client(object):
         :returns: sequence of (value, metadata) tuples
         """
         range_response = self.get_all_response(**kwargs)
-        for kv in range_response.kvs:
-            yield (kv.value, KVMetadata(kv, range_response.header))
+        return [
+            (kv.value, KVMetadata(kv, range_response.header))
+            for kv in range_response.kvs
+        ]
 
     def _build_put_request(self, key, value, lease=None, prev_kv=False):
         put_request = etcdrpc.PutRequest()
@@ -1066,12 +1070,11 @@ class MultiEndpointEtcd3Client(object):
     def refresh_lease(self, lease_id):
         keep_alive_request = etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
         request_stream = [keep_alive_request]
-        for response in self.leasestub.LeaseKeepAlive(
+        return list(self.leasestub.LeaseKeepAlive(
                 iter(request_stream),
                 self.timeout,
                 credentials=self.call_credentials,
-                metadata=self.metadata):
-            yield response
+                metadata=self.metadata))
 
     @_handle_errors
     def get_lease_info(self, lease_id):
@@ -1174,12 +1177,14 @@ class MultiEndpointEtcd3Client(object):
             metadata=self.metadata
         )
 
-        for member in member_list_response.members:
-            yield etcd3.members.Member(member.ID,
+        return [
+            etcd3.members.Member(member.ID,
                                        member.name,
                                        member.peerURLs,
                                        member.clientURLs,
                                        etcd_client=self)
+            for member in member_list_response.members
+        ]
 
     @_handle_errors
     def compact(self, revision, physical=False):
@@ -1294,8 +1299,10 @@ class MultiEndpointEtcd3Client(object):
             metadata=self.metadata
         )
 
-        for alarm in alarm_response.alarms:
-            yield Alarm(alarm.alarm, alarm.memberID)
+        return [
+            Alarm(alarm.alarm, alarm.memberID)
+            for alarm in alarm_response.alarms
+        ]
 
     @_handle_errors
     def disarm_alarm(self, member_id=0):
