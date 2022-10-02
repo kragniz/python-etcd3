@@ -611,13 +611,40 @@ class TestEtcd3(object):
     def test_transaction_range_conditions(self, etcd):
         etcdctl('put', '/doot/key1', 'dootdoot')
         etcdctl('put', '/doot/key2', 'notdootdoot')
-        range_end = utils.prefix_range_end(utils.to_bytes('/doot/'))
+        range_end = utils.prefix_range_end('/doot/')
         compare = [etcd.transactions.value('/doot/', range_end) == 'dootdoot']
         status, _ = etcd.transaction(compare=compare, success=[], failure=[])
         assert not status
         etcdctl('put', '/doot/key2', 'dootdoot')
         status, _ = etcd.transaction(compare=compare, success=[], failure=[])
         assert status
+
+    def test_transaction_get_prefix(self, etcd):
+        etcdctl('put', '/doot/key1', 'dootdoot')
+        etcdctl('put', '/doot/key2', 'notdootdoot')
+        compare = [etcd.transactions.value('/doot/key1') == 'dootdoot']
+        success = [etcd.transactions.get_prefix('/doot/')]
+        status, (values,) = etcd.transaction(
+            compare=compare,
+            success=success,
+            failure=[]
+        )
+        assert status
+        assert len(values) == 2
+
+    def test_transaction_delete_prefix(self, etcd):
+        etcdctl('put', '/doot/key1', 'dootdoot')
+        etcdctl('put', '/doot/key2', 'notdootdoot')
+        compare = [etcd.transactions.value('/doot/key1') == 'dootdoot']
+        success = [etcd.transactions.delete_prefix('/doot/')]
+        status, _ = etcd.transaction(
+            compare=compare,
+            success=success,
+            failure=[]
+        )
+        assert status
+        out = etcdctl('get', '--prefix', '/doot/')
+        assert 'kvs' not in out
 
     def test_replace_success(self, etcd):
         etcd.put('/doot/thing', 'toot')

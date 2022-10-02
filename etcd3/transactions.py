@@ -100,11 +100,25 @@ class Get(object):
         self.range_end = range_end
 
 
+class GetPrefix(Get):
+    def __init__(self, key_prefix):
+        super().__init__(key_prefix, utils.prefix_range_end(key_prefix))
+
+
 class Delete(object):
     def __init__(self, key, range_end=None, prev_kv=False):
         self.key = key
         self.range_end = range_end
         self.prev_kv = prev_kv
+
+
+class DeletePrefix(Delete):
+    def __init__(self, key_prefix, prev_kv=False):
+        super().__init__(
+            key_prefix,
+            utils.prefix_range_end(key_prefix),
+            prev_kv
+        )
 
 
 class Txn(object):

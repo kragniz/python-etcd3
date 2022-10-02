@@ -1,6 +1,6 @@
 def prefix_range_end(prefix):
     """Create a bytestring that can be used as a range_end for a prefix."""
-    s = bytearray(prefix)
+    s = bytearray(to_bytes(prefix))
     for i in reversed(range(len(s))):
         if s[i] < 0xff:
             s[i] = s[i] + 1
