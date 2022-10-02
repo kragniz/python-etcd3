@@ -1067,6 +1067,36 @@ class TestEtcd3(object):
 
             etcdctl('snapshot', 'status', f.name)
 
+    def test_get_key_revision(self, etcd):
+        KEY = '/doot/a_key_with_revision'
+        old_data = "DATA"
+        old_revision = etcdctl('put', KEY, old_data)['header']['revision']
+        new_data = "NEW DATA"
+        new_revision = etcdctl('put', KEY, new_data)['header']['revision']
+
+        old_returned, kv = etcd.get(KEY, revision=old_revision)
+        assert old_returned.decode('utf-8') == old_data
+        assert old_revision == kv.mod_revision
+
+        new_returned, kv = etcd.get(KEY, revision=new_revision)
+        assert new_returned.decode('utf-8') == new_data
+        assert new_revision == kv.mod_revision
+
+    def test_get_prefix_revision(self, etcd):
+        KEY = '/doot/a_key_with_revision'
+        old_data = "DATA"
+        old_revision = etcdctl('put', KEY, old_data)['header']['revision']
+        new_data = "NEW DATA"
+        new_revision = etcdctl('put', KEY, new_data)['header']['revision']
+
+        old_returned, kv = next(etcd.get_prefix(KEY, revision=old_revision))
+        assert old_returned.decode('utf-8') == old_data
+        assert old_revision == kv.mod_revision
+
+        new_returned, kv = next(etcd.get_prefix(KEY, revision=new_revision))
+        assert new_returned.decode('utf-8') == new_data
+        assert new_revision == kv.mod_revision
+
 
 class TestAlarms(object):
     @pytest.fixture

@@ -355,7 +355,7 @@ class MultiEndpointEtcd3Client(object):
     def _build_get_range_request(self, key,
                                  range_end=None,
                                  limit=None,
-                                 revision=None,
+                                 revision=0,
                                  sort_order=None,
                                  sort_target='key',
                                  serializable=False,
@@ -408,15 +408,19 @@ class MultiEndpointEtcd3Client(object):
         if request_sort_target is None:
             raise ValueError('sort_target must be one of "key", '
                              '"version", "create", "mod" or "value"')
+
+        range_request.revision = revision
+        range_request.serializable = serializable
         range_request.sort_target = request_sort_target
 
         return range_request
 
     @_handle_errors
-    def get_response(self, key, **kwargs):
+    def get_response(self, key, serializable=False, **kwargs):
         """Get the value of a key from etcd."""
         range_request = self._build_get_range_request(
             key,
+            serializable=serializable,
             **kwargs
         )
 
@@ -441,6 +445,9 @@ class MultiEndpointEtcd3Client(object):
             'hello world'
 
         :param key: key in etcd to get
+        :param serializable: whether to allow serializable reads. This can
+            result in stale reads
+        :param revision: key value revision
         :returns: value of key and metadata
         :rtype: bytes, ``KVMetadata``
         """
@@ -476,7 +483,7 @@ class MultiEndpointEtcd3Client(object):
 
         :param key_prefix: first key in range
         :param keys_only: if True, retrieve only the keys, not the values
-
+        :param revision: key value revision
         :returns: sequence of (value, metadata) tuples
         """
         range_response = self.get_prefix_response(key_prefix, **kwargs)
