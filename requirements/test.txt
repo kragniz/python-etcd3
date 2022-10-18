@@ -130,7 +130,7 @@ python-json-logger==2.0.1
     # via daiquiri
 python-mimeparse==1.6.0
     # via testtools
-pytz==2021.1
+pytz==2022.5
     # via babel
 pyyaml==5.4.1
     # via -r requirements/test.in
