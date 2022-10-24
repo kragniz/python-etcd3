@@ -177,7 +177,7 @@ urllib3==1.26.4
     # via requests
 virtualenv==20.4.6
     # via tox
-xattr==0.9.7
+xattr==0.10.0
     # via pifpaf
 
 # The following packages are considered to be unsafe in a requirements file:
