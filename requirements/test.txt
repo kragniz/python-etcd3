@@ -98,7 +98,7 @@ pluggy==0.13.1
     # via
     #   pytest
     #   tox
-psutil==5.8.0
+psutil==5.9.4
     # via pifpaf
 py==1.10.0
     # via
