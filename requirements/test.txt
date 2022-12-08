@@ -5,7 +5,6 @@
 #
 #    pip-compile-multi
 #
--r base.txt
 alabaster==0.7.12
     # via sphinx
 appdirs==1.4.4
@@ -21,8 +20,8 @@ babel==2.9.1
 bump2version==1.0.1
     # via bumpversion
 bumpversion==0.6.0
-    # via -r requirements/test.in
-certifi==2020.12.5
+    # via -r test.in
+certifi==2022.12.7
     # via requests
 cffi==1.14.5
     # via xattr
@@ -32,7 +31,7 @@ click==8.0.1
     # via pifpaf
 coverage[toml]==5.5
     # via
-    #   -r requirements/test.in
+    #   -r test.in
     #   pytest-cov
 daiquiri==3.0.0
     # via pifpaf
@@ -50,18 +49,22 @@ fixtures==3.0.0
     # via
     #   pifpaf
     #   testtools
-flake8-docstrings==1.6.0
-    # via -r requirements/test.in
-flake8-import-order==0.18.1
-    # via -r requirements/test.in
 flake8==3.9.2
     # via
-    #   -r requirements/test.in
+    #   -r test.in
     #   flake8-docstrings
+flake8-docstrings==1.6.0
+    # via -r test.in
+flake8-import-order==0.18.1
+    # via -r test.in
+grpcio==1.38.0
+    # via
+    #   -r base.in
+    #   grpcio-tools
 grpcio-tools==1.38.0
-    # via -r requirements/test.in
+    # via -r test.in
 hypothesis==6.13.1
-    # via -r requirements/test.in
+    # via -r test.in
 idna==2.10
     # via requests
 imagesize==1.2.0
@@ -79,9 +82,9 @@ markupsafe==2.0.1
 mccabe==0.6.1
     # via flake8
 mock==4.0.3
-    # via -r requirements/test.in
+    # via -r test.in
 more-itertools==5.0.0
-    # via -r requirements/test.in
+    # via -r test.in
 packaging==20.9
     # via
     #   pytest
@@ -93,11 +96,15 @@ pbr==5.6.0
     #   pifpaf
     #   testtools
 pifpaf==3.1.5
-    # via -r requirements/test.in
+    # via -r test.in
 pluggy==0.13.1
     # via
     #   pytest
     #   tox
+protobuf==3.17.0
+    # via
+    #   -r base.in
+    #   grpcio-tools
 psutil==5.8.0
     # via pifpaf
 py==1.10.0
@@ -112,7 +119,7 @@ pycparser==2.20
     # via cffi
 pydocstyle==3.0.0
     # via
-    #   -r requirements/test.in
+    #   -r test.in
     #   flake8-docstrings
 pyflakes==2.3.1
     # via flake8
@@ -120,12 +127,12 @@ pygments==2.9.0
     # via sphinx
 pyparsing==2.4.7
     # via packaging
-pytest-cov==2.12.0
-    # via -r requirements/test.in
 pytest==6.2.4
     # via
-    #   -r requirements/test.in
+    #   -r test.in
     #   pytest-cov
+pytest-cov==2.12.0
+    # via -r test.in
 python-json-logger==2.0.1
     # via daiquiri
 python-mimeparse==1.6.0
@@ -133,9 +140,21 @@ python-mimeparse==1.6.0
 pytz==2021.1
     # via babel
 pyyaml==5.4.1
-    # via -r requirements/test.in
+    # via -r test.in
 requests==2.25.1
     # via sphinx
+six==1.16.0
+    # via
+    #   fixtures
+    #   grpcio
+    #   more-itertools
+    #   protobuf
+    #   pydocstyle
+    #   tenacity
+    #   testtools
+    #   tox
+    #   unittest2
+    #   virtualenv
 snowballstemmer==2.1.0
     # via
     #   pydocstyle
@@ -143,7 +162,7 @@ snowballstemmer==2.1.0
 sortedcontainers==2.4.0
     # via hypothesis
 sphinx==4.0.2
-    # via -r requirements/test.in
+    # via -r test.in
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
@@ -157,7 +176,7 @@ sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.4
     # via sphinx
 tenacity==7.0.0
-    # via -r requirements/test.in
+    # via -r test.in
 testtools==2.4.0
     # via fixtures
 toml==0.10.2
@@ -166,7 +185,7 @@ toml==0.10.2
     #   pytest
     #   tox
 tox==3.23.1
-    # via -r requirements/test.in
+    # via -r test.in
 traceback2==1.4.0
     # via
     #   testtools
