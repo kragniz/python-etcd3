@@ -460,6 +460,8 @@ class TestEtcd3(object):
         assert events[1].key.decode() == '/doot/watch/prefix/callback/1'
         assert events[1].value.decode() == '1'
 
+    @pytest.mark.skipif(etcd_version.startswith('v3.0'),
+                        reason="requires etcd v3.1 or higher")
     def test_watch_prefix_callback_with_filter(self, etcd):
         def update_etcd(v):
             etcdctl('put', '/doot/watch/prefix/callback/' + v, v)
@@ -765,6 +767,8 @@ class TestEtcd3(object):
             )
             assert len(resp.kvs) == 1
 
+    @pytest.mark.skipif(etcd_version.startswith('v3.0'),
+                        reason="requires etcd v3.1 or higher")
     def test_get_max_mod_revision(self, etcd):
         revisions = []
         for i in range(5):
@@ -1221,6 +1225,8 @@ class TestClient(object):
         )
         assert client.uses_secure_channel is False
 
+    @pytest.mark.skipif(etcd_version.startswith('v3.0'),
+                        reason="requires etcd v3.1 or higher")
     @mock.patch('etcdrpc.AuthStub')
     def test_user_pwd_auth(self, auth_mock):
         auth_resp_mock = mock.MagicMock()

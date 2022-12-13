@@ -59,6 +59,9 @@ Get Started!
 
 Ready to contribute? Here's how to set up `python-etcd3` for local development.
 
+This project uses ``poetry==1.2.2`` (https://python-poetry.org/) for hard-pinning dependencies versions.
+Please see its documentation for usage instructions.
+
 1. Fork the `python-etcd3` repo on GitHub.
 2. Clone your fork locally::
 
@@ -66,9 +69,8 @@ Ready to contribute? Here's how to set up `python-etcd3` for local development.
 
 3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
 
-    $ mkvirtualenv etcd3
-    $ cd etcd3/
-    $ python setup.py develop
+    $ cd python-etcd3/
+    $ make install
 
 4. Create a branch for local development::
 
@@ -78,11 +80,7 @@ Ready to contribute? Here's how to set up `python-etcd3` for local development.
 
 5. When you're done making changes, check that your changes pass flake8 and the tests, including testing other Python versions with tox::
 
-    $ flake8 etcd3 tests
-    $ python setup.py test or py.test
-    $ tox
-
-   To get flake8 and tox, just pip install them into your virtualenv.
+    $ make lint test
 
 6. Commit your changes and push your branch to GitHub::
 
@@ -101,22 +99,17 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 2.6, 2.7, 3.3, 3.4 and 3.5, and for PyPy. Check
-   https://travis-ci.org/kragniz/python-etcd3/pull_requests
+3. The pull request should work for Python 2.7, 3.5, 3.6, 3.7, 3.8, and 3.9. Check
+   https://github.com/kragniz/python-etcd3/actions
    and make sure that the tests pass for all supported Python versions.
 
 Generating protobuf stubs
 -------------------------
 
-If the upstream protobuf files changes, copy the stubs::
+If the upstream protobuf files changes, copy the stubs and regenerate the python::
 
-    $ cp etcd/etcdserver/etcdserverpb/*.proto python-etcd3/etcd3/proto/
-
-Then::
-
-    $ cd python-etcd3
-    $ tox -e genproto
-
+    $ rm -r etcd3/proto
+    $ make etcd3/etcdrpc
 
 Cutting new releases
 --------------------
@@ -144,21 +137,3 @@ The release process to PyPi is automated using travis deploys and bumpversion.
        $ git push --tags
 
 4. Wait for travis tests to run and deploy to PyPI
-
-
-Dependency management
----------------------
-
-This project uses ``pip-compile-multi`` (https://pypi.org/project/pip-compile-multi/) for hard-pinning dependencies versions.
-Please see its documentation for usage instructions.
-In short, ``requirements/base.in`` contains the list of direct requirements with occasional version constraints (like ``Django<2``)
-and `requirements/base.txt` is automatically generated from it by adding recursive tree of dependencies with fixed versions.
-The same goes for ``test`` and ``dev``.
-
-To upgrade dependency versions, run ``pip-compile-multi``.
-
-To add a new dependency without upgrade, add it to `requirements/base.in` and run `pip-compile-multi --no-upgrade`.
-
-For installation always use ``.txt`` files. For example, command ``pip install -Ue . -r requirements/dev.txt`` will install
-this project in development mode, testing requirements and development tools.
-Another useful command is ``pip-sync requirements/dev.txt``, it uninstalls packages from your virtualenv that aren't listed in the file.

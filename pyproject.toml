@@ -1,0 +1,145 @@
+[tool.poetry]
+name = 'etcd3'
+version = '1.0.0'
+description = 'Python client for the etcd3 API'
+readme = 'README.rst'
+authors = ['Louis Taylor <louis@kragniz.eu>']
+maintainers = ['Louis Taylor <louis@kragniz.eu>']
+license = 'Apache Software License 2.0'
+classifiers = [
+    'Development Status :: 2 - Pre-Alpha',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: Apache Software License',
+    'Natural Language :: English',
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11'
+]
+keywords = []
+homepage = 'https://github.com/kragniz/python-etcd3'
+packages = [
+    { include = 'etcd3' },
+    { include = 'etcdrpc', from = 'etcd3' }
+]
+include = [
+    'AUTHORS.rst',
+    'CONTRIBUTING.rst',
+    'HISTORY.rst',
+    'LICENSE',
+    'docs'
+]
+
+[tool.poetry.urls]
+'Documentation' = 'https://github.com/kragniz/python-etcd3'
+'Code' = 'https://github.com/kragniz/python-etcd3'
+'Issue tracker' = 'https://github.com/kragniz/python-etcd3'
+
+[tool.poetry.dependencies]
+python = '^2.7 || ^3.5'
+grpcio = '>=1.2.0'
+protobuf = '^3.6.1'
+six = '^1.16.0'
+#python = '^3.7'
+#grpcio = '^1.51.1'
+#protobuf = '^4.21.12'
+
+[tool.poetry.dev-dependencies]
+alabaster = '0.7.12'
+appdirs = '1.4.4'
+argparse = '1.4.0'
+attrs = '21.2.0'
+babel = '2.9.1'
+bump2version = { version = '1.0.1', python = '^3.5' }
+bumpversion = '0.6.0'
+certifi = '2020.12.5'
+cffi = '1.14.5'
+chardet = '4.0.0'
+click = { version = '8.0.1', python = '^3.6' }
+coverage = { version = '5.5', extras = ['toml'] }
+daiquiri = '3.0.0'
+distlib = '0.3.1'
+docutils = '0.17.1'
+extras = '1.0.0'
+filelock = '3.0.12'
+fixtures = '3.0.0'
+flake8-docstrings = '1.6.0'
+flake8-import-order = '0.18.1'
+flake8 = '3.9.2'
+grpcio-tools = { version = '1.38.0', python = '>=3.6,<3.10' }  # The code was really compiled with 1.44.0 - 1.48.1
+hypothesis = { version = '6.13.1', python = '^3.6' }
+idna = '2.10'
+imagesize = '1.2.0'
+iniconfig = '1.1.1'
+jinja2 = { version = '3.0.1', python = '^3.6' }
+linecache2 = '1.0.0'
+markupsafe = { version = '2.0.1', python = '^3.6' }
+mccabe = '0.6.1'
+mock = { version = '4.0.3', python = '^3.6' }
+more-itertools = '5.0.0'
+packaging = '20.9'
+pbr = '5.6.0'
+pifpaf = { git = 'https://github.com/jd/pifpaf.git', branch = 'master' }
+pluggy = '0.13.1'
+psutil = '5.8.0'
+py = '1.10.0'
+pycodestyle = '2.7.0'
+pycparser = '2.20'
+pydocstyle = '3.0.0'
+pyflakes = '2.3.1'
+pygments = { version = '2.9.0', python = '^3.5' }
+pyparsing = '2.4.7'
+pytest-cov = '2.12.0'
+pytest = { version = '6.2.4', python = '^3.6' }
+python-json-logger = { version = '2.0.1', python = '^3.4' }
+python-mimeparse = '1.6.0'
+pytz = '2021.1'
+pyyaml = { version = '5.4.1', python = '^3.6' }
+requests = '2.25.1'
+snowballstemmer = '2.1.0'
+sortedcontainers = '2.4.0'
+sphinx = { version = '4.0.2', python = '^3.6' }
+sphinxcontrib-applehelp = { version = '1.0.2', python = '^3.5' }
+sphinxcontrib-devhelp = { version = '1.0.2', python = '^3.5' }
+sphinxcontrib-htmlhelp = { version = '1.0.3', python = '^3.5' }
+sphinxcontrib-jsmath = { version = '1.0.1', python = '^3.5' }
+sphinxcontrib-qthelp = { version = '1.0.3', python = '^3.5' }
+sphinxcontrib-serializinghtml = { version = '1.1.4', python = '^3.5' }
+tenacity = '7.0.0'
+testtools = '2.4.0'
+toml = '0.10.2'
+tox = '3.23.1'
+traceback2 = '1.4.0'
+unittest2 = '1.1.0'
+urllib3 = '1.26.4'
+virtualenv = '20.4.6'
+xattr = '0.9.7'
+#bump2version = '^1.0.1'
+#flake8 = '^6.0.0'
+#flake8-docstrings = '^1.6.0'
+#flake8-import-order = '^0.18.2'
+#grpcio-tools = '^1.51.1'
+#hypothesis = '^6.61.0'
+#mock = '^4.0.3'
+#pifpaf = { git = 'https://github.com/jd/pifpaf.git', branch = 'master' }  # etcd > 3.4
+#pytest = '^7.2.0'
+#pytest-cov = '^4.0.0'
+#sphinx = '^5.3.0'
+#tenacity = '^8.1.0'
+
+[tool.coverage.run]
+branch = false
+include = ['etcd3/*']
+
+[tool.coverage.report]
+show_missing = true
+
+[build-system]
+requires = ['poetry-core>=1.0.0']
+build-backend = 'poetry.core.masonry.api'

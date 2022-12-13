@@ -1,0 +1,14 @@
+[flake8]
+exclude =
+    .venv,
+    .git,
+    .tox,
+    dist,
+    docs,
+    *lib/python*,
+    *egg,
+    build,
+    etcd3/etcdrpc/
+application-import-names = etcd3
+ignore = D1, W503
+builtins = long
