@@ -5,11 +5,7 @@
 #
 #    pip-compile-multi
 #
-grpcio==1.38.0
+grpcio==1.51.1
     # via -r requirements/base.in
-protobuf==3.17.0
+protobuf==4.21.11
     # via -r requirements/base.in
-six==1.16.0
-    # via
-    #   grpcio
-    #   protobuf
