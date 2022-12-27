@@ -61,3 +61,7 @@ target/
 # Editor files
 .sw?
 .idea/
+*.iml
+
+# etcd
+.etcd
