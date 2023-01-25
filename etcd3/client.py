@@ -178,27 +178,8 @@ class MultiEndpointEtcd3Client(object):
             list(self.endpoints.keys())
         )
 
-        # Step 2: if auth is enabled, call the auth endpoint
         self.timeout = timeout
         self.call_credentials = None
-        cred_params = [c is not None for c in (user, password)]
-
-        if all(cred_params):
-            auth_request = etcdrpc.AuthenticateRequest(
-                name=user,
-                password=password
-            )
-
-            resp = self.authstub.Authenticate(auth_request, self.timeout)
-            self.metadata = (('token', resp.token),)
-            self.call_credentials = grpc.metadata_call_credentials(
-                EtcdTokenCallCredentials(resp.token))
-
-        elif any(cred_params):
-            raise Exception(
-                'if using authentication credentials both user and password '
-                'must be specified.'
-            )
 
         self.transactions = Transactions()
 
@@ -411,6 +392,19 @@ class MultiEndpointEtcd3Client(object):
         range_request.sort_target = request_sort_target
 
         return range_request
+
+    @_handle_errors
+    def authenticate(self, user, password):
+        """Authenticate on the server."""
+        auth_request = etcdrpc.AuthenticateRequest(
+            name=user,
+            password=password
+        )
+
+        resp = self.authstub.Authenticate(auth_request, self.timeout)
+        self.metadata = (('token', resp.token),)
+        self.call_credentials = grpc.metadata_call_credentials(
+            EtcdTokenCallCredentials(resp.token))
 
     @_handle_errors
     def get_response(self, key, **kwargs):
@@ -1399,12 +1393,23 @@ def client(host='localhost', port=2379,
            ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
            user=None, password=None, grpc_options=None):
     """Return an instance of an Etcd3Client."""
-    return Etcd3Client(host=host,
-                       port=port,
-                       ca_cert=ca_cert,
-                       cert_key=cert_key,
-                       cert_cert=cert_cert,
-                       timeout=timeout,
-                       user=user,
-                       password=password,
-                       grpc_options=grpc_options)
+    client =  Etcd3Client(host=host,
+                          port=port,
+                          ca_cert=ca_cert,
+                          cert_key=cert_key,
+                          cert_cert=cert_cert,
+                          timeout=timeout,
+                          user=user,
+                          password=password,
+                          grpc_options=grpc_options)
+
+    cred_params = [c is not None for c in (user, password)]
+    if all(cred_params):
+        client.authenticate(user, password)
+    elif any(cred_params):
+        raise Exception(
+            'if using authentication credentials both user and password '
+            'must be specified.'
+        )
+
+    return client
