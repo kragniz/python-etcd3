@@ -4,6 +4,7 @@ import grpc
 import grpc._channel
 
 import etcd3.etcdrpc as etcdrpc
+import etcd3.utils as utils
 
 from etcd3.client import (
     Endpoint,
@@ -89,7 +90,7 @@ class MultiEndpointEtcd3AioClient(MultiEndpointEtcd3Client):
         .. code-block:: python
 
             >>> import etcd3
-            >>> etcd = await etcd3.client()
+            >>> etcd = await etcd3.aioclient()
             >>> await etcd.get('/thing/key')
             'hello world'
 
@@ -103,6 +104,112 @@ class MultiEndpointEtcd3AioClient(MultiEndpointEtcd3Client):
         else:
             kv = range_response.kvs.pop()
             return kv.value, KVMetadata(kv, range_response.header)
+
+    @_handle_errors
+    async def get_prefix_response(self, key_prefix, **kwargs):
+        """Get a range of keys with a prefix."""
+        if any(kwarg in kwargs for kwarg in ("key", "range_end")):
+            raise TypeError("Don't use key or range_end with prefix")
+
+        range_request = self._build_get_range_request(
+            key=key_prefix,
+            range_end=utils.prefix_range_end(utils.to_bytes(key_prefix)),
+            **kwargs
+        )
+
+        return await self.kvstub.Range(
+            range_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    async def get_prefix(self, key_prefix, **kwargs):
+        """
+        Get a range of keys with a prefix.
+
+        :param key_prefix: first key in range
+        :param keys_only: if True, retrieve only the keys, not the values
+
+        :returns: sequence of (value, metadata) tuples
+        """
+        range_response = await self.get_prefix_response(key_prefix, **kwargs)
+        return (
+            (kv.value, KVMetadata(kv, range_response.header))
+            for kv in range_response.kvs
+        )
+
+    @_handle_errors
+    async def put(self, key, value, lease=None, prev_kv=False):
+        """
+        Save a value to etcd.
+
+        Example usage:
+
+        .. code-block:: python
+
+            >>> import etcd3
+            >>> etcd = etcd3.aioclient()
+            >>> await etcd.put('/thing/key', 'hello world')
+
+        :param key: key in etcd to set
+        :param value: value to set key to
+        :type value: bytes
+        :param lease: Lease to associate with this key.
+        :type lease: either :class:`.Lease`, or int (ID of lease)
+        :param prev_kv: return the previous key-value pair
+        :type prev_kv: bool
+        :returns: a response containing a header and the prev_kv
+        :rtype: :class:`.rpc_pb2.PutResponse`
+        """
+        put_request = self._build_put_request(key, value, lease=lease,
+                                              prev_kv=prev_kv)
+        return await self.kvstub.Put(
+            put_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    @_handle_errors
+    async def delete(self, key, prev_kv=False, return_response=False):
+        """
+        Delete a single key in etcd.
+
+        :param key: key in etcd to delete
+        :param prev_kv: return the deleted key-value pair
+        :type prev_kv: bool
+        :param return_response: return the full response
+        :type return_response: bool
+        :returns: True if the key has been deleted when
+                  ``return_response`` is False and a response containing
+                  a header, the number of deleted keys and prev_kvs when
+                  ``return_response`` is True
+        """
+        delete_request = self._build_delete_request(key, prev_kv=prev_kv)
+        delete_response = await self.kvstub.DeleteRange(
+            delete_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+        if return_response:
+            return delete_response
+        return delete_response.deleted >= 1
+
+    @_handle_errors
+    async def delete_prefix(self, prefix):
+        """Delete a range of keys with a prefix in etcd."""
+        delete_request = self._build_delete_request(
+            prefix,
+            range_end=utils.prefix_range_end(utils.to_bytes(prefix))
+        )
+        return await self.kvstub.DeleteRange(
+            delete_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
 
 
 class Etcd3AioClient(MultiEndpointEtcd3AioClient):

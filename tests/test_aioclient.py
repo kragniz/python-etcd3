@@ -1,5 +1,6 @@
 """Tests for `etcd3.aioclient` module."""
 
+import base64
 import os
 
 import grpc
@@ -90,3 +91,68 @@ class TestEtcd3AioClient(object):
         etcdctl('put', '/doot/' + string, 'dootdoot')
         _, md = await etcd.get('/doot/' + string)
         assert md.response_header.revision > 0
+
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
+    async def test_put_key(self, etcd, string):
+        await etcd.put('/doot/put_1', string)
+        out = etcdctl('get', '/doot/put_1')
+        assert base64.b64decode(out['kvs'][0]['value']) == \
+            string.encode('utf-8')
+
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
+    async def test_put_has_cluster_revision(self, etcd, string):
+        response = await etcd.put('/doot/put_1', string)
+        assert response.header.revision > 0
+
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
+    async def test_put_has_prev_kv(self,etcd,  string):
+        etcdctl('put', '/doot/put_1', 'old_value')
+        response = await etcd.put('/doot/put_1', string, prev_kv=True)
+        assert response.prev_kv.value == b'old_value'
+
+    async def test_delete_key(self, etcd):
+        etcdctl('put', '/doot/delete_this', 'delete pls')
+
+        v, _ = await etcd.get('/doot/delete_this')
+        assert v == b'delete pls'
+
+        deleted = await etcd.delete('/doot/delete_this')
+        assert deleted is True
+
+        deleted = await etcd.delete('/doot/delete_this')
+        assert deleted is False
+
+        deleted = await etcd.delete('/doot/not_here_dude')
+        assert deleted is False
+
+        v, _ = await etcd.get('/doot/delete_this')
+        assert v is None
+
+    async def test_delete_has_cluster_revision(self, etcd):
+        response = await etcd.delete('/doot/delete_this', return_response=True)
+        assert response.header.revision > 0
+
+    async def test_delete_has_prev_kv(self, etcd):
+        etcdctl('put', '/doot/delete_this', 'old_value')
+        response = await etcd.delete('/doot/delete_this', prev_kv=True,
+                                    return_response=True)
+        assert response.prev_kvs[0].value == b'old_value'
+
+    async def test_delete_keys_with_prefix(self, etcd):
+        etcdctl('put', '/foo/1', 'bar')
+        etcdctl('put', '/foo/2', 'baz')
+
+        v, _ = await etcd.get('/foo/1')
+        assert v == b'bar'
+
+        v, _ = await etcd.get('/foo/2')
+        assert v == b'baz'
+
+        response = await etcd.delete_prefix('/foo')
+        assert response.deleted == 2
+
+        v, _ = await etcd.get('/foo/1')
+        assert v is None
+
+        v, _ = await etcd.get('/foo/2')
+        assert v is None
