@@ -1,5 +1,6 @@
 """Tests for `etcd3.aioclient` module."""
 
+import asyncio
 import base64
 import os
 
@@ -14,6 +15,7 @@ from tenacity import retry, stop_after_attempt, wait_fixed
 
 import etcd3
 import etcd3.exceptions
+import etcd3.utils as utils
 
 from .test_etcd3 import etcdctl, _out_quorum
 
@@ -32,6 +34,13 @@ settings.load_profile("default")
 
 @pytest.mark.asyncio
 class TestEtcd3AioClient(object):
+
+    class MockedException(grpc.aio.AioRpcError):
+        def __init__(self, code):
+            self._code = code
+
+        def code(self):
+            return self._code
 
     @pytest_asyncio.fixture
     async def etcd(self):
@@ -156,3 +165,271 @@ class TestEtcd3AioClient(object):
 
         v, _ = await etcd.get('/foo/2')
         assert v is None
+
+    async def test_watch_key(self, etcd):
+        def update_etcd(v):
+            etcdctl('put', '/doot/watch', v)
+            out = etcdctl('get', '/doot/watch')
+            assert base64.b64decode(out['kvs'][0]['value']) == \
+                utils.to_bytes(v)
+
+        async def update_key():
+            # sleep to make watch can get the event
+            await asyncio.sleep(3)
+            update_etcd('0')
+            await asyncio.sleep(1)
+            update_etcd('1')
+            await asyncio.sleep(1)
+            update_etcd('2')
+            await asyncio.sleep(1)
+            update_etcd('3')
+            await asyncio.sleep(1)
+
+        task = asyncio.create_task(update_key())
+
+        change_count = 0
+        events_iterator, cancel = await etcd.watch(b'/doot/watch')
+
+        async for event in events_iterator:
+            assert event.key == b'/doot/watch'
+            assert event.value == \
+                utils.to_bytes(str(change_count))
+
+            # if cancel worked, we should not receive event 3
+            assert event.value != utils.to_bytes('3')
+
+            change_count += 1
+            if change_count > 2:
+                # if cancel not work, we will block in this for-loop forever
+                await cancel()
+
+        await task
+
+    async def test_watch_key_with_revision_compacted(self, etcd):
+        etcdctl('put', '/random', '1')  # Some data to compact
+
+        def update_etcd(v):
+            etcdctl('put', '/watchcompation', v)
+            out = etcdctl('get', '/watchcompation')
+            assert base64.b64decode(out['kvs'][0]['value']) == utils.to_bytes(v)
+
+        async def update_key():
+            # sleep to make watch can get the event
+            await asyncio.sleep(3)
+            update_etcd('0')
+            await asyncio.sleep(1)
+            update_etcd('1')
+            await asyncio.sleep(1)
+            update_etcd('2')
+            await asyncio.sleep(1)
+            update_etcd('3')
+            await asyncio.sleep(1)
+
+        task = asyncio.create_task(update_key())
+
+        async def watch_compacted_revision_test(test_revision):
+            events_iterator, cancel = await etcd.watch(
+                b'/watchcompation', start_revision=test_revision-1)
+
+            error_raised = False
+            compacted_revision = 0
+            try:
+                async for event in events_iterator:
+                    pass
+            except Exception as err:
+                error_raised = True
+                assert isinstance(err, etcd3.exceptions.RevisionCompactedError)
+                compacted_revision = err.compacted_revision
+
+            assert error_raised is True
+            assert compacted_revision == test_revision
+
+            change_count = 0
+            events_iterator, cancel = await etcd.watch(
+                b'/watchcompation', start_revision=compacted_revision)
+            async for event in events_iterator:
+                assert event.key == b'/watchcompation'
+                assert event.value == \
+                    utils.to_bytes(str(change_count))
+
+                # if cancel worked, we should not receive event 3
+                assert event.value != utils.to_bytes('3')
+
+                change_count += 1
+                if change_count > 2:
+                    # if cancel not work, we will block in this for-loop forever
+                    await cancel()
+
+        _, meta = await etcd.get('/random')
+        test_revision = meta.mod_revision
+
+        await etcd.compact(test_revision)
+
+        await watch_compacted_revision_test(test_revision)
+
+        await task
+
+    async def test_watch_exception_during_watch(self, etcd):
+        def _handle_response(*args, **kwargs):
+            raise self.MockedException(grpc.StatusCode.UNAVAILABLE)
+
+        async def raise_exception():
+            await asyncio.sleep(1)
+            etcdctl('put', '/foo', '1')
+            etcd.watcher._handle_response = _handle_response
+
+        events_iterator, _ = await etcd.watch('/foo')
+        asyncio.create_task(raise_exception())
+
+        with pytest.raises(etcd3.exceptions.ConnectionFailedError):
+            async for _ in events_iterator:
+                pass
+
+    async def test_watch_exception_on_establishment(self, etcd):
+        def _handle_response(*args, **kwargs):
+            raise self.MockedException(grpc.StatusCode.UNAVAILABLE)
+
+        etcd.watcher._handle_response = _handle_response
+
+        with pytest.raises(etcd3.exceptions.ConnectionFailedError):
+            events_iterator, cancel = await etcd.watch('foo')
+
+    async def test_watch_timeout_on_establishment(self):
+        foo_etcd = await etcd3.aioclient(timeout=3)
+
+        class Watch:
+            async def wait_for_connection():
+                await asyncio.sleep(4)
+
+        foo_etcd.watcher._watch_stub.Watch = Watch
+
+        with pytest.raises(etcd3.exceptions.WatchTimedOut):
+            await foo_etcd.watch('foo')
+
+    async def test_watch_prefix(self, etcd):
+        def update_etcd(v):
+            etcdctl('put', '/doot/watch/prefix/' + v, v)
+            out = etcdctl('get', '/doot/watch/prefix/' + v)
+            assert base64.b64decode(out['kvs'][0]['value']) == \
+                utils.to_bytes(v)
+
+        async def update_key():
+            # sleep to make watch can get the event
+            await asyncio.sleep(3)
+            update_etcd('0')
+            await asyncio.sleep(1)
+            update_etcd('1')
+            await asyncio.sleep(1)
+            update_etcd('2')
+            await asyncio.sleep(1)
+            update_etcd('3')
+            await asyncio.sleep(1)
+
+        task = asyncio.create_task(update_key())
+
+        change_count = 0
+        events_iterator, cancel = await etcd.watch_prefix(
+            '/doot/watch/prefix/')
+
+        async for event in events_iterator:
+            assert event.key == \
+                utils.to_bytes('/doot/watch/prefix/{}'.format(change_count))
+            assert event.value == \
+                utils.to_bytes(str(change_count))
+
+            # if cancel worked, we should not receive event 3
+            assert event.value != utils.to_bytes('3')
+
+            change_count += 1
+            if change_count > 2:
+                # if cancel not work, we will block in this for-loop forever
+                await cancel()
+
+        await task
+
+    async def test_watch_prefix_callback(self, etcd):
+        def update_etcd(v):
+            etcdctl('put', '/doot/watch/prefix/callback/' + v, v)
+            out = etcdctl('get', '/doot/watch/prefix/callback/' + v)
+            assert base64.b64decode(out['kvs'][0]['value']) == \
+                utils.to_bytes(v)
+
+        async def update_key():
+            # sleep to make watch can get the event
+            await asyncio.sleep(3)
+            update_etcd('0')
+            await asyncio.sleep(1)
+            update_etcd('1')
+            await asyncio.sleep(1)
+
+        events = []
+
+        async def callback(event):
+            events.extend(event.events)
+
+        task = asyncio.create_task(update_key())
+
+        watch_id = await etcd.add_watch_prefix_callback(
+            '/doot/watch/prefix/callback/', callback)
+
+        await task
+        await etcd.cancel_watch(watch_id)
+
+        assert len(events) == 2
+        assert events[0].key.decode() == '/doot/watch/prefix/callback/0'
+        assert events[0].value.decode() == '0'
+        assert events[1].key.decode() == '/doot/watch/prefix/callback/1'
+        assert events[1].value.decode() == '1'
+
+    async def test_sequential_watch_prefix_once(self, etcd):
+        try:
+            await etcd.watch_prefix_once('/doot/', 1)
+        except etcd3.exceptions.WatchTimedOut:
+            pass
+        try:
+            await etcd.watch_prefix_once('/doot/', 1)
+        except etcd3.exceptions.WatchTimedOut:
+            pass
+        try:
+            await etcd.watch_prefix_once('/doot/', 1)
+        except etcd3.exceptions.WatchTimedOut:
+            pass
+
+    async def test_get_prefix_error_handling(self, etcd):
+        with pytest.raises(TypeError, match="Don't use "):
+            await etcd.get_prefix('a_prefix', range_end='end')
+
+    async def test_get_prefix(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/range{}'.format(i), 'i am a range')
+
+        for i in range(5):
+            etcdctl('put', '/doot/notrange{}'.format(i), 'i am a not range')
+
+        values = list(await etcd.get_prefix('/doot/range'))
+        assert len(values) == 20
+        for value, _ in values:
+            assert value == b'i am a range'
+
+    async def test_get_prefix_keys_only(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/range{}'.format(i), 'i am a range')
+
+        for i in range(5):
+            etcdctl('put', '/doot/notrange{}'.format(i), 'i am a not range')
+
+        values = list(await etcd.get_prefix('/doot/range', keys_only=True))
+        assert len(values) == 20
+        for value, meta in values:
+            assert meta.key.startswith(b"/doot/range")
+            assert not value
+
+    async def test_get_prefix_serializable(self, etcd):
+        for i in range(20):
+            etcdctl('put', '/doot/range{}'.format(i), 'i am a range')
+
+        with _out_quorum():
+            values = list(await etcd.get_prefix(
+                '/doot/range', keys_only=True, serializable=True))
+
+        assert len(values) == 20

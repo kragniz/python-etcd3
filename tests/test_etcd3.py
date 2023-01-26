@@ -312,9 +312,9 @@ class TestEtcd3(object):
         t = threading.Thread(name="update_key", target=update_key)
         t.start()
 
-        def watch_compacted_revision_test():
+        def watch_compacted_revision_test(test_revision):
             events_iterator, cancel = etcd.watch(
-                b'/watchcompation', start_revision=1)
+                b'/watchcompation', start_revision=test_revision-1)
 
             error_raised = False
             compacted_revision = 0
@@ -326,7 +326,7 @@ class TestEtcd3(object):
                 compacted_revision = err.compacted_revision
 
             assert error_raised is True
-            assert compacted_revision == 2
+            assert compacted_revision == test_revision
 
             change_count = 0
             events_iterator, cancel = etcd.watch(
@@ -344,9 +344,11 @@ class TestEtcd3(object):
                     cancel()
 
         # Compact etcd and test watcher
-        etcd.compact(2)
+        _, meta = etcd.get('/random')
+        test_revision = meta.mod_revision
+        etcd.compact(test_revision)
 
-        watch_compacted_revision_test()
+        watch_compacted_revision_test(test_revision)
 
         t.join()
 
@@ -1209,9 +1211,12 @@ class TestClient(object):
                 cert_cert='tests/client.crt')
 
     def test_compact(self, etcd):
-        etcd.compact(3)
+        etcdctl('put', '/random', '1')  # Some data to compact
+        _, meta = etcd.get('/random')
+
+        etcd.compact(meta.mod_revision)
         with pytest.raises(grpc.RpcError):
-            etcd.compact(3)
+            etcd.compact(meta.mod_revision)
 
     def test_channel_with_no_cert(self):
         client = etcd3.client(

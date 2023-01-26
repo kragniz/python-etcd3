@@ -39,3 +39,9 @@ def response_to_event_iterator(response_iterator):
     for response in response_iterator:
         for event in response.events:
             yield event
+
+async def response_to_async_event_iterator(response_iterator):
+    """Convert a watch response async iterator to an event async iterator."""
+    async for response in response_iterator:
+        for event in response.events:
+            yield event
