@@ -751,3 +751,14 @@ class TestEtcd3AioClient(object):
 
         v, _ = await etcd.get(key)
         assert v is None
+
+    async def test_member_list(self, etcd):
+        members = list(await etcd.get_members())
+        assert len(members) == 3
+        for member in members:
+            assert member.name.startswith('pifpaf')
+            for peer_url in member.peer_urls:
+                assert peer_url.startswith('http://')
+            for client_url in member.client_urls:
+                assert client_url.startswith('http://')
+            assert isinstance(member.id, int) is True

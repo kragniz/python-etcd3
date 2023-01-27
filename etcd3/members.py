@@ -43,3 +43,29 @@ class Member(object):
         :returns: Alarms
         """
         return self._etcd_client.list_alarms(member_id=self.id)
+
+
+class AioMember(Member):
+    async def remove(self):
+        """Remove this member from the cluster."""
+        await self._etcd_client.remove_member(self.id)
+
+    async def update(self, peer_urls):
+        """
+        Update the configuration of this member.
+
+        :param peer_urls: new list of peer urls the member will use to
+                          communicate with the cluster
+        """
+        await self._etcd_client.update_member(self.id, peer_urls)
+
+    async def get_active_alarms(self):
+        """Get active alarms of the member.
+        :returns: Alarms
+        """
+        return await self._etcd_client.list_alarms(member_id=self.id)
+
+    @property
+    def active_alarms(self):
+        raise NotImplementedError(
+            "Use the coroutine method AioMember.get_active_alarms() instead.")
