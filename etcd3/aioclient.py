@@ -152,6 +152,72 @@ class MultiEndpointEtcd3AioClient(MultiEndpointEtcd3Client):
         )
 
     @_handle_errors
+    async def get_range_response(self, range_start, range_end, sort_order=None,
+                                 sort_target='key', **kwargs):
+        """Get a range of keys."""
+        range_request = self._build_get_range_request(
+            key=range_start,
+            range_end=range_end,
+            sort_order=sort_order,
+            sort_target=sort_target,
+            **kwargs
+        )
+
+        return await self.kvstub.Range(
+            range_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    async def get_range(self, range_start, range_end, **kwargs):
+        """
+        Get a range of keys.
+
+        :param range_start: first key in range
+        :param range_end: last key in range
+        :returns: sequence of (value, metadata) tuples
+        """
+        range_response = await self.get_range_response(range_start, range_end,
+                                                       **kwargs)
+        return (
+            (kv.value, KVMetadata(kv, range_response.header))
+            for kv in range_response.kvs
+        )
+
+    @_handle_errors
+    async def get_all_response(self, sort_order=None, sort_target='key',
+                               keys_only=False):
+        """Get all keys currently stored in etcd."""
+        range_request = self._build_get_range_request(
+            key=b'\0',
+            range_end=b'\0',
+            sort_order=sort_order,
+            sort_target=sort_target,
+            keys_only=keys_only,
+        )
+
+        return await self.kvstub.Range(
+            range_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    async def get_all(self, **kwargs):
+        """
+        Get all keys currently stored in etcd.
+
+        :param keys_only: if True, retrieve only the keys, not the values
+        :returns: sequence of (value, metadata) tuples
+        """
+        range_response = await self.get_all_response(**kwargs)
+        return (
+            (kv.value, KVMetadata(kv, range_response.header))
+            for kv in range_response.kvs
+        )
+
+    @_handle_errors
     async def put(self, key, value, lease=None, prev_kv=False):
         """
         Save a value to etcd.
