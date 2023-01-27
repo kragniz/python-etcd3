@@ -23,6 +23,8 @@ python-etcd3
 
 Python client for the etcd API v3, supported under python 2.7, 3.4 and 3.5.
 
+This library supports both synchronous and asyncio requests.
+
 **Warning: the API is mostly stable, but may change in the future**
 
 If you're interested in using this library, please get involved.
@@ -30,7 +32,8 @@ If you're interested in using this library, please get involved.
 * Free software: Apache Software License 2.0
 * Documentation: https://python-etcd3.readthedocs.io.
 
-Basic usage:
+Basic usage
+-----------
 
 .. code-block:: python
 
@@ -100,3 +103,45 @@ Basic usage:
 
     # cancel watch
     etcd.cancel_watch(watch_id)
+
+
+Asyncio usage
+-------------
+
+**:warning: Asyncio support is recent and is still experimental.**
+
+It implement the same interface as the synchronous client.
+Some requests are not yet implemented like lock, alarm or the some of the maintenance.
+
+.. code-block:: python
+
+    import etcd3
+
+    etcd = await etcd3.aioclient()
+
+    await etcd.get('foo')
+    await etcd.put('bar', 'doot')
+    await etcd.delete('bar')
+
+    # transactions
+    await etcd.transaction(
+        compare=[
+            etcd.transactions.value('/doot/testing') == 'doot',
+            etcd.transactions.version('/doot/testing') > 0,
+        ],
+        success=[
+            etcd.transactions.put('/doot/testing', 'success'),
+        ],
+        failure=[
+            etcd.transactions.put('/doot/testing', 'failure'),
+        ]
+    )
+
+    # watch key
+    watch_count = 0
+    events_iterator, cancel = await etcd.watch("/doot/watch")
+    async for event in events_iterator:
+        print(event)
+        watch_count += 1
+        if watch_count > 10:
+            await cancel()
