@@ -34,3 +34,53 @@ class Lease(object):
     @property
     def keys(self):
         return self._get_lease_info().keys
+
+
+class AioLease(Lease):
+    """
+    An asyncio lease.
+
+    :ivar id: ID of the lease
+    :ivar ttl: time to live for this lease
+    """
+
+    async def _get_lease_info(self):
+        return await self.etcd_client.get_lease_info(self.id)
+
+    async def revoke(self):
+        """Revoke this lease."""
+        await self.etcd_client.revoke_lease(self.id)
+
+    async def refresh(self):
+        """Refresh the time to live for this lease."""
+        return list(await self.etcd_client.refresh_lease(self.id))
+
+    async def get_remaining_ttl(self):
+        """Retrieve the remaining ttl for this lease."""
+        info = await self._get_lease_info()
+        return info.TTL
+
+    async def get_granted_ttl(self):
+        """Retrieve the initial granted ttl for this lease."""
+        info = await self._get_lease_info()
+        return info.grantedTTL
+
+    async def get_keys(self):
+        """Retrieve all keys associated with this lease."""
+        info = await self._get_lease_info()
+        return info.keys
+
+    @property
+    def remaining_ttl(self):
+        raise NotImplementedError(
+            "Use the coroutine method AioLease.get_remaining_ttl() instead.")
+
+    @property
+    def granted_ttl(self):
+        raise NotImplementedError(
+            "Use the coroutine method AioLease.get_granted_ttl() instead.")
+
+    @property
+    def keys(self):
+        raise NotImplementedError(
+            "Use the coroutine method AioLease.get_keys() instead.")

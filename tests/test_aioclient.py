@@ -585,3 +585,47 @@ class TestEtcd3AioClient(object):
         response = await etcd.get_all_response()
         assert response.count == 0
         assert response.header.revision > 0
+
+    async def test_lease_grant(self, etcd):
+        lease = await etcd.lease(1)
+
+        assert isinstance(lease.ttl, int)
+        assert isinstance(lease.id, int)
+
+    async def test_lease_revoke(self, etcd):
+        lease = await etcd.lease(1)
+        await lease.revoke()
+
+    @pytest.mark.skipif(etcd_version.startswith('v3.0'),
+                        reason="requires etcd v3.1 or higher")
+    async def test_lease_keys_empty(self, etcd):
+        lease = await etcd.lease(1)
+        assert await lease.get_keys() == []
+
+
+    @pytest.mark.skipif(etcd_version.startswith('v3.0'),
+                        reason="requires etcd v3.1 or higher")
+    async def test_lease_single_key(self, etcd):
+        lease = await etcd.lease(1)
+        await etcd.put('/doot/lease_test', 'this is a lease', lease=lease)
+        assert await lease.get_keys() == [b'/doot/lease_test']
+
+    @pytest.mark.skipif(etcd_version.startswith('v3.0'),
+                        reason="requires etcd v3.1 or higher")
+    async def test_lease_expire(self, etcd):
+        key = '/doot/lease_test_expire'
+        lease = await etcd.lease(1)
+        await etcd.put(key, 'this is a lease', lease=lease)
+        assert await lease.get_keys() == [utils.to_bytes(key)]
+        v, _ = await etcd.get(key)
+        assert v == b'this is a lease'
+
+        remaining_ttl = await lease.get_remaining_ttl()
+        granted_ttl = await lease.get_granted_ttl()
+        assert remaining_ttl <= granted_ttl
+
+        # wait for the lease to expire
+        await asyncio.sleep(granted_ttl + 2)
+
+        v, _ = await etcd.get(key)
+        assert v is None

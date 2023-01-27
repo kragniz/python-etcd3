@@ -6,6 +6,7 @@ import grpc._channel
 
 import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions as exceptions
+import etcd3.leases as leases
 import etcd3.utils as utils
 import etcd3.watch as watch
 
@@ -467,6 +468,73 @@ class MultiEndpointEtcd3AioClient(MultiEndpointEtcd3Client):
         :param watch_id: watch_id returned by ``add_watch_callback`` method
         """
         await self.watcher.cancel(watch_id)
+
+
+    @_handle_errors
+    async def lease(self, ttl, lease_id=None):
+        """
+        Create a new lease.
+
+        All keys attached to this lease will be expired and deleted if the
+        lease expires. A lease can be sent keep alive messages to refresh the
+        ttl.
+
+        :param ttl: Requested time to live
+        :param lease_id: Requested ID for the lease
+
+        :returns: new lease
+        :rtype: :class:`.Lease`
+        """
+        lease_grant_request = etcdrpc.LeaseGrantRequest(TTL=ttl, ID=lease_id)
+        lease_grant_response = await self.leasestub.LeaseGrant(
+            lease_grant_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+        return leases.AioLease(lease_id=lease_grant_response.ID,
+                               ttl=lease_grant_response.TTL,
+                               etcd_client=self)
+
+    @_handle_errors
+    async def revoke_lease(self, lease_id):
+        """
+        Revoke a lease.
+
+        :param lease_id: ID of the lease to revoke.
+        """
+        lease_revoke_request = etcdrpc.LeaseRevokeRequest(ID=lease_id)
+        await self.leasestub.LeaseRevoke(
+            lease_revoke_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    @_handle_generator_errors
+    async def refresh_lease(self, lease_id):
+        keep_alive_request = etcdrpc.LeaseKeepAliveRequest(ID=lease_id)
+        stream_lease = self.leasestub.LeaseKeepAlive(
+            iter([keep_alive_request]),
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata)
+
+        await stream_lease.wait_for_connection()
+        async for response in stream_lease:
+            yield response
+
+    @_handle_errors
+    async def get_lease_info(self, lease_id):
+        # only available in etcd v3.1.0 and later
+        ttl_request = etcdrpc.LeaseTimeToLiveRequest(ID=lease_id,
+                                                     keys=True)
+        return await self.leasestub.LeaseTimeToLive(
+            ttl_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
 
     @_handle_errors
     async def compact(self, revision, physical=False):
