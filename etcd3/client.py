@@ -954,6 +954,23 @@ class MultiEndpointEtcd3Client(object):
                     'Unknown request class {}'.format(op.__class__))
         return request_ops
 
+    def _handle_transaction_responses(self, txn_response):
+        responses = []
+        for response in txn_response.responses:
+            response_type = response.WhichOneof('response')
+            if response_type in ['response_put', 'response_delete_range',
+                                 'response_txn']:
+                responses.append(response)
+
+            elif response_type == 'response_range':
+                range_kvs = []
+                for kv in response.response_range.kvs:
+                    range_kvs.append((kv.value,
+                                      KVMetadata(kv, txn_response.header)))
+
+                responses.append(range_kvs)
+        return responses
+
     @_handle_errors
     def transaction(self, compare, success=None, failure=None):
         """
@@ -998,20 +1015,7 @@ class MultiEndpointEtcd3Client(object):
             metadata=self.metadata
         )
 
-        responses = []
-        for response in txn_response.responses:
-            response_type = response.WhichOneof('response')
-            if response_type in ['response_put', 'response_delete_range',
-                                 'response_txn']:
-                responses.append(response)
-
-            elif response_type == 'response_range':
-                range_kvs = []
-                for kv in response.response_range.kvs:
-                    range_kvs.append((kv.value,
-                                      KVMetadata(kv, txn_response.header)))
-
-                responses.append(range_kvs)
+        responses = self._handle_transaction_responses(txn_response)
 
         return txn_response.succeeded, responses
 

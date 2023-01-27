@@ -120,6 +120,16 @@ class TestEtcd3AioClient(object):
         response = await etcd.put('/doot/put_1', string, prev_kv=True)
         assert response.prev_kv.value == b'old_value'
 
+    @given(characters(blacklist_categories=['Cs', 'Cc']))
+    async def test_put_if_not_exists(self, etcd, string):
+        txn_status = await etcd.put_if_not_exists('/doot/put_1', string)
+        assert txn_status is True
+
+        txn_status = await etcd.put_if_not_exists('/doot/put_1', string)
+        assert txn_status is False
+
+        etcdctl('del', '/doot/put_1')
+
     async def test_delete_key(self, etcd):
         etcdctl('put', '/doot/delete_this', 'delete pls')
 
@@ -395,6 +405,118 @@ class TestEtcd3AioClient(object):
             await etcd.watch_prefix_once('/doot/', 1)
         except etcd3.exceptions.WatchTimedOut:
             pass
+
+    async def test_watch_responses(self, etcd):
+        # Test watch_response & watch_once_response
+        put_response = await etcd.put('/doot/watch', '0')
+        revision = put_response.header.revision
+        await etcd.put('/doot/watch', '1')
+        responses_iterator, cancel = \
+            await etcd.watch_response('/doot/watch', start_revision=revision)
+
+        response_1 = await responses_iterator.__anext__()
+        await cancel()
+        response_2 = await etcd.watch_once_response('/doot/watch',
+                                                    start_revision=revision)
+
+        for response in [response_1, response_2]:
+            count = 0
+            # check that the response contains the etcd revision
+            assert response.header.revision > 0
+            assert len(list(response.events)) == 2
+            for event in response.events:
+                assert event.key == b'/doot/watch'
+                assert event.value == utils.to_bytes(str(count))
+                count += 1
+
+        # Test watch_prefix_response & watch_prefix_once_response
+        success_ops = [etcd.transactions.put('/doot/watch/prefix/0', '0'),
+                       etcd.transactions.put('/doot/watch/prefix/1', '1')]
+        txn_response = await etcd.transaction([], success_ops, [])
+        revision = txn_response[1][0].response_put.header.revision
+
+        responses_iterator, cancel = \
+            await etcd.watch_prefix_response('/doot/watch/prefix/',
+                                             start_revision=revision)
+
+        response_1 = await responses_iterator.__anext__()
+        await cancel()
+        response_2 = await etcd.watch_prefix_once_response('/doot/watch/prefix/',
+                                                           start_revision=revision)
+
+        for response in [response_1, response_2]:
+            count = 0
+            assert response.header.revision == revision
+            assert len(list(response.events)) == 2
+            for event in response.events:
+                assert event.key == \
+                    utils.to_bytes('/doot/watch/prefix/{}'.format(count))
+                assert event.value == utils.to_bytes(str(count))
+                count += 1
+
+    async def test_transaction_success(self, etcd):
+        etcdctl('put', '/doot/txn', 'dootdoot')
+        await etcd.transaction(
+            compare=[etcd.transactions.value('/doot/txn') == 'dootdoot'],
+            success=[etcd.transactions.put('/doot/txn', 'success')],
+            failure=[etcd.transactions.put('/doot/txn', 'failure')]
+        )
+        out = etcdctl('get', '/doot/txn')
+        assert base64.b64decode(out['kvs'][0]['value']) == b'success'
+
+    async def test_transaction_failure(self, etcd):
+        etcdctl('put', '/doot/txn', 'notdootdoot')
+        await etcd.transaction(
+            compare=[etcd.transactions.value('/doot/txn') == 'dootdoot'],
+            success=[etcd.transactions.put('/doot/txn', 'success')],
+            failure=[etcd.transactions.put('/doot/txn', 'failure')]
+        )
+        out = etcdctl('get', '/doot/txn')
+        assert base64.b64decode(out['kvs'][0]['value']) == b'failure'
+
+    @pytest.mark.skipif(etcd_version < 'v3.3',
+                        reason="requires etcd v3.3 or higher")
+    async def test_nested_transactions(self, etcd):
+        await etcd.transaction(
+            compare=[],
+            success=[etcd.transactions.put('/doot/txn1', '1'),
+                     etcd.transactions.txn(
+                         compare=[],
+                         success=[etcd.transactions.put('/doot/txn2', '2')],
+                         failure=[])],
+            failure=[]
+        )
+        value, _ = await etcd.get('/doot/txn1')
+        assert value == b'1'
+        value, _ = await etcd.get('/doot/txn2')
+        assert value == b'2'
+
+    @pytest.mark.skipif(etcd_version < 'v3.3',
+                        reason="requires etcd v3.3 or higher")
+    async def test_transaction_range_conditions(self, etcd):
+        etcdctl('put', '/doot/key1', 'dootdoot')
+        etcdctl('put', '/doot/key2', 'notdootdoot')
+        range_end = utils.prefix_range_end(utils.to_bytes('/doot/'))
+        compare = [etcd.transactions.value('/doot/', range_end) == 'dootdoot']
+        status, _ = await etcd.transaction(compare=compare, success=[], failure=[])
+        assert not status
+        etcdctl('put', '/doot/key2', 'dootdoot')
+        status, _ = await etcd.transaction(compare=compare, success=[], failure=[])
+        assert status
+
+    async def test_replace_success(self, etcd):
+        await etcd.put('/doot/thing', 'toot')
+        status = await etcd.replace('/doot/thing', 'toot', 'doot')
+        v, _ = await etcd.get('/doot/thing')
+        assert v == b'doot'
+        assert status is True
+
+    async def test_replace_fail(self, etcd):
+        await etcd.put('/doot/thing', 'boot')
+        status = await etcd.replace('/doot/thing', 'toot', 'doot')
+        v, _ = await etcd.get('/doot/thing')
+        assert v == b'boot'
+        assert status is False
 
     async def test_get_prefix(self, etcd):
         for i in range(20):

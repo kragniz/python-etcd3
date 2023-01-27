@@ -251,6 +251,57 @@ class MultiEndpointEtcd3AioClient(MultiEndpointEtcd3Client):
         )
 
     @_handle_errors
+    async def put_if_not_exists(self, key, value, lease=None):
+        """
+        Atomically puts a value only if the key previously had no value.
+
+        This is the etcdv3 equivalent to setting a key with the etcdv2
+        parameter prevExist=false.
+
+        :param key: key in etcd to put
+        :param value: value to be written to key
+        :type value: bytes
+        :param lease: Lease to associate with this key.
+        :type lease: either :class:`.Lease`, or int (ID of lease)
+        :returns: state of transaction, ``True`` if the put was successful,
+                  ``False`` otherwise
+        :rtype: bool
+        """
+        status, _ = await self.transaction(
+            compare=[self.transactions.create(key) == '0'],
+            success=[self.transactions.put(key, value, lease=lease)],
+            failure=[],
+        )
+
+        return status
+
+    @_handle_errors
+    async def replace(self, key, initial_value, new_value):
+        """
+        Atomically replace the value of a key with a new value.
+
+        This compares the current value of a key, then replaces it with a new
+        value if it is equal to a specified value. This operation takes place
+        in a transaction.
+
+        :param key: key in etcd to replace
+        :param initial_value: old value to replace
+        :type initial_value: bytes
+        :param new_value: new value of the key
+        :type new_value: bytes
+        :returns: status of transaction, ``True`` if the replace was
+                  successful, ``False`` otherwise
+        :rtype: bool
+        """
+        status, _ = await self.transaction(
+            compare=[self.transactions.value(key) == initial_value],
+            success=[self.transactions.put(key, new_value)],
+            failure=[],
+        )
+
+        return status
+
+    @_handle_errors
     async def delete(self, key, prev_kv=False, return_response=False):
         """
         Delete a single key in etcd.
@@ -469,6 +520,55 @@ class MultiEndpointEtcd3AioClient(MultiEndpointEtcd3Client):
         """
         await self.watcher.cancel(watch_id)
 
+    @_handle_errors
+    async def transaction(self, compare, success=None, failure=None):
+        """
+        Perform an asyncio  transaction.
+
+        Nested transactions are only available in etcd v3.3 and later.
+
+        Example usage:
+
+        .. code-block:: python
+
+            await etcd.transaction(
+                compare=[
+                    etcd.transactions.value('/doot/testing') == 'doot',
+                    etcd.transactions.version('/doot/testing') > 0,
+                ],
+                success=[
+                    etcd.transactions.put('/doot/testing', 'success'),
+                ],
+                failure=[
+                    etcd.transactions.put('/doot/testing', 'failure'),
+                ]
+            )
+
+        :param compare: A list of comparisons to make
+        :param success: A list of operations to perform if all the comparisons
+                        are true
+        :param failure: A list of operations to perform if any of the
+                        comparisons are false
+        :return: A tuple of (operation status, responses)
+        """
+        compare = [c.build_message() for c in compare]
+
+        success_ops = self._ops_to_requests(success)
+        failure_ops = self._ops_to_requests(failure)
+
+        transaction_request = etcdrpc.TxnRequest(compare=compare,
+                                                 success=success_ops,
+                                                 failure=failure_ops)
+        txn_response = await self.kvstub.Txn(
+            transaction_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+        responses = self._handle_transaction_responses(txn_response)
+
+        return txn_response.succeeded, responses
 
     @_handle_errors
     async def lease(self, ttl, lease_id=None):
