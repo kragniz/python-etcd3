@@ -14,6 +14,7 @@ import subprocess
 import tempfile
 import threading
 import time
+from unittest.mock import MagicMock
 
 import grpc
 
@@ -1408,3 +1409,32 @@ class TestFailoverClient(object):
         etcd.put("foo", b"foo")
         assert next(iterator)
         cancel()
+
+
+class TestSRVDiscoveryClient(object):
+    def test_refresh_endpoints(self):
+        etcd_endpoint = os.environ.get('PYTHON_ETCD_HTTP_URL')
+        url = urlparse(etcd_endpoint)
+        endpoint = etcd3.Endpoint(url.hostname, url.port, secure=False)
+        fake_endpoint = etcd3.Endpoint("fake", url.port, secure=False)
+
+        resolve_mock = MagicMock()
+        resolve_mock.side_effect = [[endpoint], [fake_endpoint]]
+
+        with mock.patch.object(
+            etcd3.SRVDiscoveryEtcd3Client, "_resolve_endpoints",
+            resolve_mock,
+        ):
+            srv_record = "_etcd-client.domain.com"
+            with etcd3.SRVDiscoveryEtcd3Client(srv=srv_record) as client:
+                assert resolve_mock.call_count == 1
+                assert len(client.endpoints) == 1
+                endpoint = list(client.endpoints.values())[0]
+                assert str(endpoint) == "Endpoint({})".format(etcd_endpoint)
+
+                client.refresh_endpoints()
+
+                assert resolve_mock.call_count == 2
+                assert len(client.endpoints) == 1
+                endpoint = list(client.endpoints.values())[0]
+                assert str(endpoint) == "Endpoint(http://fake:2379)"

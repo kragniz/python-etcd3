@@ -3,6 +3,7 @@ import random
 import threading
 import time
 
+import dns.resolver
 import grpc
 import grpc._channel
 
@@ -173,16 +174,12 @@ class MultiEndpointEtcd3Client(object):
         self._stubs = {}
 
         # Step 1: setup endpoints
-        self.endpoints = {ep.netloc: ep for ep in endpoints}
-        self._current_endpoint_label = random.choice(
-            list(self.endpoints.keys())
-        )
+        self._set_endpoints(endpoints)
 
         # Step 2: if auth is enabled, call the auth endpoint
         self.timeout = timeout
         self.call_credentials = None
         cred_params = [c is not None for c in (user, password)]
-
         if all(cred_params):
             auth_request = etcdrpc.AuthenticateRequest(
                 name=user,
@@ -201,6 +198,32 @@ class MultiEndpointEtcd3Client(object):
             )
 
         self.transactions = Transactions()
+
+    @classmethod
+    def get_credentials(cls, ca_cert=None, cert_key=None, cert_cert=None):
+        cert_params = [c is not None for c in (cert_cert, cert_key)]
+        if ca_cert is None:
+            return None
+
+        if all(cert_params):
+            return cls.get_secure_creds(
+                ca_cert,
+                cert_key,
+                cert_cert
+            )
+        elif any(cert_params):
+            # some of the cert parameters are set
+            raise ValueError(
+                'to use a secure channel ca_cert is required by itself, '
+                'or cert_cert and cert_key must both be specified.')
+        else:
+            return cls.get_secure_creds(ca_cert, None, None)
+
+    def _set_endpoints(self, endpoints):
+        self.endpoints = {ep.netloc: ep for ep in endpoints}
+        self._current_endpoint_label = random.choice(
+            list(self.endpoints.keys())
+        )
 
     def _create_stub_property(name, stub_class):
         def get_stub(self):
@@ -1366,29 +1389,15 @@ class Etcd3Client(MultiEndpointEtcd3Client):
                  password=None, grpc_options=None):
 
         # Step 1: verify credentials
-        cert_params = [c is not None for c in (cert_cert, cert_key)]
-        if ca_cert is not None:
-            if all(cert_params):
-                credentials = self.get_secure_creds(
-                    ca_cert,
-                    cert_key,
-                    cert_cert
-                )
-                self.uses_secure_channel = True
-            elif any(cert_params):
-                # some of the cert parameters are set
-                raise ValueError(
-                    'to use a secure channel ca_cert is required by itself, '
-                    'or cert_cert and cert_key must both be specified.')
-            else:
-                credentials = self.get_secure_creds(ca_cert, None, None)
-                self.uses_secure_channel = True
-        else:
-            self.uses_secure_channel = False
-            credentials = None
+        credentials = MultiEndpointEtcd3Client.get_credentials(
+            ca_cert=ca_cert,
+            cert_key=cert_key,
+            cert_cert=cert_cert
+        )
 
         # Step 2: create Endpoint
-        ep = Endpoint(host, port, secure=self.uses_secure_channel,
+        uses_secure_channel = credentials is not None
+        ep = Endpoint(host, port, secure=uses_secure_channel,
                       creds=credentials, opts=grpc_options)
 
         super(Etcd3Client, self).__init__(endpoints=[ep], timeout=timeout,
@@ -1408,3 +1417,89 @@ def client(host='localhost', port=2379,
                        user=user,
                        password=password,
                        grpc_options=grpc_options)
+
+
+class SRVDiscoveryEtcd3Client(MultiEndpointEtcd3Client):
+    """
+    etcd v3 API client with dns srv discovery support.
+
+    This implementation is not thread safe, refreshing the endpoints
+    should be done carefully.
+
+    :param srv: DNS to resolve
+    :type srv: str
+    :param ca_cert: Filesystem path of etcd CA certificate
+    :type ca_cert: str or os.PathLike, optional
+    :param cert_key: Filesystem path of client key
+    :type cert_key: str or os.PathLike, optional
+    :param cert_cert: Filesystem path of client certificate
+    :type cert_cert: str or os.PathLike, optional
+    :param timeout: Timeout for all RPC in seconds
+    :type timeout: int or float, optional
+    :param user: Username for authentication
+    :type user: str, optional
+    :param password: Password for authentication
+    :type password: str, optional
+    :param bool failover: Failover between endpoints, default False
+    """
+
+    def __init__(self, srv: str, ca_cert=None,
+                 cert_key=None, cert_cert=None, timeout=None, user=None,
+                 password=None, grpc_options=None):
+
+        self.srv = srv
+        self.grpc_options = grpc_options
+
+        self.credentials = MultiEndpointEtcd3Client.get_credentials(
+            ca_cert=ca_cert,
+            cert_key=cert_key,
+            cert_cert=cert_cert
+        )
+
+        endpoints = SRVDiscoveryEtcd3Client._resolve_endpoints(
+            srv=self.srv,
+            credentials=self.credentials,
+            grpc_options=self.grpc_options,
+            timeout=timeout
+        )
+        super(SRVDiscoveryEtcd3Client, self).__init__(endpoints=endpoints,
+                                                      timeout=timeout,
+                                                      user=user,
+                                                      password=password)
+
+    @classmethod
+    def _resolve_endpoints(cls, srv: str, credentials=None,
+                           grpc_options=None, timeout=None):
+
+        '''
+        SRV records resolved contains a target, port, priority and a weight and
+        are of the form:
+
+        0 0 2379 clear-etcd1.internal.staging.vibe.co.
+        0 0 2379 clear-etcd2.internal.staging.vibe.co.
+        0 0 2379 clear-etcd0.internal.staging.vibe.co.
+        '''
+        results = dns.resolver.query(qname=srv, rdtype="SRV", lifetime=timeout)
+
+        uses_secure_channel = credentials is not None
+        endpoints = [
+            Endpoint(
+                host=str(ipval.target).rstrip("."),
+                port=ipval.port,
+                secure=uses_secure_channel,
+                creds=credentials,
+                opts=grpc_options,
+            )
+            for ipval in results
+        ]
+        return endpoints
+
+    def refresh_endpoints(self):
+        endpoints = self._resolve_endpoints(
+            srv=self.srv,
+            credentials=self.credentials,
+            grpc_options=self.grpc_options,
+            timeout=self.timeout,
+        )
+        super(SRVDiscoveryEtcd3Client, self)._set_endpoints(endpoints)
+        return endpoints
