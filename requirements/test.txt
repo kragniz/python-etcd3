@@ -156,7 +156,7 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.4
     # via sphinx
-tenacity==7.0.0
+tenacity==8.2.0
     # via -r requirements/test.in
 testtools==2.4.0
     # via fixtures
