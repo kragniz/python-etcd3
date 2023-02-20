@@ -1186,7 +1186,8 @@ class TestClient(object):
             cert_key="tests/client.key",
             cert_cert="tests/client.crt"
         )
-        assert client.uses_secure_channel is True
+        assert len(client.endpoints) > 0
+        assert all([c.secure for c in client.endpoints.values()])
 
     def test_secure_channel_ca_cert_only(self):
         client = etcd3.client(
@@ -1194,7 +1195,8 @@ class TestClient(object):
             cert_key=None,
             cert_cert=None
         )
-        assert client.uses_secure_channel is True
+        assert len(client.endpoints) > 0
+        assert all([c.secure for c in client.endpoints.values()])
 
     def test_secure_channel_ca_cert_and_key_raise_exception(self):
         with pytest.raises(ValueError):
@@ -1220,7 +1222,8 @@ class TestClient(object):
             cert_key=None,
             cert_cert=None
         )
-        assert client.uses_secure_channel is False
+        assert len(client.endpoints) > 0
+        assert all([not c.secure for c in client.endpoints.values()])
 
     @mock.patch('etcdrpc.AuthStub')
     def test_user_pwd_auth(self, auth_mock):
