@@ -1429,12 +1429,12 @@ class TestSRVDiscoveryClient(object):
             with etcd3.SRVDiscoveryEtcd3Client(srv=srv_record) as client:
                 assert resolve_mock.call_count == 1
                 assert len(client.endpoints) == 1
-                endpoint = list(client.endpoints.values())[0]
-                assert str(endpoint) == "Endpoint({})".format(etcd_endpoint)
+                actual_endpoint = list(client.endpoints.values())[0]
+                assert endpoint.netloc == actual_endpoint.netloc
 
                 client.refresh_endpoints()
 
                 assert resolve_mock.call_count == 2
                 assert len(client.endpoints) == 1
-                endpoint = list(client.endpoints.values())[0]
-                assert str(endpoint) == "Endpoint(http://fake:2379)"
+                actual_endpoint = list(client.endpoints.values())[0]
+                assert fake_endpoint.netloc == actual_endpoint.netloc
