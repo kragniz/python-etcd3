@@ -161,7 +161,8 @@ class MultiEndpointEtcd3Client(object):
     :type user: str, optional
     :param password: Password for authentication
     :type password: str, optional
-    :param bool failover: Failover between endpoints, default False
+    :param failover: Failover between endpoints, default False
+    :type failover: bool, optional
     """
 
     def __init__(self, endpoints=None, timeout=None, user=None, password=None,
@@ -1436,19 +1437,30 @@ class SRVDiscoveryEtcd3Client(MultiEndpointEtcd3Client):
     :type cert_cert: str or os.PathLike, optional
     :param timeout: Timeout for all RPC in seconds
     :type timeout: int or float, optional
+    :param time_discovery_refresh: Seconds to wait before refreshing
+    list of endpoints, default 120.0
+    :type time_discovery_refresh: int or float
+    :param time_discovery_retry: Seconds to wait before retrying
+    to refresh endpoint, default 5.0
+    :type time_discovery_retry: int or float
     :param user: Username for authentication
     :type user: str, optional
     :param password: Password for authentication
     :type password: str, optional
-    :param bool failover: Failover between endpoints, default False
+    :param dict grpc_options: Additional gRPC options
+    :type grpc_options: dict, optional
     """
 
     def __init__(self, srv: str, ca_cert=None,
-                 cert_key=None, cert_cert=None, timeout=None, user=None,
-                 password=None, grpc_options=None):
+                 cert_key=None, cert_cert=None, timeout=None,
+                 time_discovery_refresh=120.0,
+                 time_discovery_retry=5.0,
+                 user=None,password=None, grpc_options=None):
 
         self.srv = srv
         self.grpc_options = grpc_options
+        self.time_discovery_refresh = time_discovery_refresh
+        self.time_discovery_retry = time_discovery_retry
 
         self.credentials = MultiEndpointEtcd3Client.get_credentials(
             ca_cert=ca_cert,
@@ -1462,23 +1474,25 @@ class SRVDiscoveryEtcd3Client(MultiEndpointEtcd3Client):
             grpc_options=self.grpc_options,
             timeout=timeout
         )
+        self.last_discovery = time.time()
         super(SRVDiscoveryEtcd3Client, self).__init__(endpoints=endpoints,
                                                       timeout=timeout,
                                                       user=user,
-                                                      password=password)
+                                                      password=password,
+                                                      failover=True)
 
     @classmethod
     def _resolve_endpoints(cls, srv: str, credentials=None,
                            grpc_options=None, timeout=None):
 
-        '''
+        """
         SRV records resolved contains a target, port, priority and a weight and
         are of the form:
 
         0 0 2379 clear-etcd1.internal.staging.vibe.co.
         0 0 2379 clear-etcd2.internal.staging.vibe.co.
         0 0 2379 clear-etcd0.internal.staging.vibe.co.
-        '''
+        """
         results = dns.resolver.query(qname=srv, rdtype="SRV", lifetime=timeout)
 
         uses_secure_channel = credentials is not None
@@ -1494,12 +1508,35 @@ class SRVDiscoveryEtcd3Client(MultiEndpointEtcd3Client):
         ]
         return endpoints
 
-    def refresh_endpoints(self):
+    def refresh_endpoints(self, force=False):
+        """
+        Refresh endpoints if needed
+        :param force: Force refresh
+        :type force: bool, optional
+        :returns: True when endpoints were refreshed
+        """
+        if not force and \
+            ((time.time() - self.last_discovery) < self.time_discovery_refresh):
+            return False
         endpoints = self._resolve_endpoints(
             srv=self.srv,
             credentials=self.credentials,
             grpc_options=self.grpc_options,
             timeout=self.timeout,
         )
+        self.last_discovery = time.time()
         super(SRVDiscoveryEtcd3Client, self)._set_endpoints(endpoints)
-        return endpoints
+        return len(endpoints) > 0
+
+
+    @MultiEndpointEtcd3Client.channel.getter
+    def channel(self):
+        # Refresh the list of endpoints only when etcd client is accessed
+        self.refresh_endpoints()
+        try:
+            return super(SRVDiscoveryEtcd3Client, self).channel
+        except exceptions.NoServerAvailableError:
+            if (time.time() - self.last_discovery) > self.time_discovery_retry:
+                if self.refresh_endpoints(True):
+                    return super(SRVDiscoveryEtcd3Client, self).channel
+            raise
