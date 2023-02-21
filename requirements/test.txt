@@ -126,7 +126,7 @@ pytest==6.2.4
     # via
     #   -r requirements/test.in
     #   pytest-cov
-python-json-logger==2.0.1
+python-json-logger==2.0.7
     # via daiquiri
 python-mimeparse==1.6.0
     # via testtools
