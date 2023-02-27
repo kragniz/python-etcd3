@@ -14,6 +14,7 @@ import subprocess
 import tempfile
 import threading
 import time
+from unittest.mock import MagicMock
 
 import grpc
 
@@ -1185,7 +1186,8 @@ class TestClient(object):
             cert_key="tests/client.key",
             cert_cert="tests/client.crt"
         )
-        assert client.uses_secure_channel is True
+        assert len(client.endpoints) > 0
+        assert all([c.secure for c in client.endpoints.values()])
 
     def test_secure_channel_ca_cert_only(self):
         client = etcd3.client(
@@ -1193,7 +1195,8 @@ class TestClient(object):
             cert_key=None,
             cert_cert=None
         )
-        assert client.uses_secure_channel is True
+        assert len(client.endpoints) > 0
+        assert all([c.secure for c in client.endpoints.values()])
 
     def test_secure_channel_ca_cert_and_key_raise_exception(self):
         with pytest.raises(ValueError):
@@ -1219,7 +1222,8 @@ class TestClient(object):
             cert_key=None,
             cert_cert=None
         )
-        assert client.uses_secure_channel is False
+        assert len(client.endpoints) > 0
+        assert all([not c.secure for c in client.endpoints.values()])
 
     @mock.patch('etcdrpc.AuthStub')
     def test_user_pwd_auth(self, auth_mock):
@@ -1408,3 +1412,77 @@ class TestFailoverClient(object):
         etcd.put("foo", b"foo")
         assert next(iterator)
         cancel()
+
+
+class TestSRVDiscoveryClient(object):
+    def test_refresh_endpoints(self):
+        etcd_endpoint = os.environ.get('PYTHON_ETCD_HTTP_URL')
+        url = urlparse(etcd_endpoint)
+        endpoint = etcd3.Endpoint(url.hostname, url.port, secure=False)
+        fake_endpoint = etcd3.Endpoint("fake", url.port, secure=False)
+
+        resolve_mock = MagicMock()
+        resolve_mock.side_effect = [[endpoint], [fake_endpoint]]
+
+        with mock.patch.object(
+            etcd3.SRVDiscoveryEtcd3Client, "_resolve_endpoints",
+            resolve_mock,
+        ):
+            srv_record = "_etcd-client.domain.com"
+            with etcd3.SRVDiscoveryEtcd3Client(srv=srv_record) as client:
+                assert resolve_mock.call_count == 1
+                assert len(client.endpoints) == 1
+                actual_endpoint = list(client.endpoints.values())[0]
+                assert endpoint.netloc == actual_endpoint.netloc
+
+                client.refresh_endpoints(True)
+
+                assert resolve_mock.call_count == 2
+                assert len(client.endpoints) == 1
+                actual_endpoint = list(client.endpoints.values())[0]
+                assert fake_endpoint.netloc == actual_endpoint.netloc
+
+    def test_refresh_endpoints_on_error(self):
+        etcd_endpoint = os.environ.get('PYTHON_ETCD_HTTP_URL', 'http://localhost:2379')
+        url = urlparse(etcd_endpoint)
+        endpoint = etcd3.Endpoint(url.hostname, url.port, secure=False)
+        fake_endpoint = etcd3.Endpoint("fake", url.port, secure=False)
+
+        resolve_mock = MagicMock()
+        resolve_mock.side_effect = [[fake_endpoint], [endpoint]]
+
+        with mock.patch.object(
+            etcd3.SRVDiscoveryEtcd3Client, "_resolve_endpoints",
+            resolve_mock,
+        ):
+            srv_record = "_etcd-client.domain.com"
+
+            with etcd3.SRVDiscoveryEtcd3Client(srv=srv_record, timeout=1) as client:
+                assert resolve_mock.call_count == 1
+                assert len(client.endpoints) == 1
+                actual_endpoint = list(client.endpoints.values())[0]
+                assert fake_endpoint.netloc == actual_endpoint.netloc
+
+                # First call will fail
+                with pytest.raises(etcd3.exceptions.ConnectionTimeoutError):
+                    client.get("foo")
+                assert resolve_mock.call_count == 1
+
+                # Second call, realize we're out of servers
+                with pytest.raises(etcd3.exceptions.NoServerAvailableError):
+                    client.get("foo")
+                assert resolve_mock.call_count == 1
+
+                # Third call, we're out of servers but can now refresh
+                client.last_discovery = time.time() - 6
+                try:
+                    client.get("foo")
+                except:
+                    assert False, "client.get() raised an exception"
+
+
+                assert resolve_mock.call_count == 2
+                assert len(client.endpoints) == 1
+                actual_endpoint = list(client.endpoints.values())[0]
+                assert endpoint.netloc == actual_endpoint.netloc
+
