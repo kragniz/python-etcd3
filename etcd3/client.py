@@ -1377,6 +1377,9 @@ class Etcd3Client(MultiEndpointEtcd3Client):
     :type cert_cert: str or os.PathLike, optional
     :param timeout: Timeout for all RPC in seconds
     :type timeout: int or float, optional
+    :param time_retry: Seconds to wait before retrying an endpoint after
+                       failure, default 300.0
+    :type time_retry: int or float
     :param user: Username for authentication
     :type user: str, optional
     :param password: Password for authentication
@@ -1386,8 +1389,9 @@ class Etcd3Client(MultiEndpointEtcd3Client):
     """
 
     def __init__(self, host='localhost', port=2379, ca_cert=None,
-                 cert_key=None, cert_cert=None, timeout=None, user=None,
-                 password=None, grpc_options=None):
+                 cert_key=None, cert_cert=None, timeout=None,
+                 time_retry=300.0, user=None, password=None,
+                 grpc_options=None):
 
         # Step 1: verify credentials
         credentials = MultiEndpointEtcd3Client.get_credentials(
@@ -1399,7 +1403,8 @@ class Etcd3Client(MultiEndpointEtcd3Client):
         # Step 2: create Endpoint
         uses_secure_channel = credentials is not None
         ep = Endpoint(host, port, secure=uses_secure_channel,
-                      creds=credentials, opts=grpc_options)
+                      creds=credentials, time_retry=time_retry,
+                      opts=grpc_options)
 
         super(Etcd3Client, self).__init__(endpoints=[ep], timeout=timeout,
                                           user=user, password=password)
@@ -1437,6 +1442,9 @@ class SRVDiscoveryEtcd3Client(MultiEndpointEtcd3Client):
     :type cert_cert: str or os.PathLike, optional
     :param timeout: Timeout for all RPC in seconds
     :type timeout: int or float, optional
+    :param time_retry: Seconds to wait before retrying an endpoint after
+                       failure, default 300.0
+    :type time_retry: int or float
     :param time_discovery_refresh: Seconds to wait before refreshing
     list of endpoints, default 120.0
     :type time_discovery_refresh: int or float
@@ -1453,11 +1461,13 @@ class SRVDiscoveryEtcd3Client(MultiEndpointEtcd3Client):
 
     def __init__(self, srv: str, ca_cert=None,
                  cert_key=None, cert_cert=None, timeout=None,
+                 time_retry=300.0,
                  time_discovery_refresh=120.0,
                  time_discovery_retry=5.0,
                  user=None,password=None, grpc_options=None):
 
         self.srv = srv
+        self.time_retry = time_retry
         self.grpc_options = grpc_options
         self.time_discovery_refresh = time_discovery_refresh
         self.time_discovery_retry = time_discovery_retry
@@ -1471,6 +1481,7 @@ class SRVDiscoveryEtcd3Client(MultiEndpointEtcd3Client):
         endpoints = SRVDiscoveryEtcd3Client._resolve_endpoints(
             srv=self.srv,
             credentials=self.credentials,
+            time_retry=self.time_retry,
             grpc_options=self.grpc_options,
             timeout=timeout
         )
@@ -1482,7 +1493,7 @@ class SRVDiscoveryEtcd3Client(MultiEndpointEtcd3Client):
                                                       failover=True)
 
     @classmethod
-    def _resolve_endpoints(cls, srv: str, credentials=None,
+    def _resolve_endpoints(cls, srv: str, credentials=None, time_retry=300.0,
                            grpc_options=None, timeout=None):
 
         """
@@ -1502,6 +1513,7 @@ class SRVDiscoveryEtcd3Client(MultiEndpointEtcd3Client):
                 port=ipval.port,
                 secure=uses_secure_channel,
                 creds=credentials,
+                time_retry=time_retry,
                 opts=grpc_options,
             )
             for ipval in results
@@ -1521,6 +1533,7 @@ class SRVDiscoveryEtcd3Client(MultiEndpointEtcd3Client):
         endpoints = self._resolve_endpoints(
             srv=self.srv,
             credentials=self.credentials,
+            time_retry=self.time_retry,
             grpc_options=self.grpc_options,
             timeout=self.timeout,
         )
