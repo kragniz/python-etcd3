@@ -4,6 +4,7 @@ import asyncio
 import base64
 import os
 import string
+import tempfile
 from unittest import mock
 
 import grpc
@@ -762,6 +763,23 @@ class TestEtcd3AioClient(object):
             for client_url in member.client_urls:
                 assert client_url.startswith('http://')
             assert isinstance(member.id, int) is True
+
+    async def test_status_member(self, etcd):
+        status = await etcd.status()
+
+        assert isinstance(status.leader, etcd3.members.Member) is True
+        members = await etcd.get_members()
+        assert status.leader.id in [m.id for m in members]
+
+    async def test_hash(self, etcd):
+        assert isinstance(await etcd.hash(), int)
+
+    async def test_snapshot(self, etcd):
+        with tempfile.NamedTemporaryFile() as f:
+            await etcd.snapshot(f)
+            f.flush()
+
+            etcdctl('snapshot', 'status', f.name)
 
 
 @pytest.mark.skipif(not os.environ.get('ETCDCTL_ENDPOINTS'),

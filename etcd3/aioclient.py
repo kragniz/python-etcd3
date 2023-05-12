@@ -16,6 +16,7 @@ from etcd3.client import (
     MultiEndpointEtcd3Client,
     EtcdTokenCallCredentials,
     KVMetadata,
+    Status,
     _EXCEPTIONS_BY_CODE,
     _FAILED_EP_CODES,
 )
@@ -385,6 +386,31 @@ class MultiEndpointEtcd3AioClient(MultiEndpointEtcd3Client):
             credentials=self.call_credentials,
             metadata=self.metadata
         )
+
+    @_handle_errors
+    async def status(self):
+        """Get the status of the responding member."""
+        status_request = etcdrpc.StatusRequest()
+        status_response = await self.maintenancestub.Status(
+            status_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+        for m in await self.get_members():
+            if m.id == status_response.leader:
+                leader = m
+                break
+        else:
+            # raise exception?
+            leader = None
+
+        return Status(status_response.version,
+                      status_response.dbSize,
+                      leader,
+                      status_response.raftIndex,
+                      status_response.raftTerm)
 
     @_handle_errors
     async def add_watch_callback(self, *args, **kwargs):
@@ -789,6 +815,48 @@ class MultiEndpointEtcd3AioClient(MultiEndpointEtcd3Client):
             credentials=self.call_credentials,
             metadata=self.metadata
         )
+
+    @_handle_errors
+    async def defragment(self):
+        """Defragment a member's backend database to recover storage space."""
+        defrag_request = etcdrpc.DefragmentRequest()
+        await self.maintenancestub.Defragment(
+            defrag_request,
+            self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    @_handle_errors
+    async def hash(self):
+        """
+        Return the hash of the local KV state.
+
+        :returns: kv state hash
+        :rtype: int
+        """
+        hash_request = etcdrpc.HashRequest()
+        hash_response = await self.maintenancestub.Hash(hash_request)
+        return hash_response.hash
+
+    @_handle_errors
+    async def snapshot(self, file_obj):
+        """Take a snapshot of the database.
+
+        :param file_obj: A file-like object to write the database contents in.
+        """
+        snapshot_request = etcdrpc.SnapshotRequest()
+        snapshot_response = self.maintenancestub.Snapshot(
+            snapshot_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+        await snapshot_response.wait_for_connection()
+
+        async for response in snapshot_response:
+            file_obj.write(response.blob)
 
 
 class Etcd3AioClient(MultiEndpointEtcd3AioClient):
