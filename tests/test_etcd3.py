@@ -60,6 +60,17 @@ def etcdctl(*args):
     return json.loads(output.decode('utf-8'))
 
 
+def enable_password_auth():
+    subprocess.check_call(['etcdctl', '-w', 'json', 'user', 'add', 'root:pwd'])
+    subprocess.check_call(['etcdctl', 'auth', 'enable'])
+
+
+def disable_password_auth():
+    subprocess.check_call(['etcdctl', '--user', 'root:pwd', 'auth', 'disable'])
+    subprocess.check_call(['etcdctl', 'role', 'delete', 'root'])
+    subprocess.check_call(['etcdctl', 'user', 'delete', 'root'])
+
+
 # def etcdctl2(*args):
 #     # endpoint = os.environ.get('PYTHON_ETCD_HTTP_URL')
 #     # if endpoint:
@@ -1231,7 +1242,7 @@ class TestClient(object):
         auth_resp_mock = mock.MagicMock()
         auth_resp_mock.token = 'foo'
         auth_mock.Authenticate = auth_resp_mock
-        self._enable_auth_in_etcd()
+        enable_password_auth()
 
         # Create a client using username and password auth
         client = etcd3.client(
@@ -1240,7 +1251,7 @@ class TestClient(object):
         )
 
         assert client.call_credentials is not None
-        self._disable_auth_in_etcd()
+        disable_password_auth()
 
     def test_user_or_pwd_auth_raises_exception(self):
         with pytest.raises(Exception):
@@ -1248,16 +1259,6 @@ class TestClient(object):
 
         with pytest.raises(Exception):
             etcd3.client(password='pwd')
-
-    def _enable_auth_in_etcd(self):
-        subprocess.check_call(['etcdctl', '-w', 'json', 'user', 'add',
-                               'root:pwd'])
-        subprocess.check_call(['etcdctl', 'auth', 'enable'])
-
-    def _disable_auth_in_etcd(self):
-        subprocess.check_call(['etcdctl', '--user', 'root:pwd', 'auth',
-                               'disable'])
-        subprocess.check_call(['etcdctl', 'user', 'remove', 'root'])
 
 
 class TestCompares(object):

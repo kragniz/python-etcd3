@@ -20,7 +20,7 @@ import etcd3
 import etcd3.exceptions
 import etcd3.utils as utils
 
-from .test_etcd3 import etcdctl, _out_quorum
+from .test_etcd3 import disable_password_auth, enable_password_auth, etcdctl, _out_quorum
 
 etcd_version = os.environ.get('TEST_ETCD_VERSION', 'v3.2.8')
 
@@ -764,6 +764,62 @@ class TestEtcd3AioClient(object):
                 assert client_url.startswith('http://')
             assert isinstance(member.id, int) is True
 
+    async def test_internal_exception_on_internal_error(self, etcd):
+        exception = MockedException(grpc.StatusCode.INTERNAL)
+        kv_mock = mock.PropertyMock()
+        kv_mock.Range.side_effect = exception
+        with mock.patch('etcd3.MultiEndpointEtcd3Client.kvstub',
+                        new_callable=mock.PropertyMock) as property_mock:
+            property_mock.return_value = kv_mock
+            with pytest.raises(etcd3.exceptions.InternalServerError):
+                await etcd.get("foo")
+
+    async def test_connection_failure_exception_on_connection_failure(self, etcd):
+        exception = MockedException(grpc.StatusCode.UNAVAILABLE)
+        kv_mock = mock.PropertyMock()
+        kv_mock.Range.side_effect = exception
+        with mock.patch('etcd3.MultiEndpointEtcd3Client.kvstub',
+                        new_callable=mock.PropertyMock) as property_mock:
+            property_mock.return_value = kv_mock
+            with pytest.raises(etcd3.exceptions.ConnectionFailedError):
+                await etcd.get("foo")
+            assert etcd.endpoint_in_use.is_failed()
+
+    async def test_connection_timeout_exception_on_connection_timeout(self, etcd):
+        exception = MockedException(grpc.StatusCode.DEADLINE_EXCEEDED)
+        kv_mock = mock.PropertyMock()
+        kv_mock.Range.side_effect = exception
+        with mock.patch('etcd3.MultiEndpointEtcd3Client.kvstub',
+                        new_callable=mock.PropertyMock) as property_mock:
+            property_mock.return_value = kv_mock
+            with pytest.raises(etcd3.exceptions.ConnectionTimeoutError):
+                await etcd.get("foo")
+            assert etcd.endpoint_in_use.is_failed()
+
+    async def test_single_endpoint_failover(self, etcd):
+        etcd.failover = True
+        exception = MockedException(grpc.StatusCode.UNAVAILABLE)
+        kv_mock = mock.PropertyMock()
+        kv_mock.Range.side_effect = exception
+        with mock.patch('etcd3.MultiEndpointEtcd3Client.kvstub',
+                        new_callable=mock.PropertyMock) as property_mock:
+            property_mock.return_value = kv_mock
+            with pytest.raises(etcd3.exceptions.ConnectionFailedError):
+                await etcd.get("foo")
+        with pytest.raises(etcd3.exceptions.NoServerAvailableError):
+            await etcd.get("foo")
+
+    async def test_grpc_exception_on_unknown_code(self, etcd):
+        exception = MockedException(grpc.StatusCode.DATA_LOSS)
+        kv_mock = mock.PropertyMock()
+        kv_mock.Range.side_effect = exception
+        with mock.patch('etcd3.MultiEndpointEtcd3Client.kvstub',
+                        new_callable=mock.PropertyMock) as property_mock:
+            property_mock.return_value = kv_mock
+            with pytest.raises(grpc.RpcError):
+                await etcd.get("foo")
+            assert not etcd.endpoint_in_use.is_failed()
+
     async def test_status_member(self, etcd):
         status = await etcd.status()
 
@@ -780,6 +836,82 @@ class TestEtcd3AioClient(object):
             f.flush()
 
             etcdctl('snapshot', 'status', f.name)
+
+
+@pytest.mark.asyncio
+class TestAioClient(object):
+    @pytest_asyncio.fixture
+    async def etcd(self):
+        client = await etcd3.aioclient()
+        yield client
+
+    async def test_secure_channel(self):
+        client = await etcd3.aioclient(
+            ca_cert="tests/ca.crt",
+            cert_key="tests/client.key",
+            cert_cert="tests/client.crt"
+        )
+        assert client.uses_secure_channel is True
+
+    async def test_secure_channel_ca_cert_only(self):
+        client = await etcd3.aioclient(
+            ca_cert="tests/ca.crt",
+            cert_key=None,
+            cert_cert=None
+        )
+        assert client.uses_secure_channel is True
+
+    async def test_secure_channel_ca_cert_and_key_raise_exception(self):
+        with pytest.raises(ValueError):
+            await etcd3.aioclient(
+                ca_cert='tests/ca.crt',
+                cert_key='tests/client.crt',
+                cert_cert=None)
+
+        with pytest.raises(ValueError):
+            await etcd3.aioclient(
+                ca_cert='tests/ca.crt',
+                cert_key=None,
+                cert_cert='tests/client.crt')
+
+    async def test_compact(self, etcd):
+        etcdctl('put', '/random', '1')  # Some data to compact
+        _, meta = await etcd.get('/random')
+
+        await etcd.compact(meta.mod_revision)
+        with pytest.raises(grpc.RpcError):
+            await etcd.compact(meta.mod_revision)
+
+    async def test_channel_with_no_cert(self):
+        client = await etcd3.aioclient(
+            ca_cert=None,
+            cert_key=None,
+            cert_cert=None
+        )
+        assert client.uses_secure_channel is False
+
+    @mock.patch('etcdrpc.AuthStub')
+    async def test_user_pwd_auth(self, auth_mock):
+        auth_resp_mock = mock.MagicMock()
+        auth_resp_mock.token = 'foo'
+        auth_mock.Authenticate = auth_resp_mock
+        enable_password_auth()
+
+        # Create a client using username and password auth
+        client = await etcd3.aioclient(
+            user='root',
+            password='pwd'
+        )
+
+        assert client.call_credentials is not None
+        disable_password_auth()
+
+    async def test_user_or_pwd_auth_raises_exception(self):
+        with pytest.raises(Exception):
+            await etcd3.aioclient(user='usr')
+
+        with pytest.raises(Exception):
+            await etcd3.aioclient(password='pwd')
 
 
 @pytest.mark.skipif(not os.environ.get('ETCDCTL_ENDPOINTS'),

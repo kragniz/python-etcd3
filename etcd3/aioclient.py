@@ -120,7 +120,7 @@ class MultiEndpointEtcd3AioClient(MultiEndpointEtcd3Client):
             password=password
         )
 
-        resp = await self.authstub.Authenticate(auth_request, self.timeout)
+        resp = await self.authstub.Authenticate(auth_request, timeout=self.timeout)
         self.metadata = (('token', resp.token),)
         self.call_credentials = grpc.metadata_call_credentials(
             EtcdTokenCallCredentials(resp.token))
