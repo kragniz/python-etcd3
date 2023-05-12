@@ -2,6 +2,9 @@ from __future__ import absolute_import
 
 import etcd3.etcdrpc as etcdrpc
 from etcd3.aioclient import aioclient
+from etcd3.aioclient import Etcd3AioClient
+from etcd3.aioclient import AioEndpoint
+from etcd3.aioclient import MultiEndpointEtcd3AioClient
 from etcd3.client import Endpoint
 from etcd3.client import Etcd3Client
 from etcd3.client import MultiEndpointEtcd3Client
@@ -19,6 +22,8 @@ __version__ = '0.12.0'
 __all__ = (
     'etcdrpc',
     'Endpoint',
+    'AioEndpoint',
+    'Etcd3AioClient',
     'Etcd3Client',
     'Etcd3Exception',
     'Transactions',
@@ -27,5 +32,6 @@ __all__ = (
     'Lease',
     'Lock',
     'Member',
-    'MultiEndpointEtcd3Client'
+    'MultiEndpointEtcd3Client',
+    'MultiEndpointEtcd3AioClient',
 )

@@ -4,6 +4,7 @@ import asyncio
 import base64
 import os
 import string
+from unittest import mock
 
 import grpc
 import pytest
@@ -33,16 +34,15 @@ settings.register_profile(
 settings.load_profile("default")
 
 
+class MockedException(grpc.aio.AioRpcError):
+    def __init__(self, code):
+        self._code = code
+
+    def code(self):
+        return self._code
+
 @pytest.mark.asyncio
 class TestEtcd3AioClient(object):
-
-    class MockedException(grpc.aio.AioRpcError):
-        def __init__(self, code):
-            self._code = code
-
-        def code(self):
-            return self._code
-
     @pytest_asyncio.fixture
     async def etcd(self):
         client_params = {}
@@ -282,7 +282,7 @@ class TestEtcd3AioClient(object):
 
     async def test_watch_exception_during_watch(self, etcd):
         def _handle_response(*args, **kwargs):
-            raise self.MockedException(grpc.StatusCode.UNAVAILABLE)
+            raise MockedException(grpc.StatusCode.UNAVAILABLE)
 
         async def raise_exception():
             await asyncio.sleep(1)
@@ -298,7 +298,7 @@ class TestEtcd3AioClient(object):
 
     async def test_watch_exception_on_establishment(self, etcd):
         def _handle_response(*args, **kwargs):
-            raise self.MockedException(grpc.StatusCode.UNAVAILABLE)
+            raise MockedException(grpc.StatusCode.UNAVAILABLE)
 
         etcd.watcher._handle_response = _handle_response
 
@@ -762,3 +762,76 @@ class TestEtcd3AioClient(object):
             for client_url in member.client_urls:
                 assert client_url.startswith('http://')
             assert isinstance(member.id, int) is True
+
+
+@pytest.mark.skipif(not os.environ.get('ETCDCTL_ENDPOINTS'),
+                    reason="Expected etcd to have been run by pifpaf")
+@pytest.mark.asyncio
+class TestFailoverClient(object):
+    @pytest_asyncio.fixture
+    async def etcd(self):
+        endpoint_urls = os.environ.get('ETCDCTL_ENDPOINTS').split(',')
+        timeout = 5
+        endpoints = []
+        for url in endpoint_urls:
+            url = urlparse(url)
+            endpoints.append(etcd3.AioEndpoint(host=url.hostname,
+                                               port=url.port,
+                                               secure=False))
+        async with etcd3.MultiEndpointEtcd3AioClient(endpoints=endpoints,
+                                                     timeout=timeout,
+                                                     failover=True) as client:
+            yield client
+
+        @retry(wait=wait_fixed(2), stop=stop_after_attempt(3))
+        def delete_keys_definitely():
+            # clean up after fixture goes out of scope
+            etcdctl('del', '--prefix', '/')
+            out = etcdctl('get', '--prefix', '/')
+            assert 'kvs' not in out
+
+        delete_keys_definitely()
+
+    async def test_endpoint_offline(self, etcd):
+        original_endpoint = etcd.endpoint_in_use
+        assert not original_endpoint.is_failed()
+        exception = MockedException(grpc.StatusCode.UNAVAILABLE)
+        kv_mock = mock.PropertyMock()
+        kv_mock.Range.side_effect = exception
+        with mock.patch('etcd3.MultiEndpointEtcd3Client.kvstub',
+                        new_callable=mock.PropertyMock) as property_mock:
+            property_mock.return_value = kv_mock
+            with pytest.raises(etcd3.exceptions.ConnectionFailedError):
+                await etcd.get("foo")
+        assert original_endpoint.is_failed()
+        assert etcd.endpoint_in_use is not original_endpoint
+        await etcd.get("foo")
+        assert not etcd.endpoint_in_use.is_failed()
+
+    async def test_failover_during_watch(self, etcd):
+        def _handle_response(*args, **kwargs):
+            raise MockedException(grpc.StatusCode.UNAVAILABLE)
+
+        async def raise_exception():
+            await asyncio.sleep(1)
+            etcdctl('put', '/foo', '1')
+            etcd.watcher._handle_response = _handle_response
+
+        original_endpoint = etcd.endpoint_in_use
+        assert not original_endpoint.is_failed()
+
+        events_iterator, cancel = await etcd.watch('/foo')
+        asyncio.create_task(raise_exception())
+
+        with pytest.raises(etcd3.exceptions.ConnectionFailedError):
+            await events_iterator.__anext__()
+
+        assert original_endpoint.is_failed()
+        assert etcd.endpoint_in_use is not original_endpoint
+        await cancel()
+        assert not etcd.endpoint_in_use.is_failed()
+
+        events_iterator, cancel = await etcd.watch('/foo')
+        await etcd.put("/foo", b"2")
+        assert await events_iterator.__anext__()
+        await cancel()

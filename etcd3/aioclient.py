@@ -16,11 +16,16 @@ from etcd3.client import (
     MultiEndpointEtcd3Client,
     EtcdTokenCallCredentials,
     KVMetadata,
+    _EXCEPTIONS_BY_CODE,
+    _FAILED_EP_CODES,
 )
 
 
 class AioEndpoint(Endpoint):
     """Represents an etcd cluster endpoint for asyncio."""
+
+    async def close(self):
+        await self.channel.close()
 
     def _mkchannel(self, opts):
         if self.secure:
@@ -33,13 +38,67 @@ class AioEndpoint(Endpoint):
 class MultiEndpointEtcd3AioClient(MultiEndpointEtcd3Client):
     """etcd v3 API asyncio client with multiple endpoints."""
 
+    def get_watcher(self):
+        watchstub = etcdrpc.WatchStub(self.channel)
+        return watch.AioWatcher(
+            watchstub,
+            timeout=self.timeout,
+            call_credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+    async def _clear_old_stubs(self):
+        old_watcher = self._stubs.get("watcher")
+        self._stubs.clear()
+        if old_watcher:
+            await old_watcher.close()
+
+    async def _switch_endpoint(self):
+        await self._clear_old_stubs()
+
+        for label, endpoint in self.endpoints.items():
+            if endpoint.is_failed():
+                continue
+            self._current_endpoint_label = label
+            return
+
+        self._current_endpoint_label = None
+
+    async def close(self):
+        """Call the GRPC channel close semantics."""
+        possible_watcher = self._stubs.get("watcher")
+        if possible_watcher:
+            await possible_watcher.close()
+        for endpoint in self.endpoints.values():
+            await endpoint.close()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args):
+        await self.close()
+
+    async def _manage_grpc_errors(self, exc):
+        code = exc.code()
+        if code in _FAILED_EP_CODES:
+            # This sets the current node to failed.
+            # If others are available, they will be used on
+            # subsequent requests.
+            self.endpoint_in_use.fail()
+            if self.failover:
+                await self._switch_endpoint()
+        exception = _EXCEPTIONS_BY_CODE.get(code)
+        if exception is None:
+            raise
+        raise exception()
+
     def _handle_errors(payload):
         @functools.wraps(payload)
         async def handler(self, *args, **kwargs):
             try:
                 return await payload(self, *args, **kwargs)
             except grpc.aio.AioRpcError as exc:
-                self._manage_grpc_errors(exc)
+                await self._manage_grpc_errors(exc)
         return handler
 
     def _handle_generator_errors(payload):
@@ -49,23 +108,8 @@ class MultiEndpointEtcd3AioClient(MultiEndpointEtcd3Client):
                 async for item in payload(self, *args, **kwargs):
                     yield item
             except grpc.aio.AioRpcError as exc:
-                self._manage_grpc_errors(exc)
+                await self._manage_grpc_errors(exc)
         return handler
-
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, *args):
-        await self.close()
-
-    def get_watcher(self):
-        watchstub = etcdrpc.WatchStub(self.channel)
-        return watch.AioWatcher(
-            watchstub,
-            timeout=self.timeout,
-            call_credentials=self.call_credentials,
-            metadata=self.metadata
-        )
 
     @_handle_errors
     async def authenticate(self, user, password):
@@ -402,7 +446,7 @@ class MultiEndpointEtcd3AioClient(MultiEndpointEtcd3Client):
                     if not canceled.is_set():
                         yield response
             except grpc.aio.AioRpcError as exc:
-                self._manage_grpc_errors(exc)
+                await self._manage_grpc_errors(exc)
 
         return iterator(), cancel
 

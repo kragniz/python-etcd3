@@ -1370,10 +1370,9 @@ class TestFailoverClient(object):
             property_mock.return_value = kv_mock
             with pytest.raises(etcd3.exceptions.ConnectionFailedError):
                 etcd.get("foo")
-        assert etcd.endpoint_in_use is original_endpoint
-        assert etcd.endpoint_in_use.is_failed()
-        etcd.get("foo")
+        assert original_endpoint.is_failed()
         assert etcd.endpoint_in_use is not original_endpoint
+        etcd.get("foo")
         assert not etcd.endpoint_in_use.is_failed()
 
     def test_failover_during_watch(self, etcd):
@@ -1404,10 +1403,9 @@ class TestFailoverClient(object):
             iterator, cancel = etcd.watch("foo")
             with pytest.raises(etcd3.exceptions.ConnectionFailedError):
                 next(iterator)
-        assert etcd.endpoint_in_use is original_endpoint
-        assert etcd.endpoint_in_use.is_failed()
-        cancel()
+        assert original_endpoint.is_failed()
         assert etcd.endpoint_in_use is not original_endpoint
+        cancel()
         assert not etcd.endpoint_in_use.is_failed()
         iterator, cancel = etcd.watch("foo")
         etcd.put("foo", b"foo")

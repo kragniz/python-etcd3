@@ -226,16 +226,6 @@ class MultiEndpointEtcd3Client(object):
             old_watcher.close()
 
     @property
-    def _current_endpoint_label(self):
-        return self._current_ep_label
-
-    @_current_endpoint_label.setter
-    def _current_endpoint_label(self, value):
-        if getattr(self, "_current_ep_label", None) is not value:
-            self._clear_old_stubs()
-        self._current_ep_label = value
-
-    @property
     def endpoint_in_use(self):
         """Get the current endpoint in use."""
         if self._current_endpoint_label is None:
@@ -250,20 +240,21 @@ class MultiEndpointEtcd3Client(object):
         Raises an exception if no node is available
         """
         try:
-            return self.endpoint_in_use.use()
+            if self.endpoint_in_use:
+                return self.endpoint_in_use.use()
         except ValueError:
             if not self.failover:
                 raise
-        # We're failing over. We get the first non-failed channel
-        # we encounter, and use it by calling this function again,
-        # recursively
+        raise exceptions.NoServerAvailableError("No endpoint available and not failed")
+
+    def _switch_endpoint(self):
+        self._clear_old_stubs()
         for label, endpoint in self.endpoints.items():
             if endpoint.is_failed():
                 continue
             self._current_endpoint_label = label
-            return self.channel
-        raise exceptions.NoServerAvailableError(
-            "No endpoint available and not failed")
+            return
+        self._current_endpoint_label = None
 
     def close(self):
         """Call the GRPC channel close semantics."""
@@ -308,7 +299,8 @@ class MultiEndpointEtcd3Client(object):
             # If others are available, they will be used on
             # subsequent requests.
             self.endpoint_in_use.fail()
-            self._clear_old_stubs()
+            if self.failover:
+                self._switch_endpoint()
         exception = _EXCEPTIONS_BY_CODE.get(code)
         if exception is None:
             raise
