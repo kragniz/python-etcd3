@@ -179,6 +179,18 @@ class TestEtcd3AioClient(object):
         v, _ = await etcd.get('/foo/2')
         assert v is None
 
+    async def test_new_watch_error(self, etcd):
+        # Trigger a failure while waiting on the new watch condition
+        with mock.patch.object(etcd.watcher, '_handle_response', side_effect=ValueError):
+            with pytest.raises(ValueError):
+                await etcd.watch('/foo')
+
+        # Ensure a new watch can be created
+        events, cancel = await etcd.watch('/foo')
+        etcdctl('put', '/foo', '42')
+        await events.__anext__()
+        await cancel()
+
     async def test_watch_key(self, etcd):
         def update_etcd(v):
             etcdctl('put', '/doot/watch', v)
@@ -384,6 +396,47 @@ class TestEtcd3AioClient(object):
 
         watch_id = await etcd.add_watch_prefix_callback(
             '/doot/watch/prefix/callback/', callback)
+
+        await task
+        await etcd.cancel_watch(watch_id)
+
+        assert len(events) == 2
+        assert events[0].key.decode() == '/doot/watch/prefix/callback/0'
+        assert events[0].value.decode() == '0'
+        assert events[1].key.decode() == '/doot/watch/prefix/callback/1'
+        assert events[1].value.decode() == '1'
+
+    async def test_watch_prefix_callback_with_filter(self, etcd):
+        def update_etcd(v):
+            etcdctl('put', '/doot/watch/prefix/callback/' + v, v)
+            out = etcdctl('get', '/doot/watch/prefix/callback/' + v)
+            assert base64.b64decode(out['kvs'][0]['value']) == utils.to_bytes(v)
+
+        def delete_etcd(v):
+            etcdctl('del', '/doot/watch/prefix/callback/' + v)
+
+        async def update_key():
+            # sleep to make watch can get the event
+            await asyncio.sleep(3)
+            update_etcd('0')
+            await asyncio.sleep(1)
+            update_etcd('1')
+            await asyncio.sleep(1)
+            delete_etcd('1')
+            await asyncio.sleep(1)
+
+        events = []
+
+        async def callback(event):
+            events.extend(event.events)
+
+        task = asyncio.create_task(update_key())
+
+        watch_id = await etcd.add_watch_prefix_callback(
+            '/doot/watch/prefix/callback/',
+            callback,
+            filters=[etcdrpc.WatchCreateRequest.FilterType.Value('NODELETE')]
+        )
 
         await task
         await etcd.cancel_watch(watch_id)
@@ -639,6 +692,18 @@ class TestEtcd3AioClient(object):
                 revision=revision
             )
             assert resp.count == min(len(revisions), i + 1)
+
+    async def test_get_min_mod_revision(self, etcd):
+        revisions = []
+        for i in range(5):
+            resp = etcdctl('put', '/doot/revision', str(i))
+            revisions.append(resp['header']['revision'])
+        for revision in revisions:
+            resp = await etcd.get_response(
+                key='/doot/revision',
+                min_mod_revision=revision
+            )
+            assert len(resp.kvs) == 1
 
     async def test_get_max_mod_revision(self, etcd):
         revisions = []
