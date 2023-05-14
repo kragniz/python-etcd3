@@ -12,10 +12,11 @@ import etcd3.utils as utils
 import etcd3.watch as watch
 
 from etcd3.client import (
+    Alarm,
     Endpoint,
-    MultiEndpointEtcd3Client,
     EtcdTokenCallCredentials,
     KVMetadata,
+    MultiEndpointEtcd3Client,
     Status,
     _EXCEPTIONS_BY_CODE,
     _FAILED_EP_CODES,
@@ -838,6 +839,76 @@ class MultiEndpointEtcd3AioClient(MultiEndpointEtcd3Client):
         hash_request = etcdrpc.HashRequest()
         hash_response = await self.maintenancestub.Hash(hash_request)
         return hash_response.hash
+
+    @_handle_errors
+    async def create_alarm(self, member_id=0):
+        """Create an alarm.
+
+        If no member id is given, the alarm is activated for all the
+        members of the cluster. Only the `no space` alarm can be raised.
+
+        :param member_id: The cluster member id to create an alarm to.
+                          If 0, the alarm is created for all the members
+                          of the cluster.
+        :returns: list of :class:`.Alarm`
+        """
+        alarm_request = self._build_alarm_request('activate', member_id, 'no space')
+        alarm_response = await self.maintenancestub.Alarm(
+            alarm_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+        return [
+            Alarm(alarm.alarm, alarm.memberID)
+            for alarm in alarm_response.alarms
+        ]
+
+    @_handle_errors
+    async def list_alarms(self, member_id=0, alarm_type='none'):
+        """List the activated alarms.
+
+        :param member_id:
+        :param alarm_type: The cluster member id to create an alarm to.
+                           If 0, the alarm is created for all the members
+                           of the cluster.
+        :returns: sequence of :class:`.Alarm`
+        """
+        alarm_request = self._build_alarm_request('get', member_id, alarm_type)
+        alarm_response = await self.maintenancestub.Alarm(
+            alarm_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+        return [
+            Alarm(alarm.alarm, alarm.memberID)
+            for alarm in alarm_response.alarms
+        ]
+
+    @_handle_errors
+    async def disarm_alarm(self, member_id=0):
+        """Cancel an alarm.
+
+        :param member_id: The cluster member id to cancel an alarm.
+                          If 0, the alarm is canceled for all the members
+                          of the cluster.
+        :returns: List of :class:`.Alarm`
+        """
+        alarm_request = self._build_alarm_request('deactivate', member_id, 'no space')
+        alarm_response = await self.maintenancestub.Alarm(
+            alarm_request,
+            timeout=self.timeout,
+            credentials=self.call_credentials,
+            metadata=self.metadata
+        )
+
+        return [
+            Alarm(alarm.alarm, alarm.memberID)
+            for alarm in alarm_response.alarms
+        ]
 
     @_handle_errors
     async def snapshot(self, file_obj):

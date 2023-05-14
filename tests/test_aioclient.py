@@ -17,6 +17,7 @@ from six.moves.urllib.parse import urlparse
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 import etcd3
+import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions
 import etcd3.utils as utils
 
@@ -837,6 +838,55 @@ class TestEtcd3AioClient(object):
 
             etcdctl('snapshot', 'status', f.name)
 
+
+@pytest.mark.asyncio
+class TestAioAlarms(object):
+    @pytest_asyncio.fixture
+    async def etcd(self):
+        etcd = await etcd3.aioclient()
+        yield etcd
+        await etcd.disarm_alarm()
+        members = await etcd.get_members()
+        for m in members:
+            if await m.get_active_alarms():
+                await etcd.disarm_alarm(m.id)
+
+    async def test_create_alarm_all_members(self, etcd):
+        alarms = await etcd.create_alarm()
+
+        assert len(alarms) == 1
+        assert alarms[0].member_id == 0
+        assert alarms[0].alarm_type == etcdrpc.NOSPACE
+
+    async def test_create_alarm_specific_member(self, etcd):
+        a_member = next(await etcd.get_members())
+        alarms = await etcd.create_alarm(member_id=a_member.id)
+
+        assert len(alarms) == 1
+        assert alarms[0].member_id == a_member.id
+        assert alarms[0].alarm_type == etcdrpc.NOSPACE
+
+    async def test_list_alarms(self, etcd):
+        a_member = next(await etcd.get_members())
+        await etcd.create_alarm()
+        await etcd.create_alarm(member_id=a_member.id)
+        possible_member_ids = [0, a_member.id]
+
+        alarms = list(await etcd.list_alarms())
+
+        assert len(alarms) == 2
+        for alarm in alarms:
+            possible_member_ids.remove(alarm.member_id)
+            assert alarm.alarm_type == etcdrpc.NOSPACE
+
+        assert possible_member_ids == []
+
+    async def test_disarm_alarm(self, etcd):
+        await etcd.create_alarm()
+        assert len(list(await etcd.list_alarms())) == 1
+
+        await etcd.disarm_alarm()
+        assert len(list(await etcd.list_alarms())) == 0
 
 @pytest.mark.asyncio
 class TestAioClient(object):
