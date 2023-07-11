@@ -78,7 +78,7 @@ markupsafe==2.0.1
     # via jinja2
 mccabe==0.6.1
     # via flake8
-mock==4.0.3
+mock==5.1.0
     # via -r requirements/test.in
 more-itertools==5.0.0
     # via -r requirements/test.in
