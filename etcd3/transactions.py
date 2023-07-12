@@ -54,7 +54,7 @@ class BaseCompare(object):
             compare.range_end = utils.to_bytes(self.range_end)
 
         if self.op is None:
-            raise ValueError('op must be one of =, !=, < or >')
+            raise ValueError('op must be one of ==, !=, < or >')
 
         compare.result = self.op
 
