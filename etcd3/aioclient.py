@@ -7,6 +7,7 @@ import grpc._channel
 import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions as exceptions
 import etcd3.leases as leases
+import etcd3.locks as locks
 import etcd3.members as members
 import etcd3.utils as utils
 import etcd3.watch as watch
@@ -707,6 +708,21 @@ class MultiEndpointEtcd3AioClient(MultiEndpointEtcd3Client):
             credentials=self.call_credentials,
             metadata=self.metadata
         )
+
+    def lock(self, name, ttl=60):
+        """
+        Create a new lock.
+
+        :param name: name of the lock
+        :type name: string or bytes
+        :param ttl: length of time for the lock to live for in seconds. The
+                    lock will be released after this time elapses, unless
+                    refreshed
+        :type ttl: int
+        :returns: new lock
+        :rtype: :class:`.Lock`
+        """
+        return locks.AioLock(name, ttl=ttl, etcd_client=self)
 
     async def get_members(self):
         """

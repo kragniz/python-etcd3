@@ -53,7 +53,7 @@ class AioLease(Lease):
 
     async def refresh(self):
         """Refresh the time to live for this lease."""
-        return list(await self.etcd_client.refresh_lease(self.id))
+        return [response async for response in self.etcd_client.refresh_lease(self.id)]
 
     async def get_remaining_ttl(self):
         """Retrieve the remaining ttl for this lease."""
