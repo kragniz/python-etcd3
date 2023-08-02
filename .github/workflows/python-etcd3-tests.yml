@@ -1,0 +1,44 @@
+name: Python etcd3 tests
+
+on:
+  push:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: Pytest python ${{ matrix.python }}, etcd ${{ matrix.etcd }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: [3.7, 3.8, 3.9]
+        etcd: [v3.2.32, v3.3.27]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+
+      - id: cache-etcd
+        uses: actions/cache@v3
+        with:
+          path: ~/.etcd_bin/etcd-${{ matrix.etcd }}-linux-amd64
+          key: ${{ matrix.etcd }}
+
+      - name: Setup Etcd
+        if: steps.cache-etcd.outputs.cache-hit != 'true'
+        run: |
+          curl -L https://github.com/coreos/etcd/releases/download/${{ matrix.etcd }}/etcd-${{ matrix.etcd }}-linux-amd64.tar.gz -o etcd-${{ matrix.etcd }}-linux-amd64.tar.gz
+          mkdir -p ~/.etcd_bin/
+          tar xf etcd-${{ matrix.etcd }}-linux-amd64.tar.gz -C ~/.etcd_bin/
+
+      - name: Setup Tox
+        run: pip install tox
+
+      - name: Run Tox
+        env:
+          TEST_ETCD_VERSION: ${{ matrix.etcd }}
+        run: PATH=$PATH:~/.etcd_bin/etcd-${{ matrix.etcd }}-linux-amd64 tox -e py
