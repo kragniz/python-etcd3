@@ -60,6 +60,17 @@ def etcdctl(*args):
     return json.loads(output.decode('utf-8'))
 
 
+def enable_password_auth():
+    subprocess.check_call(['etcdctl', '-w', 'json', 'user', 'add', 'root:pwd'])
+    subprocess.check_call(['etcdctl', 'auth', 'enable'])
+
+
+def disable_password_auth():
+    subprocess.check_call(['etcdctl', '--user', 'root:pwd', 'auth', 'disable'])
+    subprocess.check_call(['etcdctl', 'role', 'delete', 'root'])
+    subprocess.check_call(['etcdctl', 'user', 'delete', 'root'])
+
+
 # def etcdctl2(*args):
 #     # endpoint = os.environ.get('PYTHON_ETCD_HTTP_URL')
 #     # if endpoint:
@@ -312,9 +323,9 @@ class TestEtcd3(object):
         t = threading.Thread(name="update_key", target=update_key)
         t.start()
 
-        def watch_compacted_revision_test():
+        def watch_compacted_revision_test(test_revision):
             events_iterator, cancel = etcd.watch(
-                b'/watchcompation', start_revision=1)
+                b'/watchcompation', start_revision=test_revision-1)
 
             error_raised = False
             compacted_revision = 0
@@ -326,7 +337,7 @@ class TestEtcd3(object):
                 compacted_revision = err.compacted_revision
 
             assert error_raised is True
-            assert compacted_revision == 2
+            assert compacted_revision == test_revision
 
             change_count = 0
             events_iterator, cancel = etcd.watch(
@@ -344,9 +355,11 @@ class TestEtcd3(object):
                     cancel()
 
         # Compact etcd and test watcher
-        etcd.compact(2)
+        _, meta = etcd.get('/random')
+        test_revision = meta.mod_revision
+        etcd.compact(test_revision)
 
-        watch_compacted_revision_test()
+        watch_compacted_revision_test(test_revision)
 
         t.join()
 
@@ -1209,9 +1222,12 @@ class TestClient(object):
                 cert_cert='tests/client.crt')
 
     def test_compact(self, etcd):
-        etcd.compact(3)
+        etcdctl('put', '/random', '1')  # Some data to compact
+        _, meta = etcd.get('/random')
+
+        etcd.compact(meta.mod_revision)
         with pytest.raises(grpc.RpcError):
-            etcd.compact(3)
+            etcd.compact(meta.mod_revision)
 
     def test_channel_with_no_cert(self):
         client = etcd3.client(
@@ -1226,7 +1242,7 @@ class TestClient(object):
         auth_resp_mock = mock.MagicMock()
         auth_resp_mock.token = 'foo'
         auth_mock.Authenticate = auth_resp_mock
-        self._enable_auth_in_etcd()
+        enable_password_auth()
 
         # Create a client using username and password auth
         client = etcd3.client(
@@ -1235,7 +1251,7 @@ class TestClient(object):
         )
 
         assert client.call_credentials is not None
-        self._disable_auth_in_etcd()
+        disable_password_auth()
 
     def test_user_or_pwd_auth_raises_exception(self):
         with pytest.raises(Exception):
@@ -1243,16 +1259,6 @@ class TestClient(object):
 
         with pytest.raises(Exception):
             etcd3.client(password='pwd')
-
-    def _enable_auth_in_etcd(self):
-        subprocess.check_call(['etcdctl', '-w', 'json', 'user', 'add',
-                               'root:pwd'])
-        subprocess.check_call(['etcdctl', 'auth', 'enable'])
-
-    def _disable_auth_in_etcd(self):
-        subprocess.check_call(['etcdctl', '--user', 'root:pwd', 'auth',
-                               'disable'])
-        subprocess.check_call(['etcdctl', 'user', 'remove', 'root'])
 
 
 class TestCompares(object):
@@ -1365,10 +1371,9 @@ class TestFailoverClient(object):
             property_mock.return_value = kv_mock
             with pytest.raises(etcd3.exceptions.ConnectionFailedError):
                 etcd.get("foo")
-        assert etcd.endpoint_in_use is original_endpoint
-        assert etcd.endpoint_in_use.is_failed()
-        etcd.get("foo")
+        assert original_endpoint.is_failed()
         assert etcd.endpoint_in_use is not original_endpoint
+        etcd.get("foo")
         assert not etcd.endpoint_in_use.is_failed()
 
     def test_failover_during_watch(self, etcd):
@@ -1399,10 +1404,9 @@ class TestFailoverClient(object):
             iterator, cancel = etcd.watch("foo")
             with pytest.raises(etcd3.exceptions.ConnectionFailedError):
                 next(iterator)
-        assert etcd.endpoint_in_use is original_endpoint
-        assert etcd.endpoint_in_use.is_failed()
-        cancel()
+        assert original_endpoint.is_failed()
         assert etcd.endpoint_in_use is not original_endpoint
+        cancel()
         assert not etcd.endpoint_in_use.is_failed()
         iterator, cancel = etcd.watch("foo")
         etcd.put("foo", b"foo")

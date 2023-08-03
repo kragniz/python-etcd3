@@ -1,11 +1,37 @@
+import asyncio
 import threading
 import time
 import uuid
+from abc import ABC, abstractmethod
 
 from etcd3 import events, exceptions
 
 
-class Lock(object):
+class BaseLock(ABC):
+    """A distributed lock."""
+
+    @abstractmethod
+    def __init__(self, name, ttl=60, etcd_client=None):
+        pass
+
+    @abstractmethod
+    def acquire(self, timeout=10):
+        """Acquire the lock."""
+
+    @abstractmethod
+    def release(self):
+        """Release the lock."""
+
+    @abstractmethod
+    def refresh(self):
+        """Refresh the time to live on this lock."""
+
+    @abstractmethod
+    def is_acquired(self):
+        """Check if this lock is currently acquired."""
+
+
+class Lock(BaseLock):
     """
     A distributed lock.
 
@@ -148,3 +174,145 @@ class Lock(object):
 
     def __exit__(self, exception_type, exception_value, traceback):
         self.release()
+
+
+class AioLock(BaseLock):
+    """A distributed lock with asyncio client.
+
+    This can be used as a context manager, with the lock being acquired and
+    released as you would expect:
+
+    .. code-block:: python
+
+        etcd = await etcd3.aioclient()
+
+        # create a lock that expires after 20 seconds
+        async with etcd.lock('toot', ttl=20) as lock:
+            # do something that requires the lock
+            print(await lock.is_acquired())
+
+            # refresh the timeout on the lease
+            await lock.refresh()
+
+    :param name: name of the lock
+    :type name: string or bytes
+    :param ttl: length of time for the lock to live for in seconds. The lock
+                will be released after this time elapses, unless refreshed
+    :type ttl: int
+    """
+
+    lock_prefix = '/locks/'
+
+    def __init__(self, name, ttl=60,
+                 etcd_client=None):
+        self.name = name
+        self.ttl = ttl
+        if etcd_client is not None:
+            self.etcd_client = etcd_client
+
+        self.key = self.lock_prefix + self.name
+        self.lease = None
+        # store uuid as bytes, since it avoids having to decode each time we
+        # need to compare
+        self.uuid = uuid.uuid1().bytes
+
+    async def acquire(self, timeout=10):
+        """Acquire the lock.
+
+        :params timeout: Maximum time to wait before returning. `None` means
+                         forever, any other value equal or greater than 0 is
+                         the number of seconds.
+        :returns: True if the lock has been acquired, False otherwise.
+
+        """
+        if timeout is not None:
+            deadline = time.time() + timeout
+
+        while True:
+            if await self._try_acquire():
+                return True
+
+            if timeout is not None:
+                remaining_timeout = max(deadline - time.time(), 0)
+                if remaining_timeout == 0:
+                    return False
+            else:
+                remaining_timeout = None
+
+            await self._wait_delete_event(remaining_timeout)
+
+    async def _try_acquire(self):
+        self.lease = await self.etcd_client.lease(self.ttl)
+
+        success, metadata = await self.etcd_client.transaction(
+            compare=[
+                self.etcd_client.transactions.create(self.key) == 0
+            ],
+            success=[
+                self.etcd_client.transactions.put(self.key, self.uuid,
+                                                  lease=self.lease)
+            ],
+            failure=[
+                self.etcd_client.transactions.get(self.key)
+            ]
+        )
+
+        if success is True:
+            self.revision = metadata[0].response_put.header.revision
+            return True
+
+        self.revision = metadata[0][0][1].mod_revision
+        self.lease = None
+        return False
+
+    async def _wait_delete_event(self, timeout):
+        async def watch_delete(event_iter, cancel):
+            async for event in event_iter:
+                if isinstance(event, events.DeleteEvent):
+                    await cancel()
+
+        try:
+            event_iter, cancel = await self.etcd_client.watch(
+                self.key, start_revision=self.revision + 1)
+        except exceptions.WatchTimedOut:
+            return
+
+        try:
+            await asyncio.wait_for(watch_delete(event_iter, cancel), timeout=timeout)
+        except asyncio.TimeoutError:
+            await cancel()
+
+    async def release(self):
+        """Release the lock."""
+        success, _ = await self.etcd_client.transaction(
+            compare=[
+                self.etcd_client.transactions.value(self.key) == self.uuid
+            ],
+            success=[self.etcd_client.transactions.delete(self.key)],
+            failure=[]
+        )
+        return success
+
+    async def refresh(self):
+        """Refresh the time to live on this lock."""
+        if self.lease is not None:
+            return await self.lease.refresh()
+        else:
+            raise ValueError('No lease associated with this lock - have you '
+                             'acquired the lock yet?')
+
+    async def is_acquired(self):
+        """Check if this lock is currently acquired."""
+        uuid, _ = await self.etcd_client.get(self.key)
+
+        if uuid is None:
+            return False
+
+        return uuid == self.uuid
+
+    async def __aenter__(self):
+        await self.acquire()
+        return self
+
+    async def __aexit__(self, exception_type, exception_value, traceback):
+        await self.release()

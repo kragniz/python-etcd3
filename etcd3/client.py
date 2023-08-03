@@ -178,27 +178,8 @@ class MultiEndpointEtcd3Client(object):
             list(self.endpoints.keys())
         )
 
-        # Step 2: if auth is enabled, call the auth endpoint
         self.timeout = timeout
         self.call_credentials = None
-        cred_params = [c is not None for c in (user, password)]
-
-        if all(cred_params):
-            auth_request = etcdrpc.AuthenticateRequest(
-                name=user,
-                password=password
-            )
-
-            resp = self.authstub.Authenticate(auth_request, self.timeout)
-            self.metadata = (('token', resp.token),)
-            self.call_credentials = grpc.metadata_call_credentials(
-                EtcdTokenCallCredentials(resp.token))
-
-        elif any(cred_params):
-            raise Exception(
-                'if using authentication credentials both user and password '
-                'must be specified.'
-            )
 
         self.transactions = Transactions()
 
@@ -245,16 +226,6 @@ class MultiEndpointEtcd3Client(object):
             old_watcher.close()
 
     @property
-    def _current_endpoint_label(self):
-        return self._current_ep_label
-
-    @_current_endpoint_label.setter
-    def _current_endpoint_label(self, value):
-        if getattr(self, "_current_ep_label", None) is not value:
-            self._clear_old_stubs()
-        self._current_ep_label = value
-
-    @property
     def endpoint_in_use(self):
         """Get the current endpoint in use."""
         if self._current_endpoint_label is None:
@@ -269,20 +240,21 @@ class MultiEndpointEtcd3Client(object):
         Raises an exception if no node is available
         """
         try:
-            return self.endpoint_in_use.use()
+            if self.endpoint_in_use:
+                return self.endpoint_in_use.use()
         except ValueError:
             if not self.failover:
                 raise
-        # We're failing over. We get the first non-failed channel
-        # we encounter, and use it by calling this function again,
-        # recursively
+        raise exceptions.NoServerAvailableError("No endpoint available and not failed")
+
+    def _switch_endpoint(self):
+        self._clear_old_stubs()
         for label, endpoint in self.endpoints.items():
             if endpoint.is_failed():
                 continue
             self._current_endpoint_label = label
-            return self.channel
-        raise exceptions.NoServerAvailableError(
-            "No endpoint available and not failed")
+            return
+        self._current_endpoint_label = None
 
     def close(self):
         """Call the GRPC channel close semantics."""
@@ -327,7 +299,8 @@ class MultiEndpointEtcd3Client(object):
             # If others are available, they will be used on
             # subsequent requests.
             self.endpoint_in_use.fail()
-            self._clear_old_stubs()
+            if self.failover:
+                self._switch_endpoint()
         exception = _EXCEPTIONS_BY_CODE.get(code)
         if exception is None:
             raise
@@ -411,6 +384,19 @@ class MultiEndpointEtcd3Client(object):
         range_request.sort_target = request_sort_target
 
         return range_request
+
+    @_handle_errors
+    def authenticate(self, user, password):
+        """Authenticate on the server."""
+        auth_request = etcdrpc.AuthenticateRequest(
+            name=user,
+            password=password
+        )
+
+        resp = self.authstub.Authenticate(auth_request, self.timeout)
+        self.metadata = (('token', resp.token),)
+        self.call_credentials = grpc.metadata_call_credentials(
+            EtcdTokenCallCredentials(resp.token))
 
     @_handle_errors
     def get_response(self, key, **kwargs):
@@ -960,6 +946,23 @@ class MultiEndpointEtcd3Client(object):
                     'Unknown request class {}'.format(op.__class__))
         return request_ops
 
+    def _handle_transaction_responses(self, txn_response):
+        responses = []
+        for response in txn_response.responses:
+            response_type = response.WhichOneof('response')
+            if response_type in ['response_put', 'response_delete_range',
+                                 'response_txn']:
+                responses.append(response)
+
+            elif response_type == 'response_range':
+                range_kvs = []
+                for kv in response.response_range.kvs:
+                    range_kvs.append((kv.value,
+                                      KVMetadata(kv, txn_response.header)))
+
+                responses.append(range_kvs)
+        return responses
+
     @_handle_errors
     def transaction(self, compare, success=None, failure=None):
         """
@@ -1004,20 +1007,7 @@ class MultiEndpointEtcd3Client(object):
             metadata=self.metadata
         )
 
-        responses = []
-        for response in txn_response.responses:
-            response_type = response.WhichOneof('response')
-            if response_type in ['response_put', 'response_delete_range',
-                                 'response_txn']:
-                responses.append(response)
-
-            elif response_type == 'response_range':
-                range_kvs = []
-                for kv in response.response_range.kvs:
-                    range_kvs.append((kv.value,
-                                      KVMetadata(kv, txn_response.header)))
-
-                responses.append(range_kvs)
+        responses = self._handle_transaction_responses(txn_response)
 
         return txn_response.succeeded, responses
 
@@ -1399,12 +1389,23 @@ def client(host='localhost', port=2379,
            ca_cert=None, cert_key=None, cert_cert=None, timeout=None,
            user=None, password=None, grpc_options=None):
     """Return an instance of an Etcd3Client."""
-    return Etcd3Client(host=host,
-                       port=port,
-                       ca_cert=ca_cert,
-                       cert_key=cert_key,
-                       cert_cert=cert_cert,
-                       timeout=timeout,
-                       user=user,
-                       password=password,
-                       grpc_options=grpc_options)
+    client =  Etcd3Client(host=host,
+                          port=port,
+                          ca_cert=ca_cert,
+                          cert_key=cert_key,
+                          cert_cert=cert_cert,
+                          timeout=timeout,
+                          user=user,
+                          password=password,
+                          grpc_options=grpc_options)
+
+    cred_params = [c is not None for c in (user, password)]
+    if all(cred_params):
+        client.authenticate(user, password)
+    elif any(cred_params):
+        raise Exception(
+            'if using authentication credentials both user and password '
+            'must be specified.'
+        )
+
+    return client
