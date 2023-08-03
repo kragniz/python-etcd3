@@ -111,7 +111,7 @@ Asyncio usage
 **:warning: Asyncio support is recent and is still experimental.**
 
 It implement the same interface as the synchronous client.
-Some requests are not yet implemented like lock, alarm or the some of the maintenance.
+The asyncio client require Python 3.7+.
 
 .. code-block:: python
 
