@@ -144,7 +144,7 @@ sortedcontainers==2.4.0
     # via hypothesis
 sphinx==4.0.2
     # via -r requirements/test.in
-sphinxcontrib-applehelp==1.0.2
+sphinxcontrib-applehelp==1.0.5
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
     # via sphinx
