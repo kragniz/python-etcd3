@@ -34,7 +34,7 @@ coverage[toml]==5.5
     # via
     #   -r requirements/test.in
     #   pytest-cov
-daiquiri==3.0.0
+daiquiri==3.2.3
     # via pifpaf
 distlib==0.3.1
     # via virtualenv
