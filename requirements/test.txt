@@ -94,7 +94,7 @@ pbr==5.6.0
     #   testtools
 pifpaf==3.1.5
     # via -r requirements/test.in
-pluggy==0.13.1
+pluggy==1.4.0
     # via
     #   pytest
     #   tox
