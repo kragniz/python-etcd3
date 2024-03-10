@@ -82,7 +82,7 @@ mock==4.0.3
     # via -r requirements/test.in
 more-itertools==5.0.0
     # via -r requirements/test.in
-packaging==20.9
+packaging==24.0
     # via
     #   pytest
     #   sphinx
