@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "python-etcd3"
+version = "0.12.0"
+description = "Python client for the etcd3 API"
+authors = ["Louis Taylor <louis@kragniz.eu>"]
+license = "Apache Software License 2.0"
+readme = "README.rst"
+packages = [
+    {include = "etcd3"},
+    {include = "etcd3/etcdrpc"},
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8"
+grpcio = ">=1.2.0"
+protobuf = ">=3.6.1"
+six = "^1.16.0"
+tenacity = "^8.2.3"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=4.6.5"
+pytest-cov = "^5.0.0"
+tox = "^4.14.2"
+pifpaf = "^3.1.5"
+hypothesis = "^6.100.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
