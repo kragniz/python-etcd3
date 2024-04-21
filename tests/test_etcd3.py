@@ -14,13 +14,12 @@ import subprocess
 import tempfile
 import threading
 import time
+from unittest import mock
 
 import grpc
 
 from hypothesis import given, settings
 from hypothesis.strategies import characters
-
-import mock
 
 import pytest
 
