@@ -49,6 +49,62 @@ settings.register_profile("default", deadline=None)
 settings.load_profile("default")
 
 
+@pytest.fixture(scope="session")
+def etcd_cluster():
+    """
+    Start an etcd cluster. Code adapted from pifpaf's etcd driver.
+    There are multiple issues with this code, but pifpaf doesn't work anymore
+    due to https://github.com/jd/pifpaf/issues/127
+    """
+    port = 2379
+    http_urls = [("http://localhost:%d" % (p + 1),
+                  "http://localhost:%d" % p)
+                 for p in (port, port + 2, port + 4)]
+    procs = []
+    for i, (peer_url, client_url) in enumerate(http_urls):
+        name = f"python-etcd3-{i}"
+        tempdir = tempfile.TemporaryDirectory(prefix=name).name
+
+        t = subprocess.Popen([
+            "etcd",
+            "--data-dir", tempdir,
+            "--name", name,
+            "--listen-client-urls", client_url,
+            "--advertise-client-urls", client_url,
+            "--listen-peer-urls", peer_url,
+            "--initial-advertise-peer-urls", peer_url,
+            "--initial-cluster-token", "etcd-cluster-python-etcd3",
+            "--initial-cluster", ",".join("python-etcd3-%d=%s" % (i, peer_url)
+                                          for i, (peer_url, client_url)
+                                          in enumerate(http_urls)),
+            "--initial-cluster-state", "new",
+            ],
+             stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+        )
+        procs.append(t)
+    endpoints = ",".join(client_url
+                         for peer_url, client_url in http_urls)
+
+    # wait for servers to be ready
+    while True:
+        client = etcd3.client()
+        try:
+            client.get('/ready')
+        except etcd3.exceptions.ConnectionFailedError:
+            pass
+        else:
+            break
+
+    yield endpoints
+
+    for proc in procs:
+        proc.terminate()
+
+def test_start_etcd_cluster(etcd_cluster):
+    client = etcd3.client()
+    print(etcdctl('get', '--prefix', '/'))
+
 def etcdctl(*args):
     endpoint = os.environ.get('PYTHON_ETCD_HTTP_URL')
     if endpoint:
@@ -82,8 +138,9 @@ def _out_quorum():
             os.kill(pid, signal.SIGCONT)
 
 
-class TestEtcd3(object):
 
+@pytest.mark.usefixtures("etcd_cluster")
+class TestEtcd3(object):
     class MockedException(grpc.RpcError):
         def __init__(self, code):
             self._code = code
