@@ -936,7 +936,7 @@ class TestEtcd3(object):
     def test_member_list(self, etcd):
         assert len(list(etcd.members)) == 3
         for member in etcd.members:
-            assert member.name.startswith('pifpaf')
+            assert member.name.startswith('python-etcd3')
             for peer_url in member.peer_urls:
                 assert peer_url.startswith('http://')
             for client_url in member.client_urls:
