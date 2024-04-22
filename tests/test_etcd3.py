@@ -127,7 +127,7 @@ def etcdctl(*args):
 
 @contextlib.contextmanager
 def _out_quorum():
-    pids = subprocess.check_output(['pgrep', '-f', '--', '--name pifpaf[12]'])
+    pids = subprocess.check_output(['pgrep', '-f', '--', '--name python-etcd3-[12]'])
     pids = [int(pid.strip()) for pid in pids.splitlines()]
     try:
         for pid in pids:
@@ -156,7 +156,12 @@ class TestEtcd3(object):
             url = urlparse(endpoint)
             with etcd3.client(host=url.hostname,
                               port=url.port,
-                              timeout=timeout) as client:
+                              timeout=timeout,
+                              options={
+                                  'keepalive_time_ms': 6000,
+                                  'keepalive_permit_without_calls': True,
+                                  'http2_max_pings_without_data': 0,
+                              }) as client:
                 yield client
         else:
             with etcd3.client() as client:
@@ -1277,7 +1282,7 @@ class TestClient(object):
         )
         assert client.uses_secure_channel is False
 
-    @mock.patch('etcdrpc.AuthStub')
+    @mock.patch('etcd3.etcdrpc.AuthStub')
     def test_user_pwd_auth(self, auth_mock):
         auth_resp_mock = mock.MagicMock()
         auth_resp_mock.token = 'foo'
@@ -1383,12 +1388,10 @@ class TestCompares(object):
         assert create_compare.build_message().target == etcdrpc.Compare.CREATE
 
 
-@pytest.mark.skipif(not os.environ.get('ETCDCTL_ENDPOINTS'),
-                    reason="Expected etcd to have been run by pifpaf")
 class TestFailoverClient(object):
     @pytest.fixture
-    def etcd(self):
-        endpoint_urls = os.environ.get('ETCDCTL_ENDPOINTS').split(',')
+    def etcd(self, etcd_cluster):
+        endpoint_urls = etcd_cluster.split(',')
         timeout = 5
         endpoints = []
         for url in endpoint_urls:
