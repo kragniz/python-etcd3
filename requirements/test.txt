@@ -58,7 +58,7 @@ flake8==3.9.2
     # via
     #   -r requirements/test.in
     #   flake8-docstrings
-grpcio-tools==1.38.0
+grpcio-tools==1.65.0
     # via -r requirements/test.in
 hypothesis==6.13.1
     # via -r requirements/test.in
