@@ -104,7 +104,7 @@ py==1.10.0
     # via
     #   pytest
     #   tox
-pycodestyle==2.7.0
+pycodestyle==2.12.1
     # via
     #   flake8
     #   flake8-import-order
