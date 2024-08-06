@@ -24,7 +24,7 @@ bumpversion==0.6.0
     # via -r requirements/test.in
 certifi==2020.12.5
     # via requests
-cffi==1.14.5
+cffi==1.17.0
     # via xattr
 chardet==4.0.0
     # via requests
