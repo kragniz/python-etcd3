@@ -132,7 +132,7 @@ python-mimeparse==1.6.0
     # via testtools
 pytz==2021.1
     # via babel
-pyyaml==5.4.1
+pyyaml==6.0.2
     # via -r requirements/test.in
 requests==2.25.1
     # via sphinx
