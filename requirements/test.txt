@@ -16,7 +16,7 @@ attrs==21.2.0
     # via
     #   hypothesis
     #   pytest
-babel==2.9.1
+babel==2.16.0
     # via sphinx
 bump2version==1.0.1
     # via bumpversion
