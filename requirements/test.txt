@@ -128,7 +128,7 @@ pytest==6.2.4
     #   pytest-cov
 python-json-logger==2.0.1
     # via daiquiri
-python-mimeparse==1.6.0
+python-mimeparse==2.0.0
     # via testtools
 pytz==2021.1
     # via babel
