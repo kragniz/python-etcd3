@@ -1,0 +1,5 @@
+eclipse.preferences.version=1
+encoding//etcd3/etcdrpc/auth_pb2.py=utf-8
+encoding//etcd3/etcdrpc/kv_pb2.py=utf-8
+encoding//etcd3/etcdrpc/rpc_pb2.py=utf-8
+encoding/setup.py=utf-8
