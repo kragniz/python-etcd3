@@ -1,12 +1,11 @@
 import functools
+import queue
 import random
 import threading
 import time
 
 import grpc
 import grpc._channel
-
-from six.moves import queue
 
 import etcd3.etcdrpc as etcdrpc
 import etcd3.exceptions as exceptions

@@ -1,10 +1,8 @@
 import logging
+import queue
 import threading
 
 import grpc
-
-import six
-from six.moves import queue
 
 import etcd3.etcdrpc as etcdrpc
 import etcd3.events as events
@@ -154,7 +152,7 @@ class Watcher(object):
                 self._request_queue.put(None)
                 self._request_queue = queue.Queue(maxsize=10)
 
-            for callback in six.itervalues(callbacks):
+            for callback in callbacks.values():
                 _safe_callback(callback, callback_err)
 
     def _handle_response(self, rs):
