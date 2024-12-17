@@ -5,7 +5,7 @@ bumpversion>=0.5.3
 coverage
 flake8-import-order
 flake8
-grpcio-tools
+grpcio-tools>=1.66.2
 hypothesis
 more-itertools<6  # python2.7
 pytest>=4.6.5

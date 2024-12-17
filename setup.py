@@ -14,14 +14,11 @@ with open('HISTORY.rst') as history_file:
 
 def load_reqs(filename):
     with open(filename) as reqs_file:
-        return [
-            re.sub('==', '>=', line) for line in reqs_file.readlines()
-            if not re.match(r'(\s*#|-r)', line)
-        ]
+        lines = [line.split("#")[0].strip() for line in reqs_file.readlines()]
+        return [line for line in lines if line != "" and not line.startswith("-r")]
 
-
-requirements = load_reqs('requirements/base.txt')
-test_requirements = load_reqs('requirements/test.txt')
+requirements = load_reqs('requirements/base.in')
+test_requirements = load_reqs('requirements/test.in')
 
 setup(
     name='etcd3',
