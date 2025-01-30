@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from etcd3.etcdrpc import rpc_pb2 as rpc__pb2
+import rpc_pb2 as rpc__pb2
 
 GRPC_GENERATED_VERSION = '1.70.0'
 GRPC_VERSION = grpc.__version__
