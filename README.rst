@@ -30,7 +30,29 @@ If you're interested in using this library, please get involved.
 * Free software: Apache Software License 2.0
 * Documentation: https://python-etcd3.readthedocs.io.
 
-Basic usage:
+
+Building python package
+-----------------------
+
+The package build is made using the ToX orchestrator.
+It is required to generate python files before building the package as they are
+not kept in gconf.
+You only need the ToX orchestrator to produce the package:
+
+```
+pip install tox
+```
+
+A typical build sequence is the folling:
+
+```
+tox -e genproto
+tox -e build
+```
+
+
+Basic usage
+-----------
 
 .. code-block:: python
 

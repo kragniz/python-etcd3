@@ -1,0 +1,95 @@
+name: build
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  publish:
+    runs-on: public-ledgerhq-shared-small
+    permissions:
+      id-token: write
+      contents: read
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - run: |
+          pip install tox
+          tox -e genproto
+          tox -e build
+      # initiate jfrog login and install jf
+      - name: Login to JFrog Ledger
+        uses: LedgerHQ/actions-security/actions/jfrog-login@actions/jfrog-login-1
+      # upload package to jfrog
+      - name: upload package
+        run: jf rt u --build-name=python-etcd3-release --build-number=1 --module=etcd3 'dist/*.tar.gz' enclave-pypi-prod-green
+      # attest that the delivered package is authenticated as a CI build
+      - name: Attest
+        id: attest
+        uses: LedgerHQ/actions-security/actions/attest@actions/attest-1
+        with:
+          subject-path: 'dist/*.tar.gz'
+          push-to-registry: false
+      - uses: LedgerHQ/actions/gemfury/publish@main
+        env:
+          PUSH_TOKEN: ${{ secrets.PYPI_PUSH_TOKEN }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.run_id }}
+          path: |
+            dist
+          retention-days: 2
+
+  validate:
+    runs-on: public-ledgerhq-shared-small
+    permissions:
+      id-token: write
+      contents: read
+    needs:
+      - publish
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ github.run_id }}
+          path: dist
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+      - run: |
+          pip install build twine wheel-filename blob
+      # in order to allow test pip install after publish, get back pkg version
+      - name: get back local build version
+        id: get_pkg_version
+        run: |
+          from wheel_filename import parse_wheel_filename
+          import glob
+          import os
+          from random import choices
+          from string import ascii_letters
+
+          whl = str(glob.glob('dist/*.whl')[0]);
+          pwf = parse_wheel_filename('dist/' + whl);
+          with open(os.environ["GITHUB_OUTPUT"], "a") as gh_output:
+             delimiter = "".join(choices(ascii_letters, k=16))
+             gh_output.writelines([
+             f"pkg_version<<{delimiter}\n",
+             f"{pwf.version}\n",
+             delimiter + "\n",
+          ])
+        shell: python
+      - name: Login to JFrog Ledger
+        uses: LedgerHQ/actions-security/actions/jfrog-login@actions/jfrog-login-1
+      # configure jfrog repo and test pip install from it for the delivered package
+      - name: set jfrog Repo URL
+        run: jf pipc --global --repo-resolve=enclave-pypi-virtual-green
+      - name: test install from jfrog
+        run: |
+          jf pip install etcd3==${{ steps.get_pkg_version.outputs.pkg_version }}
+          pip show etcd3
+        shell: bash
