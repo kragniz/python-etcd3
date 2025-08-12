@@ -86,6 +86,12 @@ class Mod(BaseCompare):
         compare.mod_revision = int(self.value)
 
 
+class Lease(BaseCompare):
+    def build_compare(self, compare):
+        compare.target = etcdrpc.Compare.LEASE
+        compare.lease = int(self.value)
+
+
 class Put(object):
     def __init__(self, key, value, lease=None, prev_kv=False):
         self.key = key
