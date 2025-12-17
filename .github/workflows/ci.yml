@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches: [master]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Setup etcd
+        uses: supplypike/setup-bin@v5
+        with:
+          uri: "https://github.com/etcd-io/etcd/releases/download/v3.6.6/etcd-v3.6.6-linux-amd64.tar.gz"
+          name: "etcd"
+          version: "3.6.6"
+          subPath: "etcd-v3.6.6-linux-amd64"
+
+      - name: Setup etcdutl
+        uses: supplypike/setup-bin@v5
+        with:
+          uri: "https://github.com/etcd-io/etcd/releases/download/v3.6.6/etcd-v3.6.6-linux-amd64.tar.gz"
+          name: "etcdutl"
+          version: "3.6.6"
+          subPath: "etcd-v3.6.6-linux-amd64"
+
+      - name: Setup etcdctl
+        uses: supplypike/setup-bin@v5
+        with:
+          uri: "https://github.com/etcd-io/etcd/releases/download/v3.6.6/etcd-v3.6.6-linux-amd64.tar.gz"
+          name: "etcdctl"
+          version: "3.6.6"
+          subPath: "etcd-v3.6.6-linux-amd64"
+
+      - name: Test all etcd tools
+        run: |
+          etcdctl --help
+          etcdutl --help
+          etcd --help
+
+      - name: Install tox
+        run: uv tool install tox --with tox-uv
+
+      - name: Run proto generation
+        run: tox run -e genproto
+
+      - name: Run lint
+        run: tox run -e ruff
+
+      - name: Run test
+        run: tox run -e py310
