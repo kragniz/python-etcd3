@@ -61,3 +61,6 @@ target/
 # Editor files
 .sw?
 .idea/
+
+# Fellow semantic knowledge base
+.fellow-data/
